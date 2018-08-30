@@ -6,8 +6,8 @@ const paubox = require("../lib/paubox.js");
 const config = require("./data/config.js");
 
 let messageDefaults = {
-  from: "renee@undefeatedgames.com",
-  to: "jonathan@paubox.com",
+  from: config.from,
+  to: config.to,
   subject: "Test Runner",
   text: "Text content"
 };
