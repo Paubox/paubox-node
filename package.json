@@ -1,0 +1,40 @@
+{
+  "name": "paubox-js",
+  "version": "1.0.0",
+  "description": "A Node.js module for the Paubox Transactional Email API.",
+  "main": "./lib/paubox.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "pretest": "eslint ."
+  },
+  "author": "Paubox <info@paubox.com> (http://www.paubox.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Paubox/paubox-js.git"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "eslint": "^5.2.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.2",
+    "mocha": "^5.2.0",
+    "prettier": "1.13.7"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "plugin:vue/essential",
+      "plugin:prettier/recommended",
+      "eslint:recommended"
+    ]
+  },
+  "eslintIgnore": [
+    ".gitignore",
+    "test/data/config.js"
+  ],
+  "dependencies": {
+    "axios": "^0.18.0",
+    "dotenv": "^6.0.0"
+  }
+}
