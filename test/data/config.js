@@ -20,7 +20,7 @@ environments.dev = {
 
 const currentEnvironment = typeof ( process.env.NODE_ENV ) == "string" ? process.env.NODE_ENV.toLowerCase() : "";
 
-const environmentToExport = typeof ( environments[ currentEnvironment ] ) == "object" ? environments[ currentEnvironment ] : environments.dev;
+const environmentToExport = typeof ( environments[ currentEnvironment ] ) == "object" ? environments[ currentEnvironment ] : environments.test;
 
 module.exports = environmentToExport;
 
