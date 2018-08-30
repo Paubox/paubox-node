@@ -14,6 +14,6 @@ npx babel --presets env ./src --out-dir ./lib
 
 ## Running Tests
 ```
-node test
+npm test
 
 ```
