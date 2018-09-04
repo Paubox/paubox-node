@@ -15,7 +15,7 @@ let messageDefaults = {
 describe("Paubox.options", () => {
   it("should return options object", () => {
     let result = paubox(config);
-
+    console.log(result);
     expect(result.options.apiKey).to.equal(config.apiKey);
   });
 

@@ -15,11 +15,13 @@ class Paubox {
     this.protocol = options.protocol || "https:";
     this.host = options.host || "api.paubox.net";
     this.port = options.protocol || 443;
+    this.version = "v1";
+    this.url = `${this.protocol}//${this.host}/${this.version}/${this.endpointUsername}`
 
     this.options = {
       apiKey: this.apiKey,
       endpointUsername: this.endpointUsername,
-      baseUrl: `${this.protocol}//${this.host}/${this.endpointUsername}`
+      url: `${this.protocol}//${this.host}/${this.endpointUsername}`
     };
   }
   message(options) {
