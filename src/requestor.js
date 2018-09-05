@@ -1,5 +1,7 @@
 "use strict";
 const axios = require("axios");
+var t = require('tcomb-validation');
+var getEmailDispositionResponse = require("../lib/data/CommonClasses.js");
 // const qs = require("qs");
 
 class Requestor {
@@ -7,7 +9,7 @@ class Requestor {
     this.url = opts.url;
     this.headers = {
       authorization: `Token token=${opts.apiKey}`,
-      "content-type": "application/json"
+      "Content-type": "application/json"
     };
     this.body = opts.body;
   }
@@ -65,8 +67,14 @@ class Requestor {
  
   return axiosInstance({ method:"GET", url:options.url, data:null, headers : options.headers})
   .then(response => {
-      console.log(response);
-      return response.data;
+      //var resp = JSON.parse(response.data);
+      var resp = response.data;
+      // var result = t.validate(resp, getEmailDispostionResponse);  
+      // if (result.isValid()) {
+        var jsonResp = JSON.stringify(resp);
+        var output = JSON.parse(jsonResp);
+        return output;
+      //}     
   })
    .catch(error => {
        console.log(error);

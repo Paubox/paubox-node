@@ -6,7 +6,7 @@ environments.test = {
     subject: "Test Runner",
     text: "Text content",
     apiKey: process.env.TEST_API_KEY,
-    endpointUsername: process.env.TEST_USERNAME
+    apiUser: process.env.TEST_USERNAME
 };
 
 environments.dev = {
@@ -15,7 +15,7 @@ environments.dev = {
     subject: "Test Runner",
     text: "Text content",
     apiKey: process.env.DEV_API_KEY,
-    endpointUsername: process.env.DEV_USERNAME
+    apiUser: process.env.DEV_USERNAME
 };
 
 const currentEnvironment = typeof ( process.env.NODE_ENV ) == "string" ? process.env.NODE_ENV.toLowerCase() : "";

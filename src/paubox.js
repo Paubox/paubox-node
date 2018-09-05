@@ -30,6 +30,6 @@ class Paubox {
   }
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
   return new Paubox(options);
 };
