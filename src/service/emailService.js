@@ -5,15 +5,15 @@ const _getAuthheader = Symbol('getAuthheader');
 const _convertMsgObjtoJSONReqObj = Symbol('convertMsgObjtoJSONReqObj');
 
 class emailService {
-  constructor(options) {
-    if (!options.apiKey) {
+  constructor() {
+    if (!process.env.API_KEY) {
       throw new Error("apiKey is missing.");
     }
-    if (!options.apiUser) {
-      throw new Error("apiUser is missing.");
+    if (!process.env.API_USERNAME) {
+      throw new Error("apiUsername is missing.");
     }
-    this.apiKey = options.apiKey;
-    this.apiUser = options.apiUser;
+    this.apiKey = process.env.API_KEY;
+    this.apiUser = process.env.API_USERNAME;
     this.protocol = "https:";
     this.host = "api.paubox.net";
     this.port = 443;
@@ -56,6 +56,7 @@ class emailService {
   }
 
   // public methods
+  
   getEmailDisposition(sourceTrackingId) {
 
     try {

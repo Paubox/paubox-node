@@ -1,9 +1,8 @@
 require("dotenv").config();
-const config = require("../test/data/config.js");
 const emailService = require("../lib/service/emailService.js");
 const message = require("../lib/data/message.js");
 
-let service = emailService(config);
+let service = emailService();
 
 let options = {
     from: 'renee@undefeatedgames.com',
