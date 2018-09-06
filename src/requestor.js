@@ -1,7 +1,5 @@
 "use strict";
 const axios = require("axios");
-var t = require('tcomb-validation');
-var getEmailDispositionResponse = require("../lib/data/CommonClasses.js");
 // const qs = require("qs");
 
 class Requestor {

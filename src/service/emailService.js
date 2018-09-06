@@ -2,7 +2,6 @@
 //require("dotenv").config();
 
 const apiHelper = require("./apiHelper.js");
-var getEmailDispositionResponse = require("../data/CommonClasses.js");
 
 class emailService {
   constructor(options) {
@@ -33,19 +32,19 @@ class emailService {
       var apiUrl = "/message_receipt?sourceTrackingId=" + sourceTrackingId;
       return apiHelperService.callToAPIByGet(this.baseURL, apiUrl, this.getAuthheader())
         .then(response => {
-          var apiResponse = getEmailDispositionResponse(response);
+          var apiResponse = response;
           if (apiResponse != null && apiResponse.data != null && apiResponse.data.message != null
             && apiResponse.data.message.message_deliveries != null && apiResponse.data.message.message_deliveries.length > 0) {
               for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-                if (message_deliveries.status.openedStatus == null) {
-                  //apiResponse = getEmailDispositionResponse.update(apiResponse,message_deliveries.status.openedStatus = "unopened");
+                if (message_deliveries.status.openedStatus == "opened") {
+                  message_deliveries.status.openedStatus = "unopened";                  
                 }
               }
           }
           return apiResponse;
         })
         .catch(error => {
-          var apiError = getEmailDispositionResponse(error);
+          var apiError = error;
           if (apiError.data == null && apiError.sourceTrackingId == null && apiError.errors == null) {
             throw new Error(response);
           }

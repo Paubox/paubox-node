@@ -1,7 +1,6 @@
 require("dotenv").config();
 const config = require("../test/data/config.js");
 var emailService = require("../lib/service/emailService.js");
-const getEmailDispositionResponse = require("./data/CommonClasses.js");
 
 let service = emailService(config);
 
@@ -25,13 +24,11 @@ let service = emailService(config);
 
 
 service.getEmailDisposition("3b5c7b9e-32d6-41c3-9058-06eb2ca5073b")
-    .then(response => {
-        var apiResponse = getEmailDispositionResponse(response);
+    .then(response => {    
         var dataJson = JSON.stringify(response);
         console.log("Response: " + dataJson);
     }
-    ).catch(error => {
-        var apiError = getEmailDispositionResponse(error);
-        var dataJson = JSON.stringify(apiError);
-        console.log("Error: " + apiError);
+    ).catch(error => {        
+        var dataJson = JSON.stringify(error);
+        console.log("Error: " + error);
     });
