@@ -3,17 +3,17 @@
 const axios = require("axios");
 
 class apiHelper {
-    constructor() {            
+    constructor() {
     }
 
-    callToAPIBypost(baseUrl,apiUrl, authHeader, reqBody) {
+    callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
         var apiHeaders = {
             Authorization: `${authHeader}`,
             "Content-type": "application/json"
         };
 
-        var axiosInstance = axios.create({
-            baseURL: apiUrl,
+        const axiosInstance = axios.create({
+            baseURL: baseUrl,
             headers: apiHeaders,
         });
 
@@ -22,11 +22,11 @@ class apiHelper {
                 return response.data;
             })
             .catch(error => {
-                return error;
+                return error.response.data;
             });
     }
 
-    callToAPIByGet(baseUrl,apiUrl, authHeader) {
+    callToAPIByGet(baseUrl, apiUrl, authHeader) {
 
         var apiHeaders = {
             Authorization: `${authHeader}`,
@@ -38,7 +38,7 @@ class apiHelper {
             headers: apiHeaders,
         });
 
-        return axiosInstance({ method: "GET", url: apiUrl, data: null})
+        return axiosInstance({ method: "GET", url: apiUrl, data: null })
             .then(response => {
                 return response.data;
             })

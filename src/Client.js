@@ -1,34 +1,46 @@
 require("dotenv").config();
 const config = require("../test/data/config.js");
-var emailService = require("../lib/service/emailService.js");
+const emailService = require("../lib/service/emailService.js");
+const message = require("../lib/data/message.js");
 
 let service = emailService(config);
 
-// let options = {
-//     from: 'you@yourdomain.com',
-//     to: 'someone@domain.com, someone-else@domain.com',
-//     bcc: ['another@domain.com', 'yet-another@domain.com'],    
-//     reply_to: 'reply-to@yourdomain.com',
-//     subject: 'Testing!',
-//     text_content: 'Hello World!',
-//     html_content: '<h1>Hello World!</h1>',
-//     attachments: [ 
-//             {
-//                 fileName : "HelloWorld.txt",
-//                 ContentType : "HelloWorld.txt",
-//                 fileName : "HelloWorld.txt",
-//             }
-//         ]
-// }
+let options = {
+    from: 'renee@undefeatedgames.com',
+    to: ['vighneshtrivedi2004@gmail.com'],
+    bcc: ['vighneshtrivedi2004@gmail.com'],
+    reply_to: 'renee@undefeatedgames.com',
+    subject: 'Testing from NodeJs',
+    //allowNonTLS: true,
+    text_content: 'Hello World text!',
+    html_content: '<h1>Hello World!</h1>',
+    attachments: [
+        {
+            fileName: "HelloWorld.txt",
+            contentType: "text/plain",
+            content: "SGVsbG8gV29ybGQh\n",
+        }
+    ]
+}
 
+service.getEmailDisposition("31b23486-9340-4b34-b313-44ee1109bb57")
+            .then(response => {
+                var dataJson = JSON.stringify(response);
+                console.log("Response: " + dataJson);
+            }
+            ).catch(error => {
+                var dataJson = JSON.stringify(error);
+                console.log("Error: " + error);
+            });
 
-
-service.getEmailDisposition("3b5c7b9e-32d6-41c3-9058-06eb2ca5073b")
-    .then(response => {    
+var msg = message(options);
+var resp = service.sendMessage(msg)
+    .then(response => {
         var dataJson = JSON.stringify(response);
-        console.log("Response: " + dataJson);
+        console.log("Post Response: " + dataJson);
     }
-    ).catch(error => {        
+    ).catch(error => {
         var dataJson = JSON.stringify(error);
-        console.log("Error: " + error);
+        console.log("Post Error: " + error);
     });
+
