@@ -7,6 +7,7 @@ let service = emailService(config);
 
 let options = {
     from: 'renee@undefeatedgames.com',
+    //to: ['vighneshtrivedi2004@gmail.com'],
     to: ['vighneshtrivedi2004@gmail.com'],
     bcc: ['vighneshtrivedi2004@gmail.com'],
     reply_to: 'renee@undefeatedgames.com',
@@ -41,6 +42,6 @@ var resp = service.sendMessage(msg)
     }
     ).catch(error => {
         var dataJson = JSON.stringify(error);
-        console.log("Post Error: " + error);
+        console.log("Post Error: " + dataJson);
     });
 

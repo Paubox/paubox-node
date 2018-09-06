@@ -1,6 +1,8 @@
 "use strict";
 
 const apiHelper = require("./apiHelper.js");
+const _getAuthheader = Symbol('getAuthheader');
+const _convertMsgObjtoJSONReqObj = Symbol('convertMsgObjtoJSONReqObj');
 
 class emailService {
   constructor(options) {
@@ -19,46 +21,14 @@ class emailService {
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
   }
 
-  getAuthheader() {
+
+  // private methods
+  [_getAuthheader]() {
     var token = "Token token=" + this.apiKey;
     return token;
   }
 
-  getEmailDisposition(sourceTrackingId) {
-
-    try {
-      let apiHelperService = apiHelper();
-      var apiUrl = "/message_receipt?sourceTrackingId=" + sourceTrackingId;
-      return apiHelperService.callToAPIByGet(this.baseURL, apiUrl, this.getAuthheader())
-        .then(response => {
-          var apiResponse = response;
-          if (apiResponse != null && apiResponse.data != null && apiResponse.data.message != null
-            && apiResponse.data.message.message_deliveries != null && apiResponse.data.message.message_deliveries.length > 0) {
-            for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-              if (message_deliveries.status.openedStatus == null) {
-                message_deliveries.status.openedStatus = "unopened";
-              }
-            }
-          }
-          return apiResponse;
-        })
-        .catch(error => {
-          var apiError = error;
-          if (apiError.data == null && apiError.sourceTrackingId == null && apiError.errors == null) {
-            throw new Error(response);
-          }
-          return apiError;
-        });
-
-
-    }
-
-    catch (error) {
-      console.log(error);
-    }
-  }
-
-  ConvertMsgObjecttoJSONReqObject(msg) {
+  [_convertMsgObjtoJSONReqObj](msg) {
     var reqObjectJSON = {};
     var data = {};
     var message = {};
@@ -85,29 +55,55 @@ class emailService {
     return JSON.stringify(reqObjectJSON);
   }
 
+  // public methods
+  getEmailDisposition(sourceTrackingId) {
+
+    try {
+      let apiHelperService = apiHelper();
+      var apiUrl = "/message_receipt?sourceTrackingId=" + sourceTrackingId;
+      return apiHelperService.callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
+        .then(response => {
+          var apiResponse = response;
+          if (apiResponse.data == null && apiResponse.sourceTrackingId == null && apiResponse.errors == null) {
+            throw apiResponse;
+          }
+
+          if (apiResponse != null && apiResponse.data != null && apiResponse.data.message != null
+            && apiResponse.data.message.message_deliveries != null && apiResponse.data.message.message_deliveries.length > 0) {
+            for (let message_deliveries of apiResponse.data.message.message_deliveries) {
+              if (message_deliveries.status.openedStatus == null) {
+                message_deliveries.status.openedStatus = "unopened";
+              }
+            }
+          }
+          return apiResponse;
+        });
+    }
+    catch (error) {
+      throw new Error(error);
+    }
+  }
+
+
+
   sendMessage(msg) {
 
     try {
-      var reqObject = this.ConvertMsgObjecttoJSONReqObject(msg);
+
+      var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
       let apiHelperService = apiHelper();
       var apiUrl = "/messages";
-      return apiHelperService.callToAPIByPost(this.baseURL, apiUrl, this.getAuthheader(), reqObject)
+      return apiHelperService.callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
         .then(response => {
           var apiResponse = response;
+          if (apiResponse.data == null && apiResponse.sourceTrackingId == null && apiResponse.errors == null) {
+            throw apiResponse;
+          }
           return apiResponse;
         })
-        .catch(error => {
-          var apiError = error;
-          if (apiError.data == null && apiError.sourceTrackingId == null && apiError.errors == null) {
-            throw new Error(response);
-          }
-          return apiError;
-        });
-
-
     }
     catch (error) {
-      console.log(error);
+      throw new Error(error);
     }
 
   }
