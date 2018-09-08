@@ -1,0 +1,16 @@
+S.No,Recipient,Bcc,Subject,From,Reply_To,AllowNonTLS ,Text_Plain,Text_Html,Attachments,FileName,ContentType,Content,Expected Response
+1,vighneshtrivedi2004@gmail.com,vighneshtrivedi2004@gmail.com,Test Mail,renee@undefeatedgames.com,renee@undefeatedgames.com,TRUE,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,SUCCESS
+2,vighneshtrivedi2004@gmail.com,,Test Mail,renee@undefeatedgames.com,,,Hello VG,,0,,,,SUCCESS
+3,vighneshtrivedi2004,,Test Mail,renee@undefeatedgames.com,,,Hello Vighnesh,,0,,,,ERROR
+4,vighneshtrivedi2004@gmail.com,,Test Mail,renee@undefeatedgames.com,,,,,1,hello_world.txt,text/html,SGVsbG8gV29ybGQh\n,SUCCESS
+5,vighneshtrivedi2004@gmail.com,,Test Mail,renee@undefeatedgames.com,,,Hello Vighnesh,,0,,,,SUCCESS
+6,vighneshtrivedi2004@gmail.com,,Test Mail,renee@undefeatedgames.com,,,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SG,SUCCESS
+7,vighneshtrivedi2004@gmail.com,,Test Mail,renee@undefeatedgames.com,,,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,fg,SGVsbG8gV29ybGQh\n,SUCCESS
+8,,,Test Mail,renee@undefeatedgames.com,,,Hello Vighnesh,,0,,,,ERROR
+9,vighneshtrivedi2004@gmail.com,,,renee@undefeatedgames.com,,,Hello Vighnesh,,0,,,,ERROR
+10,vighneshtrivedi2004@gmail.com,,Test Mail,,,,Hello Vighnesh,,0,,,,ERROR
+11,vighneshtrivedi2004@gmail.com,,Test Mail 2,renee@undefeatedgames.com,,,,,0,,,,SUCCESS
+12,vighneshtrivedi2004@gmail.com,,,renee@undefeatedgames.com,,,,,0,,,,ERROR
+13,vighneshtrivedi2004@gmail.com,,,,,,Hello Vighnesh,,0,,,,ERROR
+14,,,Test Mail,,,,Hello Vighnesh,,0,,,,ERROR
+15,,,,,,,,,0,,,,ERROR
