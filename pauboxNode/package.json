@@ -32,7 +32,6 @@
   },
   "eslintIgnore": [
     ".gitignore",
-    "test/data/config.js",
     "src",
     "lib"
   ],

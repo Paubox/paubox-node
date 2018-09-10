@@ -18,6 +18,6 @@
   },
   "dependencies": {
     "dotenv": "^6.0.0",
-    "paubox-js": "file:../pauboxNode"
+    "paubox-js": "file:../../../paubox-js"
   }
 }
