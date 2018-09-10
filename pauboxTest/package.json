@@ -1,0 +1,23 @@
+{
+  "name": "paubox-testjs",
+  "version": "1.0.0",
+  "description": "A Node.js test module for the Paubox Transactional Email API.",
+  "main": "pauboxClient.js",
+  "author": "Paubox <info@paubox.com> (http://www.paubox.com)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Paubox/paubox-node.git"
+  },
+  "scripts": {
+    "build": "babel --presets env ./src --out-dir ./lib"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
+  },
+  "dependencies": {
+    "dotenv": "^6.0.0",
+    "paubox-js": "file:../pauboxNode"
+  }
+}

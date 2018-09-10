@@ -2,7 +2,7 @@
   "name": "paubox-js",
   "version": "1.0.0",
   "description": "A Node.js module for the Paubox Transactional Email API.",
-  "main": "./lib/service/emailService.js",
+  "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
