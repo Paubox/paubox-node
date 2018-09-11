@@ -1,14 +1,14 @@
 "use strict";
 
 require("dotenv").config();
-var pauboxjs = require("paubox-js");
+var pauboxjs = require("../paubox-js");
 
 var service = pauboxjs.emailService();
 
 var options = {
     from: 'renee@undefeatedgames.com',
-    to: ['someone@domain.com'],
-    bcc: ['someone2@domain.com'],
+    to: ['someone@xyzdomain.com'],
+    bcc: ['someone2@xyzdomain.com'],
     reply_to: 'renee@undefeatedgames.com',
     subject: 'Testing from paubox node test',
     text_content: 'Hello World text!',

@@ -17,7 +17,7 @@
     "babel-preset-env": "^1.7.0"
   },
   "dependencies": {
-    "dotenv": "^6.0.0",
-    "paubox-js": "file:../../../paubox-js"
+    "axios": "^0.18.0",
+    "dotenv": "^6.0.0"
   }
 }
