@@ -1,8 +1,8 @@
 "use strict";
 
-require("dotenv").config();
-var pauboxjs = require("../paubox-js");
 
+var pauboxjs = require("paubox-js");
+require("dotenv").config();
 var service = pauboxjs.emailService();
 
 var options = {
