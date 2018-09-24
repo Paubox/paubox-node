@@ -14,9 +14,11 @@ The API wrapper allows you to construct and send messages.
 <a name="#installation"></a>
 ## Installation
 
-Download the [Paubox NodeJS repository](https://github.com/Paubox/paubox-node).
+Using npm:
 
-Run `npm install /path/to/paubox-node`
+```bash
+$ npm install --save paubox-node
+```
 
 ### Getting Paubox API Credentials
 
