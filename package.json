@@ -1,5 +1,5 @@
 {
-  "name": "paubox-js",
+  "name": "paubox-node",
   "version": "1.0.0",
   "description": "A Node.js module for the Paubox Transactional Email API.",
   "main": "index.js",
