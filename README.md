@@ -16,7 +16,7 @@ The API wrapper allows you to construct and send messages.
 
 Download the [Paubox NodeJS repository](https://github.com/Paubox/paubox-node).
 
-Run `npm init /path/to/paubox-node`
+Run `npm install /path/to/paubox-node`
 
 ### Getting Paubox API Credentials
 
@@ -27,8 +27,8 @@ You can [sign-up for an account here](https://www.paubox.com/solutions/email-api
 Include your API credentials in your environment file.
 
 ```bash
-$ echo "export API_KEY='YOUR_API_KEY'" > .env
-$ echo "export API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
+$ echo "API_KEY='YOUR_API_KEY'" > .env
+$ echo "API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
 $ echo ".env" >> .gitignore
 ```
 
