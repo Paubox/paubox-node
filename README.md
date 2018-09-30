@@ -21,8 +21,9 @@ $ npm install --save paubox-node
 ```
 
 ### Getting Paubox API Credentials
+You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/join/see-pricing?unit=messages).
 
-You can [sign-up for an account here](https://www.paubox.com/solutions/email-api). Once you have an account, follow the instructions on the Rest API dashboard to verify domain ownership and generate API credentials.
+Once you have an account, follow the instructions on the Rest API dashboard to verify domain ownership and generate API credentials.
 
 ### Configuring API Credentials
 
