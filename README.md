@@ -35,6 +35,17 @@ $ echo "API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
 $ echo ".env" >> .gitignore
 ```
 
+Or pass them as parameters when creating emailService
+
+```javascript
+const pbMail = require('paubox-node');
+const pauboxConfig = {
+  apiUsername: 'your-api-username',
+  apiKey: 'your-api-key',
+};
+const service = pbMail.emailService(pauboxConfig);
+```
+
 <a name="#usage"></a>
 ## Usage
 
