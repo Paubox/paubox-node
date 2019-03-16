@@ -11,12 +11,17 @@ var content = fs.readFileSync("./test/SendMessage_TestData.csv", "utf8");
 var Papa = require('papaparse');
 var sendCsvParsedData = Papa.parse(content);
 
+const pauboxConfig = {
+    apiUsername: 'your-api-username',
+    apiKey: 'your-api-key',
+  };
+
 describe("emailService.GetEmailDisposition_ReturnSuccess", function () {
     this.timeout(4000);
     var apiResponse;
     var testData = [
-        "1aed91d1-f7ce-4c3d-8df2-85ecd225a7fc",
-        "31b23486-9340-4b34-b313-44ee1109bb57"
+        "f0777ce7-bd6b-4a49-ab58-91e0cacbc642",
+        "0c1cf5ae-34ea-4694-b42b-3e0ac6906cdd"
     ];
     var i = 0;
 
@@ -105,6 +110,39 @@ describe("emailService.SendMessage_ReturnSuccess", function () {
             service.sendMessage(testData[i])
                 .then(function (response) {
                     apiResponse = response;
+                    done();
+                })
+                .catch(error => {
+                    apiResponse = error;
+                    done();
+                });
+        }, 100);
+    });
+
+    afterEach(function () {
+        i = i + 1;
+    });
+
+    for (var k = 0; k < testData.length; k++)
+        it("should return successful response " + (k + 1), function () {
+            passIfPostResponseIsSuccessful(apiResponse);
+        });
+});
+
+describe("emailService.SendMessage_ReturnSuccess: Using Passed credentials as pauboxConfig", function () {
+    this.timeout(4000);
+    var apiResponse;
+    var testData = sendMessage_TestData(true);
+    var i = 0;
+
+    beforeEach(function (done) {
+
+        // simulate async call w/ setTimeout
+        setTimeout(function () {           
+            let service = emailService(pauboxConfig);
+            service.sendMessage(testData[i])
+                .then(function (response) {
+                    apiResponse = response;                    
                     done();
                 })
                 .catch(error => {
