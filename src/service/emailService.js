@@ -59,13 +59,19 @@ class emailService {
     var message = {};
     var content = {};
     var headers = {};
+    var base64EncodedHtmlText = null;
 
     headers.subject = msg.subject;
     headers.from = msg.from;
     headers["reply-to"] = msg.reply_to;
 
     content["text/plain"] = msg.plaintext;
-    content["text/html"] = msg.htmltext;
+
+    //base 64 encoding html text
+    if (msg.htmltext != null && msg.htmltext != "") {
+      base64EncodedHtmlText = Buffer.from(msg.htmltext).toString('base64');
+    }
+    content["text/html"] = base64EncodedHtmlText;
 
     message.recipients = msg.to;
     message.bcc = msg.bcc;
