@@ -102,6 +102,29 @@ var options = {
 var message = pbMail.message(options)
 ```
 
+### Forcing Secure Notifications
+Paubox Secure Notifications allow an extra layer of security, especially when coupled with an organization's requirement for message recipients to use 2-factor authentication to read messages (this setting is available to org administrators in the Paubox Admin Panel).
+
+Instead of receiving an email with the message contents, the recipient will receive a notification email that they have a new message in Paubox.
+
+```javascript
+"use strict";
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+var options = {  
+  forceSecureNotification: 'true',
+  from: 'sender@domain.com',
+  to: ['recipient@example.com'],
+  subject: 'Testing!',
+  text_content: 'Hello World!',
+  html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
+}
+
+var message = pbMail.message(options)
+```
+
 ### Adding Attachments and Additional Headers
 
 
