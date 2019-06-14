@@ -74,7 +74,8 @@ class emailService {
     content["text/html"] = base64EncodedHtmlText;
 
     message.recipients = msg.to;
-    message.bcc = msg.bcc;
+    message.cc = msg.cc;
+    message.bcc = msg.bcc;    
     message.headers = headers;
     message.allowNonTLS = msg.allowNonTLS;
     message.content = content;

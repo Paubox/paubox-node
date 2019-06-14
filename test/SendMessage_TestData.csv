@@ -1,17 +1,17 @@
-S.No,Recipient,Bcc,Subject,From,Reply_To,AllowNonTLS ,Text_Plain,Text_Html,Attachments,FileName,ContentType,Content,ForceSecureNotification,Expected Response
-1,testuser@test.com,testuser@test.com,Test Mail,renee@undefeatedgames.com,renee@undefeatedgames.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,FALSE,SUCCESS
-2,testuser@test.com,,Test Secure Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,TRUE,SUCCESS
-3,testuser,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,ERROR
-4,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,,,1,hello_world.txt,text/html,SGVsbG8gV29ybGQh\n,,SUCCESS
-5,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,SUCCESS
-6,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SG,FALSE,SUCCESS
-7,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,fg,SGVsbG8gV29ybGQh\n,FALSE,SUCCESS
-8,,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,,ERROR
-9,testuser@test.com,,,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,SUCCESS
-10,testuser@test.com,,Test Mail,,,,Hello Test User,,0,,,,FALSE,ERROR
-11,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,,,0,,,,,SUCCESS
-12,testuser@test.com,,,renee@undefeatedgames.com,,,,,0,,,,FALSE,SUCCESS
-13,testuser@test.com,,,,,,Hello Test User,,0,,,,FALSE,ERROR
-14,,,Test Mail,,,,Hello Test User,,0,,,,FALSE,ERROR
-15,,,,,,,,,0,,,,FALSE,ERROR
-16,testuser@test.com,testuser@test.com,Test Secure Mail,renee@undefeatedgames.com,renee@undefeatedgames.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,TRUE,SUCCESS
+S.No,Recipient,Bcc,Subject,From,Reply_To,AllowNonTLS ,Text_Plain,Text_Html,Attachments,FileName,ContentType,Content,ForceSecureNotification,Cc,Expected Response
+1,testuser@test.com,testuser@test.com,Test Mail,sender@test.com,sender@test.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,FALSE,testuser@test.com,SUCCESS
+2,testuser@test.com,,Test Secure Mail,sender@test.com,,,Hello Test User,,0,,,,TRUE,testuser@test.com,SUCCESS
+3,testuser,,Test Mail,sender@test.com,,,Hello Test User,,0,,,,FALSE,testuser,ERROR
+4,testuser@test.com,,Test Mail,sender@test.com,,,,,1,hello_world.txt,text/html,SGVsbG8gV29ybGQh\n,,testuser@test.com,SUCCESS
+5,testuser@test.com,,Test Mail,sender@test.com,,,Hello Test User,,0,,,,FALSE,testuser@test.com,SUCCESS
+6,testuser@test.com,,Test Mail,sender@test.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SG,FALSE,testuser@test.com,SUCCESS
+7,testuser@test.com,,Test Mail,sender@test.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,fg,SGVsbG8gV29ybGQh\n,FALSE,testuser@test.com,SUCCESS
+8,,,Test Mail,sender@test.com,,,Hello Test User,,0,,,,,,ERROR
+9,testuser@test.com,,,sender@test.com,,,Hello Test User,,0,,,,FALSE,testuser@test.com,SUCCESS
+10,testuser@test.com,,Test Mail,,,,Hello Test User,,0,,,,FALSE,testuser@test.com,ERROR
+11,testuser@test.com,,Test Mail,sender@test.com,,,,,0,,,,,testuser@test.com,SUCCESS
+12,testuser@test.com,,,sender@test.com,,,,,0,,,,FALSE,testuser@test.com,SUCCESS
+13,testuser@test.com,,,,,,Hello Test User,,0,,,,FALSE,testuser@test.com,ERROR
+14,,,Test Mail,,,,Hello Test User,,0,,,,FALSE,,ERROR
+15,,,,,,,,,0,,,,FALSE,,ERROR
+16,testuser@test.com,testuser@test.com,Test Secure Mail,sender@test.com,sender@test.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,TRUE,testuser@test.com,SUCCESS
