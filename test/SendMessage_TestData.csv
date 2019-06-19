@@ -1,16 +1,17 @@
-S.No,Recipient,Bcc,Subject,From,Reply_To,AllowNonTLS ,Text_Plain,Text_Html,Attachments,FileName,ContentType,Content,Expected Response
-1,vighneshtrivedi2004@gmail.com,vighneshtrivedi2004@gmail.com,Test Mail,renee@jongreeley.com,renee@jongreeley.com,TRUE,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,SUCCESS
-2,vighneshtrivedi2004@gmail.com,,Test Mail,renee@jongreeley.com,,,Hello VG,,0,,,,SUCCESS
-3,vighneshtrivedi2004,,Test Mail,renee@jongreeley.com,,,Hello Vighnesh,,0,,,,ERROR
-4,vighneshtrivedi2004@gmail.com,,Test Mail,renee@jongreeley.com,,,,,1,hello_world.txt,text/html,SGVsbG8gV29ybGQh\n,SUCCESS
-5,vighneshtrivedi2004@gmail.com,,Test Mail,renee@jongreeley.com,,,Hello Vighnesh,,0,,,,SUCCESS
-6,vighneshtrivedi2004@gmail.com,,Test Mail,renee@jongreeley.com,,,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SG,SUCCESS
-7,vighneshtrivedi2004@gmail.com,,Test Mail,renee@jongreeley.com,,,Hello Vighnesh,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,fg,SGVsbG8gV29ybGQh\n,SUCCESS
-8,,,Test Mail,renee@jongreeley.com,,,Hello Vighnesh,,0,,,,ERROR
-9,vighneshtrivedi2004@gmail.com,,,renee@jongreeley.com,,,Hello Vighnesh,,0,,,,ERROR
-10,vighneshtrivedi2004@gmail.com,,Test Mail,,,,Hello Vighnesh,,0,,,,ERROR
-11,vighneshtrivedi2004@gmail.com,,Test Mail 2,renee@jongreeley.com,,,,,0,,,,SUCCESS
-12,vighneshtrivedi2004@gmail.com,,,renee@jongreeley.com,,,,,0,,,,ERROR
-13,vighneshtrivedi2004@gmail.com,,,,,,Hello Vighnesh,,0,,,,ERROR
-14,,,Test Mail,,,,Hello Vighnesh,,0,,,,ERROR
-15,,,,,,,,,0,,,,ERROR
+S.No,Recipient,Bcc,Subject,From,Reply_To,AllowNonTLS ,Text_Plain,Text_Html,Attachments,FileName,ContentType,Content,ForceSecureNotification,Expected Response
+1,testuser@test.com,testuser@test.com,Test Mail,renee@undefeatedgames.com,renee@undefeatedgames.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,FALSE,SUCCESS
+2,testuser@test.com,,Test Secure Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,TRUE,SUCCESS
+3,testuser,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,ERROR
+4,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,,,1,hello_world.txt,text/html,SGVsbG8gV29ybGQh\n,,SUCCESS
+5,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,SUCCESS
+6,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SG,FALSE,SUCCESS
+7,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,fg,SGVsbG8gV29ybGQh\n,FALSE,SUCCESS
+8,,,Test Mail,renee@undefeatedgames.com,,,Hello Test User,,0,,,,,ERROR
+9,testuser@test.com,,,renee@undefeatedgames.com,,,Hello Test User,,0,,,,FALSE,SUCCESS
+10,testuser@test.com,,Test Mail,,,,Hello Test User,,0,,,,FALSE,ERROR
+11,testuser@test.com,,Test Mail,renee@undefeatedgames.com,,,,,0,,,,,SUCCESS
+12,testuser@test.com,,,renee@undefeatedgames.com,,,,,0,,,,FALSE,SUCCESS
+13,testuser@test.com,,,,,,Hello Test User,,0,,,,FALSE,ERROR
+14,,,Test Mail,,,,Hello Test User,,0,,,,FALSE,ERROR
+15,,,,,,,,,0,,,,FALSE,ERROR
+16,testuser@test.com,testuser@test.com,Test Secure Mail,renee@undefeatedgames.com,renee@undefeatedgames.com,TRUE,Hello Test User,<html><body><h1>Hello World!</h1></body></html>,1,hello_world.txt,text/plain,SGVsbG8gV29ybGQh\n,TRUE,SUCCESS

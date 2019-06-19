@@ -20,8 +20,8 @@ describe("emailService.GetEmailDisposition_ReturnSuccess", function () {
     this.timeout(4000);
     var apiResponse;
     var testData = [
-        "f0777ce7-bd6b-4a49-ab58-91e0cacbc642",
-        "0c1cf5ae-34ea-4694-b42b-3e0ac6906cdd"
+        "1aed91d1-f7ce-4c3d-8df2-85ecd225a7fc",
+        "ce1e2143-474d-43ba-b829-17a26b8005e5"
     ];
     var i = 0;
 
@@ -204,11 +204,11 @@ function sendMessage_TestData(forSuccess) {
 
         var testMsgData = csvData[j];
         if (forSuccess) {
-            if (testMsgData[13] != 'SUCCESS') // If Expected output is not Success , then skip the test data
+            if (testMsgData[14] != 'SUCCESS') // If Expected output is not Success , then skip the test data
                 continue;
         }
         else {
-            if (testMsgData[13] != 'ERROR')   // If Expected output is not Error , then skip the test data
+            if (testMsgData[14] != 'ERROR')   // If Expected output is not Error , then skip the test data
                 continue;
         }
 
@@ -219,6 +219,7 @@ function sendMessage_TestData(forSuccess) {
             reply_to: testMsgData[5],
             subject: testMsgData[3],
             allowNonTLS: testMsgData[6].toLowerCase() == 'true' ? true : false,
+            forceSecureNotification: testMsgData[13],
             text_content: testMsgData[7] != null ? testMsgData[7] : null,
             html_content: testMsgData[8] != null ? testMsgData[8] : null
         };
@@ -272,7 +273,7 @@ function passIfPostResponseIsSuccessful(apiResponse) {
         if (apiResponse.data != null && apiResponse.sourceTrackingId != null) {
             expect("Success").to.equal("Success");
         }
-        else {
+        else {            
             expect("Success").to.equal("Error");
         }
     }

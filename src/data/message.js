@@ -8,6 +8,7 @@ class Message {
     this.bcc = options.bcc;
     this.subject = options.subject;
     this.allowNonTLS = options.allowNonTLS || false;
+    this.forceSecureNotification = options.forceSecureNotification;
     this.plaintext = options.text_content;
     this.htmltext = options.html_content;
     this.attachments = options.attachments;
