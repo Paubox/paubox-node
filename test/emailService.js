@@ -204,17 +204,18 @@ function sendMessage_TestData(forSuccess) {
 
         var testMsgData = csvData[j];
         if (forSuccess) {
-            if (testMsgData[14] != 'SUCCESS') // If Expected output is not Success , then skip the test data
+            if (testMsgData[15] != 'SUCCESS') // If Expected output is not Success , then skip the test data
                 continue;
         }
         else {
-            if (testMsgData[14] != 'ERROR')   // If Expected output is not Error , then skip the test data
+            if (testMsgData[15] != 'ERROR')   // If Expected output is not Error , then skip the test data
                 continue;
         }
 
         var options = {
             from: testMsgData[4],
             to: [testMsgData[1]],
+            cc: [testMsgData[14]],
             bcc: [testMsgData[2]],
             reply_to: testMsgData[5],
             subject: testMsgData[3],
@@ -273,7 +274,7 @@ function passIfPostResponseIsSuccessful(apiResponse) {
         if (apiResponse.data != null && apiResponse.sourceTrackingId != null) {
             expect("Success").to.equal("Success");
         }
-        else {            
+        else {                        
             expect("Success").to.equal("Error");
         }
     }

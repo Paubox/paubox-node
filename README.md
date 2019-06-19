@@ -141,6 +141,7 @@ var options = {
   reply_to: 'reply_to@domain.com',
   to: ['recipient@example.com'],
   bcc: ['recipient2@example.com'],
+  cc: ['recipientcc@example.com'],
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
