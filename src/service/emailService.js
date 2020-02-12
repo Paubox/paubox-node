@@ -63,7 +63,7 @@ class emailService {
 
     headers.subject = msg.subject;
     headers.from = msg.from;
-    headers["reply-to"] = msg.reply_to;
+    headers["reply-to"] = msg.replyTo;
 
     content["text/plain"] = msg.plaintext;
 
@@ -75,7 +75,7 @@ class emailService {
 
     message.recipients = msg.to;
     message.cc = msg.cc;
-    message.bcc = msg.bcc;    
+    message.bcc = msg.bcc;
     message.headers = headers;
     message.allowNonTLS = msg.allowNonTLS;
     message.content = content;
