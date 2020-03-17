@@ -1,3 +1,5 @@
+<img src="https://github.com/Paubox/paubox-csharp/raw/master/paubox_logo.png" alt="Paubox" width="150px">
+
 # Paubox NodeJS
 
 This is the official NodeJS wrapper for the [Paubox Email API](https://www.paubox.com/solutions/email-api).
