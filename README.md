@@ -1,8 +1,9 @@
 # Paubox NodeJS
 
-This is the official NodeJS wrapper for the [Paubox Transactional Email API](https://www.paubox.com/solutions/email-api). It is currently in alpha development.
+This is the official NodeJS wrapper for the [Paubox Email API](https://www.paubox.com/solutions/email-api).
 
-The Paubox Transactional Email API allows your application to send secure, HIPAA-compliant email via Paubox and track deliveries and opens.
+The Paubox Email API allows your application to send secure, 
+compliant email via Paubox and track deliveries and opens.
 The API wrapper allows you to construct and send messages.
 
 # Table of Contents
@@ -80,7 +81,7 @@ service.sendMessage(message)
 
 ### Allowing non-TLS message delivery
 
-If you want to send non-PHI mail that does not need to be HIPAA-compliant, you can allow the message delivery to take place even if a TLS connection is unavailable.
+If you want to send non-PHI mail that does not need to be HIPAA compliant, you can allow the message delivery to take place even if a TLS connection is unavailable.
 
 This means the message will not be converted into a secure portal message when a nonTLS connection is encountered. To do this, include `allowNonTLS: true` in the options, as shown below:
 
@@ -192,4 +193,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 ## Copyright
-Copyright &copy; 2019, Paubox Inc.
+Copyright &copy; 2020, Paubox Inc.
