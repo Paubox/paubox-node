@@ -142,6 +142,9 @@ var attachmentContent = Buffer.from('Hello! This is the attachment content!').to
 var options = {
   from: 'sender@domain.com',
   reply_to: 'reply_to@domain.com',
+  listUnsubscribe: '<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe.html>',
+  listUnsubscribePost: '<http://www.example.com/unsubscribe>'
+  reply_to: 'reply_to@domain.com',
   to: ['recipient@example.com'],
   bcc: ['recipient2@example.com'],
   cc: ['recipientcc@example.com'],
