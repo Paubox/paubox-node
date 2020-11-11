@@ -4,6 +4,8 @@ class Message {
   constructor(options) {
     this.from = options.from;
     this.replyTo = options.reply_to;
+    this.listUnsubscribe = options.list_unsubscribe;
+    this.listUnsubscribePost = options.list_unsubcribe_post;
     this.to = options.to;
     this.cc = options.cc;
     this.bcc = options.bcc;
