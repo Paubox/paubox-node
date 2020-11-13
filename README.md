@@ -14,6 +14,8 @@ The API wrapper allows you to construct and send messages.
 *  [Contributing](#contributing)
 *  [License](#license)
 
+Further documentation can be found at [docs.paubox.com](https://docs.paubox.com/docs/paubox_email_api/introduction/).
+
 <a name="#installation"></a>
 ## Installation
 
@@ -24,13 +26,18 @@ $ npm install --save paubox-node
 ```
 
 ### Getting Paubox API Credentials
-You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/join/see-pricing?unit=messages).
+You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/join/see-pricing?unit=messages#paubox-email-api).
 
 Once you have an account, follow the instructions on the Rest API dashboard to verify domain ownership and generate API credentials.
 
 ### Configuring API Credentials
 
 Include your API credentials in your environment file.
+
+Your "API Username" comes from your unique API endpoint.
+
+**Base URL:** ```https://api.paubox.net/v1/<USERNAME>```
+
 
 ```bash
 $ echo "API_KEY='YOUR_API_KEY'" > .env
