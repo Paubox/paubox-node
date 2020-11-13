@@ -135,6 +135,30 @@ var options = {
 var message = pbMail.message(options)
 ```
 
+### Adding the List-Unsubscribe Header
+The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explaination and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
+
+This header can be used by adding the `list_unsubscribe: '<Email Unsubscribe Address>, <Web Unsubscribe URL'` and `list_unsubscribe_post: 'List-Unsubscribe=One-Click'` key-value pairs to the options object as follows:
+
+```javascript
+"use strict";
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+var options = {
+  from: 'sender@domain.com',
+  to: ['recipient@example.com'],
+  subject: 'Testing!',
+  text_content: 'Hello World!',
+  html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
+  list_unsubscribe: '<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe.html>',
+  list_unsubscribe_post: 'List-Unsubscribe=One-Click'
+}
+
+var message = pbMail.message(options)
+
+
 ### Adding Attachments and Additional Headers
 
 
