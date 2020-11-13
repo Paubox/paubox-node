@@ -14,6 +14,7 @@ class Message {
     this.htmltext = options.html_content;
     this.attachments = options.attachments;
     this.listUnsubscribe = options.list_unsubscribe;
+    this.listUnsubscribePost = options.list_unsubscribe_post;
   }  
 }
 

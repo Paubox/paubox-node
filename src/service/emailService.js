@@ -65,6 +65,7 @@ class emailService {
     headers.from = msg.from;
     headers["reply-to"] = msg.replyTo;
     headers["List-Unsubscribe"] = msg.listUnsubscribe
+    headers["List-Unsubscribe-Post"] = msg.listUnsubscribePost
 
     content["text/plain"] = msg.plaintext;
 
