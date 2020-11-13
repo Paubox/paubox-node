@@ -13,6 +13,7 @@ class Message {
     this.plaintext = options.text_content;
     this.htmltext = options.html_content;
     this.attachments = options.attachments;
+    this.listUnsubscribe = options.list_unsubscribe;
   }  
 }
 
