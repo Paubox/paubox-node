@@ -157,7 +157,7 @@ var options = {
 }
 
 var message = pbMail.message(options)
-
+```
 
 ### Adding Attachments and Additional Headers
 
