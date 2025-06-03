@@ -1,4 +1,6 @@
+<!-- markdownlint-disable -->
 ![Paubox](https://avatars.githubusercontent.com/u/22528478?s=200&v=4)
+<!-- markdownlint-restore -->
 
 # Paubox NodeJS <!-- omit from toc -->
 
@@ -152,7 +154,7 @@ var message = pbMail.message(options);
 
 ### Adding the List-Unsubscribe Header
 
-The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explaination and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
+The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explanation and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
 
 This header can be used by adding the `list_unsubscribe: '<Email Unsubscribe Address>, <Web Unsubscribe URL'` and `list_unsubscribe_post: 'List-Unsubscribe=One-Click'` key-value pairs to the options object as follows:
 
