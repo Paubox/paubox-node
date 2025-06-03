@@ -1,53 +1,52 @@
-"use strict";
+'use strict';
 
-const apiHelper = require("./apiHelper.js");
+const apiHelper = require('./apiHelper.js');
 const _getAuthheader = Symbol('getAuthheader');
 const _convertMsgObjtoJSONReqObj = Symbol('convertMsgObjtoJSONReqObj');
 const _returnForceSecureNotificationValue = Symbol('returnForceSecureNotificationValue');
 
 class emailService {
   constructor(config) {
-    config = Object.assign({
-      apiUsername: process.env.API_USERNAME,
-      apiKey: process.env.API_KEY,
-    }, config);
+    config = Object.assign(
+      {
+        apiUsername: process.env.API_USERNAME,
+        apiKey: process.env.API_KEY,
+      },
+      config,
+    );
 
     if (!config.apiKey) {
-      throw new Error("apiKey is missing.");
+      throw new Error('apiKey is missing.');
     }
     if (!config.apiUsername) {
-      throw new Error("apiUsername is missing.");
+      throw new Error('apiUsername is missing.');
     }
     this.apiKey = config.apiKey;
     this.apiUser = config.apiUsername;
-    this.protocol = "https:";
-    this.host = "api.paubox.net";
+    this.protocol = 'https:';
+    this.host = 'api.paubox.net';
     this.port = 443;
-    this.version = "v1";
+    this.version = 'v1';
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
   }
 
-
   // private methods
   [_getAuthheader]() {
-    var token = "Token token=" + this.apiKey;
+    var token = 'Token token=' + this.apiKey;
     return token;
   }
 
   [_returnForceSecureNotificationValue](forceSecureNotification) {
     var forceSecureNotificationValue = null;
-    if (forceSecureNotification == null || forceSecureNotification == "") {
+    if (forceSecureNotification == null || forceSecureNotification == '') {
       return null;
-    }
-    else {
+    } else {
       forceSecureNotificationValue = forceSecureNotification.trim().toLowerCase();
-      if (forceSecureNotificationValue == "true") {
+      if (forceSecureNotificationValue == 'true') {
         return true;
-      }
-      else if (forceSecureNotificationValue == "false") {
+      } else if (forceSecureNotificationValue == 'false') {
         return false;
-      }
-      else {
+      } else {
         return null;
       }
     }
@@ -63,17 +62,17 @@ class emailService {
 
     headers.subject = msg.subject;
     headers.from = msg.from;
-    headers["reply-to"] = msg.replyTo;
-    headers["List-Unsubscribe"] = msg.listUnsubscribe;
-    headers["List-Unsubscribe-Post"] = msg.listUnsubscribePost;
+    headers['reply-to'] = msg.replyTo;
+    headers['List-Unsubscribe'] = msg.listUnsubscribe;
+    headers['List-Unsubscribe-Post'] = msg.listUnsubscribePost;
 
-    content["text/plain"] = msg.plaintext;
+    content['text/plain'] = msg.plaintext;
 
     //base 64 encoding html text
-    if (msg.htmltext != null && msg.htmltext != "") {
+    if (msg.htmltext != null && msg.htmltext != '') {
       base64EncodedHtmlText = Buffer.from(msg.htmltext).toString('base64');
     }
-    content["text/html"] = base64EncodedHtmlText;
+    content['text/html'] = base64EncodedHtmlText;
 
     message.recipients = msg.to;
     message.cc = msg.cc;
@@ -83,7 +82,9 @@ class emailService {
     message.content = content;
     message.attachments = msg.attachments;
 
-    var forceSecureNotificationValue = this[_returnForceSecureNotificationValue](msg.forceSecureNotification);
+    var forceSecureNotificationValue = this[_returnForceSecureNotificationValue](
+      msg.forceSecureNotification,
+    );
     if (forceSecureNotificationValue != null) {
       message.forceSecureNotification = forceSecureNotificationValue;
     }
@@ -97,58 +98,63 @@ class emailService {
   // public methods
 
   getEmailDisposition(sourceTrackingId) {
-
     try {
       let apiHelperService = apiHelper();
-      var apiUrl = "/message_receipt?sourceTrackingId=" + sourceTrackingId;
-      return apiHelperService.callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
-        .then(response => {
+      var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
+      return apiHelperService
+        .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
+        .then((response) => {
           var apiResponse = response;
-          if (apiResponse.data == null && apiResponse.sourceTrackingId == null && apiResponse.errors == null) {
+          if (
+            apiResponse.data == null &&
+            apiResponse.sourceTrackingId == null &&
+            apiResponse.errors == null
+          ) {
             throw apiResponse;
           }
 
-          if (apiResponse != null && apiResponse.data != null && apiResponse.data.message != null
-            && apiResponse.data.message.message_deliveries != null && apiResponse.data.message.message_deliveries.length > 0) {
+          if (
+            apiResponse != null &&
+            apiResponse.data != null &&
+            apiResponse.data.message != null &&
+            apiResponse.data.message.message_deliveries != null &&
+            apiResponse.data.message.message_deliveries.length > 0
+          ) {
             for (let message_deliveries of apiResponse.data.message.message_deliveries) {
               if (message_deliveries.status.openedStatus == null) {
-                message_deliveries.status.openedStatus = "unopened";
+                message_deliveries.status.openedStatus = 'unopened';
               }
             }
           }
           return apiResponse;
         });
-    }
-    catch (error) {
+    } catch (error) {
       throw new Error(error);
     }
   }
 
-
-
   sendMessage(msg) {
-
     try {
-
       var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
       let apiHelperService = apiHelper();
-      var apiUrl = "/messages";
-      return apiHelperService.callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
-        .then(response => {
+      var apiUrl = '/messages';
+      return apiHelperService
+        .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
+        .then((response) => {
           var apiResponse = response;
-          if (apiResponse.data == null && apiResponse.sourceTrackingId == null && apiResponse.errors == null) {
+          if (
+            apiResponse.data == null &&
+            apiResponse.sourceTrackingId == null &&
+            apiResponse.errors == null
+          ) {
             throw apiResponse;
           }
           return apiResponse;
-        })
-    }
-    catch (error) {
+        });
+    } catch (error) {
       throw new Error(error);
     }
-
   }
-
-
 }
 
 module.exports = function (options) {

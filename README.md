@@ -74,7 +74,7 @@ emailService.
 ### Sending messages
 
 ```javascript
-"use strict";
+'use strict';
 
 require('dotenv').config();
 const pbMail = require('paubox-node');
@@ -86,15 +86,17 @@ var options = {
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
-}
+};
 
-var message = pbMail.message(options)
+var message = pbMail.message(options);
 
-service.sendMessage(message)
-  .then(response => {
-    console.log("Send Message method Response: " + JSON.stringify(response));
-  }).catch(error => {
-    console.log("Error in Send Message method: " + JSON.stringify(error));
+service
+  .sendMessage(message)
+  .then((response) => {
+    console.log('Send Message method Response: ' + JSON.stringify(response));
+  })
+  .catch((error) => {
+    console.log('Error in Send Message method: ' + JSON.stringify(error));
   });
 ```
 
@@ -105,7 +107,7 @@ If you want to send non-PHI mail that does not need to be HIPAA compliant, you c
 This means the message will not be converted into a secure portal message when a nonTLS connection is encountered. To do this, include `allowNonTLS: true` in the options, as shown below:
 
 ```javascript
-"use strict";
+'use strict';
 
 require('dotenv').config();
 const pbMail = require('paubox-node');
@@ -118,9 +120,9 @@ var options = {
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
-}
+};
 
-var message = pbMail.message(options)
+var message = pbMail.message(options);
 ```
 
 ### Forcing Secure Notifications
@@ -130,7 +132,7 @@ Paubox Secure Notifications allow an extra layer of security, especially when co
 Instead of receiving an email with the message contents, the recipient will receive a notification email that they have a new message in Paubox.
 
 ```javascript
-"use strict";
+'use strict';
 
 require('dotenv').config();
 const pbMail = require('paubox-node');
@@ -143,9 +145,9 @@ var options = {
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
-}
+};
 
-var message = pbMail.message(options)
+var message = pbMail.message(options);
 ```
 
 ### Adding the List-Unsubscribe Header
@@ -155,7 +157,7 @@ The List-Unsubscribe header provides the recipient with the option to easily opt
 This header can be used by adding the `list_unsubscribe: '<Email Unsubscribe Address>, <Web Unsubscribe URL'` and `list_unsubscribe_post: 'List-Unsubscribe=One-Click'` key-value pairs to the options object as follows:
 
 ```javascript
-"use strict";
+'use strict';
 
 require('dotenv').config();
 const pbMail = require('paubox-node');
@@ -167,23 +169,24 @@ var options = {
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
-  list_unsubscribe: '<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe.html>',
-  list_unsubscribe_post: 'List-Unsubscribe=One-Click'
-}
+  list_unsubscribe:
+    '<mailto: unsubscribe@example.com?subject=unsubscribe>, <http://www.example.com/unsubscribe.html>',
+  list_unsubscribe_post: 'List-Unsubscribe=One-Click',
+};
 
-var message = pbMail.message(options)
+var message = pbMail.message(options);
 ```
 
 ### Adding Attachments and Additional Headers
 
 ```javascript
-"use strict";
+'use strict';
 
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
 
-var attachmentContent = Buffer.from('Hello! This is the attachment content!').toString('base64')
+var attachmentContent = Buffer.from('Hello! This is the attachment content!').toString('base64');
 
 var options = {
   from: 'sender@domain.com',
@@ -194,14 +197,16 @@ var options = {
   subject: 'Testing!',
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
-  attachments: [{
-    fileName: "HelloWorld.txt",
-    contentType: "text/plain",
-    content: attachmentContent
-  }]
-}
+  attachments: [
+    {
+      fileName: 'HelloWorld.txt',
+      contentType: 'text/plain',
+      content: attachmentContent,
+    },
+  ],
+};
 
-var message = pbMail.message(options)
+var message = pbMail.message(options);
 ```
 
 ### Checking Email Dispositions
@@ -209,15 +214,14 @@ var message = pbMail.message(options)
 The SOURCE_TRACKING_ID of a message is returned in the response of the sendMessage method. To check the status for any email, use its source tracking id and call the getEmailDisposition method of emailService:
 
 ```javascript
-"use strict";
+'use strict';
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
 
-service.getEmailDisposition("SOURCE_TRACKING_ID")
-  .then(function (response) {
-      console.log("Get Email Disposition method Response: " + JSON.stringify(response));
-  });
+service.getEmailDisposition('SOURCE_TRACKING_ID').then(function (response) {
+  console.log('Get Email Disposition method Response: ' + JSON.stringify(response));
+});
 ```
 
 ## Supported Node Versions

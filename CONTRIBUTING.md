@@ -6,9 +6,9 @@ Bug reports and pull requests are welcome on GitHub at <https://github.com/paubo
 
 1. Install [nvm](https://github.com/nvm-sh/nvm):
 
-    ```sh
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-    ```
+   ```sh
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+   ```
 
 2. Clone the repo
 3. Install node version:
@@ -34,3 +34,23 @@ Bug reports and pull requests are welcome on GitHub at <https://github.com/paubo
 ```sh
 npm run test
 ```
+
+## Linting
+
+1. Run linting to detect problems:
+
+   ```sh
+   npm run lint
+   ```
+
+2. Fix auto-correctable problems:
+
+   ```sh
+   npm run lint:fix
+   ```
+
+3. Format code using Prettier:
+
+   ```sh
+   npm run format
+   ```
