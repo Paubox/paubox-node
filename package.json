@@ -11,7 +11,9 @@
     "test": "./node_modules/.bin/mocha --reporter spec",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write '**/*.{js,json,md}'"
+    "format": "prettier --write '**/*.{js,json,md}'",
+    "clean": "rm -rf lib/",
+    "build": "npm run clean && babel src -d lib && npm run format"
   },
   "author": "Paubox <info@paubox.com> (http://www.paubox.com)",
   "license": "Apache-2.0",

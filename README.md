@@ -1,5 +1,7 @@
 <!-- markdownlint-disable -->
+
 ![Paubox](https://avatars.githubusercontent.com/u/22528478?s=200&v=4)
+
 <!-- markdownlint-restore -->
 
 # Paubox NodeJS <!-- omit from toc -->
