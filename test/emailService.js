@@ -1,85 +1,95 @@
-require('dotenv').config();
-const expect = require('chai').expect;
-const emailService = require('../lib/service/emailService.js');
-const message = require('../lib/data/message.js');
-const fs = require('fs');
-const content = fs.readFileSync('./test/SendMessage_TestData.csv', 'utf8');
+import dotenv from 'dotenv';
+dotenv.config();
+import { expect } from 'chai';
+import sinon from 'sinon';
+import axios from 'axios';
+import emailService from '../lib/service/emailService.js';
+import message from '../lib/data/message.js';
+import { readFileSync } from 'fs';
+import Papa from 'papaparse';
 
+const content = readFileSync('./test/SendMessage_TestData.csv', 'utf8');
 // Papa Parse for parsing CSV Files
-const Papa = require('papaparse');
 const sendCsvParsedData = Papa.parse(content);
 
-const pauboxConfig = {
-  apiUsername: 'your-api-username',
-  apiKey: 'your-api-key',
+const testCredentials = {
+  apiUsername: 'authorized_domain',
+  apiKey: 'api-key-12345',
 };
 
-describe('emailService.GetEmailDisposition_ReturnSuccess', function () {
-  this.timeout(4000);
-  let apiResponse;
-  const testData = ['1aed91d1-f7ce-4c3d-8df2-85ecd225a7fc', 'ce1e2143-474d-43ba-b829-17a26b8005e5'];
-  let i = 0;
+const sourceTrackingId = '6e1cf9a4-7bde-4834-8200-ed424b50c8a7';
 
-  beforeEach(function (done) {
-    // simulate async call w/ setTimeout
-    setTimeout(function () {
-      const service = emailService();
-      service
-        .getEmailDisposition(testData[i])
-        .then(function (response) {
-          apiResponse = response;
-          done();
-        })
-        .catch((error) => {
-          apiResponse = error;
-          done();
-        });
-    }, 100);
+describe('emailService.GetEmailDisposition_ReturnSuccess', function () {
+  let axiosStub;
+
+  beforeEach(function () {
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      return Promise.resolve({
+        data: {
+          "sourceTrackingId": sourceTrackingId,
+          "data": {
+            "message": {
+              "id": `${sourceTrackingId}@authorized_domain.com`,
+              "message_deliveries": [
+                {
+                  "recipient": "recipient@host.com",
+                  "status": {
+                    "deliveryStatus": "delivered",
+                    "deliveryTime": "Mon, 23 Apr 2018 13:27:34 -0700",
+                    "openedStatus": "opened",
+                    "openedTime": "Mon, 23 Apr 2018 13:27:51 -0700"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      });
+    });
   });
 
   afterEach(function () {
-    i = i + 1;
+    axiosStub.restore();
   });
 
-  for (let k = 0; k < testData.length; k++) {
-    it('should return successful response ' + (k + 1), function () {
-      passIfGetResponseIsSuccessful(apiResponse);
-    });
-  }
+  it('returns a successful response', async function () {
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(sourceTrackingId);
+    passIfGetResponseIsSuccessful(response);
+  });
 });
 
 describe('emailService.GetEmailDisposition_ReturnError', function () {
-  this.timeout(3000);
-  let apiResponse;
-  const testData = [null, '', ' ', '151515215'];
-  let i = 0;
+  let axiosStub;
 
-  beforeEach(function (done) {
-    // simulate async call w/ setTimeout
-    setTimeout(function () {
-      const service = emailService();
-      service
-        .getEmailDisposition(testData[i])
-        .then(function (response) {
-          apiResponse = response;
-          done();
-        })
-        .catch((error) => {
-          apiResponse = error;
-          done();
-        });
-    }, 100);
+  const notFoundSourceTrackingId = 'this-message-does-not-exist';
+
+  beforeEach(function () {
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      return Promise.resolve({
+        data: {
+          "errors": [
+            {
+              "code": 404,
+              "title": "Message was not found",
+              "details": "Message with this tracking id was not found"
+            }
+          ],
+          "sourceTrackingId": notFoundSourceTrackingId
+        }
+      });
+    });
   });
 
   afterEach(function () {
-    i = i + 1;
+    axiosStub.restore();
   });
 
-  for (let k = 0; k < testData.length; k++) {
-    it('should return error response ' + (k + 1), function () {
-      passIfGetResponseHasError(apiResponse);
-    });
-  }
+  it('returns an error response for non-existent message', async function () {
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(notFoundSourceTrackingId);
+    passIfGetResponseHasError(response);
+  });
 });
 
 describe('emailService.SendMessage_ReturnSuccess', function () {
@@ -125,7 +135,7 @@ describe('emailService.SendMessage_ReturnSuccess: Using Passed credentials as pa
   beforeEach(function (done) {
     // simulate async call w/ setTimeout
     setTimeout(function () {
-      const service = emailService(pauboxConfig);
+      const service = emailService(testCredentials);
       service
         .sendMessage(testData[i])
         .then(function (response) {
