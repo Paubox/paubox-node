@@ -1,31 +1,42 @@
-<img src="https://avatars.githubusercontent.com/u/22528478?s=200&v=4" alt="Paubox" width="150px">
+![Paubox](https://avatars.githubusercontent.com/u/22528478?s=200&v=4)
 
-# Paubox NodeJS
+# Paubox NodeJS <!-- omit from toc -->
 
 This is the official NodeJS wrapper for the [Paubox Email API](https://www.paubox.com/solutions/email-api).
 
-The Paubox Email API allows your application to send secure, 
+The Paubox Email API allows your application to send secure,
 compliant email via Paubox and track deliveries and opens.
 The API wrapper allows you to construct and send messages.
 
-# Table of Contents
-* [Installation](#installation)
-*  [Usage](#usage)
-*  [Contributing](#contributing)
-*  [License](#license)
+# Table of Contents <!-- omit from toc -->
+
+- [Installation](#installation)
+  - [Getting Paubox API Credentials](#getting-paubox-api-credentials)
+  - [Configuring API Credentials](#configuring-api-credentials)
+- [Usage](#usage)
+  - [Sending messages](#sending-messages)
+  - [Allowing non-TLS message delivery](#allowing-non-tls-message-delivery)
+  - [Forcing Secure Notifications](#forcing-secure-notifications)
+  - [Adding the List-Unsubscribe Header](#adding-the-list-unsubscribe-header)
+  - [Adding Attachments and Additional Headers](#adding-attachments-and-additional-headers)
+  - [Checking Email Dispositions](#checking-email-dispositions)
+- [Supported Node Versions](#supported-node-versions)
+- [Contributing](#contributing)
+- [License](#license)
+- [Copyright](#copyright)
 
 Further documentation can be found at [docs.paubox.com](https://docs.paubox.com/docs/paubox_email_api/introduction/).
 
-<a name="#installation"></a>
 ## Installation
 
 Using npm:
 
 ```bash
-$ npm install --save paubox-node
+npm install --save paubox-node
 ```
 
 ### Getting Paubox API Credentials
+
 You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/join/see-pricing?unit=messages#paubox-email-api).
 
 Once you have an account, follow the instructions on the Rest API dashboard to verify domain ownership and generate API credentials.
@@ -36,13 +47,12 @@ Include your API credentials in your environment file.
 
 Your "API Username" comes from your unique API endpoint.
 
-**Base URL:** ```https://api.paubox.net/v1/<USERNAME>```
-
+**Base URL:** `https://api.paubox.net/v1/<USERNAME>`
 
 ```bash
-$ echo "API_KEY='YOUR_API_KEY'" > .env
-$ echo "API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
-$ echo ".env" >> .gitignore
+echo "API_KEY='YOUR_API_KEY'" > .env
+echo "API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
+echo ".env" >> .gitignore
 ```
 
 Or pass them as parameters when creating emailService
@@ -56,7 +66,6 @@ const pauboxConfig = {
 const service = pbMail.emailService(pauboxConfig);
 ```
 
-<a name="#usage"></a>
 ## Usage
 
 To send email, prepare a Message object and call the sendMessage method of
@@ -66,6 +75,7 @@ emailService.
 
 ```javascript
 "use strict";
+
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
@@ -96,6 +106,7 @@ This means the message will not be converted into a secure portal message when a
 
 ```javascript
 "use strict";
+
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
@@ -113,17 +124,19 @@ var message = pbMail.message(options)
 ```
 
 ### Forcing Secure Notifications
+
 Paubox Secure Notifications allow an extra layer of security, especially when coupled with an organization's requirement for message recipients to use 2-factor authentication to read messages (this setting is available to org administrators in the Paubox Admin Panel).
 
 Instead of receiving an email with the message contents, the recipient will receive a notification email that they have a new message in Paubox.
 
 ```javascript
 "use strict";
+
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
 
-var options = {  
+var options = {
   forceSecureNotification: 'true',
   from: 'sender@domain.com',
   to: ['recipient@example.com'],
@@ -136,12 +149,14 @@ var message = pbMail.message(options)
 ```
 
 ### Adding the List-Unsubscribe Header
+
 The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explaination and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
 
 This header can be used by adding the `list_unsubscribe: '<Email Unsubscribe Address>, <Web Unsubscribe URL'` and `list_unsubscribe_post: 'List-Unsubscribe=One-Click'` key-value pairs to the options object as follows:
 
 ```javascript
 "use strict";
+
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
@@ -157,13 +172,13 @@ var options = {
 }
 
 var message = pbMail.message(options)
-
+```
 
 ### Adding Attachments and Additional Headers
 
-
 ```javascript
 "use strict";
+
 require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
@@ -189,7 +204,6 @@ var options = {
 var message = pbMail.message(options)
 ```
 
-
 ### Checking Email Dispositions
 
 The SOURCE_TRACKING_ID of a message is returned in the response of the sendMessage method. To check the status for any email, use its source tracking id and call the getEmailDisposition method of emailService:
@@ -206,24 +220,21 @@ service.getEmailDisposition("SOURCE_TRACKING_ID")
   });
 ```
 
-<a name="#contributing"></a>
+## Supported Node Versions
+
+Currently supported Node versions are:
+
+- Node v22.16.x (LTS Jod)
+- Node v24
+
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/paubox/paubox-node.
+See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-
-<a name="#license"></a>
 ## License
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+See [LICENSE](LICENSE)
 
 ## Copyright
-Copyright &copy; 2021, Paubox, Inc. 
+
+Copyright &copy; 2025, Paubox, Inc.
