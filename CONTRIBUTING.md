@@ -54,3 +54,13 @@ npm run test
    ```sh
    npm run format
    ```
+
+## Building
+
+Build config is specified in [.babelrc](.babelrc).
+
+Run:
+
+```sh
+npm run build
+```
