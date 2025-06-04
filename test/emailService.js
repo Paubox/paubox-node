@@ -1,11 +1,12 @@
-import chai, { expect } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+const chai = require('chai');
+const { expect } = chai;
+const chaiAsPromised = require('chai-as-promised').default;
 
-import sinon from 'sinon';
-import axios from 'axios';
+const sinon = require('sinon');
+const axios = require('axios');
 
-import emailService from '../lib/service/emailService.js';
-import Message from '../lib/data/message.js';
+const emailService = require('../lib/service/emailService.js');
+const Message = require('../lib/data/message.js');
 
 chai.use(chaiAsPromised);
 
@@ -29,14 +30,14 @@ describe('emailService.GetEmailDisposition', function () {
       data: {
         message: {
           id: `${validSourceTrackingId}@authorized_domain.com`,
-          message_deliveries: []
-        }
-      }
-    }
+          message_deliveries: [],
+        },
+      },
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: validResponse
+        data: validResponse,
       });
     });
 
@@ -55,22 +56,22 @@ describe('emailService.GetEmailDisposition', function () {
           id: `${validSourceTrackingId}@authorized_domain.com`,
           message_deliveries: [
             {
-              recipient: "recipient@host.com",
+              recipient: 'recipient@host.com',
               status: {
-                deliveryStatus: "delivered",
-                deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700",
-                openedStatus: "opened",
-                openedTime: "Mon, 23 Apr 2018 13:27:51 -0700"
-              }
-            }
-          ]
-        }
-      }
-    }
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
+                openedStatus: 'opened',
+                openedTime: 'Mon, 23 Apr 2018 13:27:51 -0700',
+              },
+            },
+          ],
+        },
+      },
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: validResponse
+        data: validResponse,
       });
     });
 
@@ -89,22 +90,22 @@ describe('emailService.GetEmailDisposition', function () {
           id: `${validSourceTrackingId}@authorized_domain.com`,
           message_deliveries: [
             {
-              recipient: "recipient@host.com",
+              recipient: 'recipient@host.com',
               status: {
-                deliveryStatus: "delivered",
-                deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700",
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
                 openedStatus: null, // This should be defaulted to unopened
                 openedTime: null,
-              }
-            }
-          ]
-        }
-      }
-    }
+              },
+            },
+          ],
+        },
+      },
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: validResponse
+        data: validResponse,
       });
     });
 
@@ -118,17 +119,17 @@ describe('emailService.GetEmailDisposition', function () {
           id: `${validSourceTrackingId}@authorized_domain.com`,
           message_deliveries: [
             {
-              recipient: "recipient@host.com",
+              recipient: 'recipient@host.com',
               status: {
-                deliveryStatus: "delivered",
-                deliveryTime: "Mon, 23 Apr 2018 13:27:34 -0700",
-                openedStatus: "unopened", // This has been changed from null to unopened
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
+                openedStatus: 'unopened', // This has been changed from null to unopened
                 openedTime: null,
-              }
-            }
-          ]
-        }
-      }
+              },
+            },
+          ],
+        },
+      },
     });
   });
 
@@ -139,11 +140,11 @@ describe('emailService.GetEmailDisposition', function () {
       data: null,
       sourceTrackingId: null,
       errors: null,
-    }
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: emptyResponse
+        data: emptyResponse,
       });
     });
 
@@ -159,17 +160,17 @@ describe('emailService.GetEmailDisposition', function () {
         errors: [
           {
             code: 404,
-            title: "Message was not found",
-            details: "Message with this tracking id was not found"
-          }
+            title: 'Message was not found',
+            details: 'Message with this tracking id was not found',
+          },
         ],
-        sourceTrackingId: invalidSourceTrackingId
-      }
-    }
+        sourceTrackingId: invalidSourceTrackingId,
+      },
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: notFoundResponse
+        data: notFoundResponse,
       });
     });
 
@@ -195,7 +196,7 @@ describe('emailService.SendMessage', function () {
     html_content: '<html><body><h1>Hello world!</h1></body></html>',
     attachments: null,
     list_unsubscribe: null,
-    list_unsubscribe_post: null
+    list_unsubscribe_post: null,
   });
 
   this.afterEach(() => {
@@ -204,16 +205,16 @@ describe('emailService.SendMessage', function () {
 
   it('can return a successful response', async function () {
     const validResponse = {
-      sourceTrackingId: "3d38ab13-0af8-4028-bd45-52e882e0d584",
+      sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
       customHeaders: {
-        "X-Custom-Header": "value"
+        'X-Custom-Header': 'value',
       },
-      data: "Service OK"
-    }
+      data: 'Service OK',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: validResponse
+        data: validResponse,
       });
     });
 
@@ -227,15 +228,15 @@ describe('emailService.SendMessage', function () {
       errors: [
         {
           code: 400,
-          title: "Error Title",
-          details: "Description of error"
-        }
-      ]
-    }
+          title: 'Error Title',
+          details: 'Description of error',
+        },
+      ],
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: badRequestResponse
+        data: badRequestResponse,
       });
     });
 
@@ -249,11 +250,11 @@ describe('emailService.SendMessage', function () {
       data: null,
       sourceTrackingId: null,
       errors: null,
-    }
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: emptyResponse
+        data: emptyResponse,
       });
     });
 
