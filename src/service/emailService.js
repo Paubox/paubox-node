@@ -98,62 +98,54 @@ class emailService {
   // public methods
 
   getEmailDisposition(sourceTrackingId) {
-    try {
-      let apiHelperService = apiHelper();
-      var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
-      return apiHelperService
-        .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
-        .then((response) => {
-          var apiResponse = response;
-          if (
-            apiResponse.data == null &&
-            apiResponse.sourceTrackingId == null &&
-            apiResponse.errors == null
-          ) {
-            throw apiResponse;
-          }
+    let apiHelperService = apiHelper();
+    var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
+    return apiHelperService
+      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.sourceTrackingId == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
 
-          if (
-            apiResponse != null &&
-            apiResponse.data != null &&
-            apiResponse.data.message != null &&
-            apiResponse.data.message.message_deliveries != null &&
-            apiResponse.data.message.message_deliveries.length > 0
-          ) {
-            for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-              if (message_deliveries.status.openedStatus == null) {
-                message_deliveries.status.openedStatus = 'unopened';
-              }
+        if (
+          apiResponse != null &&
+          apiResponse.data != null &&
+          apiResponse.data.message != null &&
+          apiResponse.data.message.message_deliveries != null &&
+          apiResponse.data.message.message_deliveries.length > 0
+        ) {
+          for (let message_deliveries of apiResponse.data.message.message_deliveries) {
+            if (message_deliveries.status.openedStatus == null) {
+              message_deliveries.status.openedStatus = 'unopened';
             }
           }
-          return apiResponse;
-        });
-    } catch (error) {
-      throw new Error(error);
-    }
+        }
+        return apiResponse;
+      });
   }
 
   sendMessage(msg) {
-    try {
-      var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
-      let apiHelperService = apiHelper();
-      var apiUrl = '/messages';
-      return apiHelperService
-        .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
-        .then((response) => {
-          var apiResponse = response;
-          if (
-            apiResponse.data == null &&
-            apiResponse.sourceTrackingId == null &&
-            apiResponse.errors == null
-          ) {
-            throw apiResponse;
-          }
-          return apiResponse;
-        });
-    } catch (error) {
-      throw new Error(error);
-    }
+    var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
+    let apiHelperService = apiHelper();
+    var apiUrl = '/messages';
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.sourceTrackingId == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
+        return apiResponse;
+      });
   }
 }
 
