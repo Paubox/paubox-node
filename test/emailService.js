@@ -1,13 +1,12 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+
 import sinon from 'sinon';
 import axios from 'axios';
+
 import emailService from '../lib/service/emailService.js';
 import Message from '../lib/data/message.js';
 
-// Setup chai-as-promised
 chai.use(chaiAsPromised);
 
 const testCredentials = {
@@ -204,64 +203,61 @@ describe('emailService.SendMessage', function () {
   });
 
   it('can return a successful response', async function () {
+    const validResponse = {
+      sourceTrackingId: "3d38ab13-0af8-4028-bd45-52e882e0d584",
+      customHeaders: {
+        "X-Custom-Header": "value"
+      },
+      data: "Service OK"
+    }
+
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
       return Promise.resolve({
-        data: {
-          "sourceTrackingId": "3d38ab13-0af8-4028-bd45-52e882e0d584",
-          "customHeaders": {
-            "X-Custom-Header": "value"
-          },
-          "data": "Service OK"
-        }
+        data: validResponse
       });
     });
 
     const service = emailService(testCredentials);
     const response = await service.sendMessage(message);
-    passIfPostResponseIsSuccessful(response);
+    expect(response).to.deep.equal(validResponse);
   });
 
   it('can return an error response for a bad request (HTTP 400)', async function () {
+    const badRequestResponse = {
+      errors: [
+        {
+          code: 400,
+          title: "Error Title",
+          details: "Description of error"
+        }
+      ]
+    }
+
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
       return Promise.resolve({
-        data: {
-          errors: [
-            {
-              code: 400,
-              title: "Error Title",
-              details: "Description of error"
-            }
-          ]
-        }
+        data: badRequestResponse
       });
     });
 
     const service = emailService(testCredentials);
     const response = await service.sendMessage(message);
-    passIfPostResponseHasError(response);
+    expect(response).to.deep.equal(badRequestResponse);
+  });
+
+  it('raises the API response as an error if no data is returned from the Paubox API', async function () {
+    const emptyResponse = {
+      data: null,
+      sourceTrackingId: null,
+      errors: null,
+    }
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      return Promise.resolve({
+        data: emptyResponse
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.sendMessage(message)).to.be.rejectedWith(emptyResponse);
   });
 });
-
-function passIfPostResponseIsSuccessful(apiResponse) {
-  if (apiResponse != null) {
-    if (apiResponse.data != null && apiResponse.sourceTrackingId != null) {
-      expect('Success').to.equal('Success');
-    } else {
-      expect('Success').to.equal('Error');
-    }
-  } else {
-    expect('Success').to.equal('Error');
-  }
-}
-
-function passIfPostResponseHasError(apiResponse) {
-  if (apiResponse != null) {
-    if (apiResponse.errors != null && apiResponse.errors.length > 0) {
-      expect('Error').to.equal('Error');
-    } else {
-      expect('Error').to.equal('Success');
-    }
-  } else {
-    expect('Error').to.equal('Success');
-  }
-}
