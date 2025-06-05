@@ -262,3 +262,71 @@ describe('emailService.SendMessage', function () {
     await expect(service.sendMessage(message)).to.be.rejectedWith(emptyResponse);
   });
 });
+
+describe('emailService.SendBulkMessages', function () {
+  let axiosStub;
+
+  const messageAlice = Message({
+    from: 'reception@authorized_domain.com',
+    reply_to: 'reception@authorized_domain.com',
+    to: ['alice@example.com'],
+    cc: ['accounts@authorized_domain.com'],
+    bcc: null,
+    subject: 'Hi Alice!',
+    allowNonTLS: false,
+    forceSecureNotification: false,
+    text_content: 'Hi Alice!',
+    html_content: '<html><body><h1>Hi Alice!</h1></body></html>',
+    attachments: null,
+    list_unsubscribe: null,
+    list_unsubscribe_post: null,
+  });
+
+  const messageBob = Message({
+    from: 'reception@authorized_domain.com',
+    reply_to: 'reception@authorized_domain.com',
+    to: ['bob@example.com'],
+    cc: ['accounts@authorized_domain.com'],
+    bcc: null,
+    subject: 'Hi Bob!',
+    allowNonTLS: false,
+    forceSecureNotification: false,
+    text_content: 'Hi Bob!',
+    html_content: '<html><body><h1>Hi Bob!</h1></body></html>',
+    attachments: null,
+    list_unsubscribe: null,
+    list_unsubscribe_post: null,
+  });
+
+
+  this.afterEach(() => {
+    axiosStub.restore();
+  });
+
+  it('can return a successful response', async function () {
+    const validResponse = {
+      messages: [
+        {
+          sourceTrackingId: '3d38ab13-0af8-4028-bd45-999999999999',
+          customHeaders: {},
+          data: 'Service OK',
+        },
+        {
+          "sourceTrackingId": "3d38ab13-0af8-4028-bd45-000000000000",
+          "customHeaders": {},
+          "data": "Service OK"
+        }
+      ]
+    }
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.sendBulkMessages([messageAlice, messageBob]);
+    expect(response).to.deep.equal(validResponse);
+  });
+});

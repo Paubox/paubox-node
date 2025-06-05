@@ -1,8 +1,8 @@
 'use strict';
 
 const apiHelper = require('./apiHelper.js');
-const _getAuthheader = Symbol('getAuthheader');
-const _convertMsgObjtoJSONReqObj = Symbol('convertMsgObjtoJSONReqObj');
+const _getAuthHeader = Symbol('getAuthHeader');
+const _messageToJson = Symbol('messageToJson');
 const _returnForceSecureNotificationValue = Symbol('returnForceSecureNotificationValue');
 
 class emailService {
@@ -30,8 +30,62 @@ class emailService {
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
   }
 
+  // public methods
+
+  getEmailDisposition(sourceTrackingId) {
+    let apiHelperService = apiHelper();
+    var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
+    return apiHelperService
+      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.sourceTrackingId == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
+
+        if (
+          apiResponse != null &&
+          apiResponse.data != null &&
+          apiResponse.data.message != null &&
+          apiResponse.data.message.message_deliveries != null &&
+          apiResponse.data.message.message_deliveries.length > 0
+        ) {
+          for (let message_deliveries of apiResponse.data.message.message_deliveries) {
+            if (message_deliveries.status.openedStatus == null) {
+              message_deliveries.status.openedStatus = 'unopened';
+            }
+          }
+        }
+        return apiResponse;
+      });
+  }
+
+  sendMessage(msg) {
+    var reqObject = this[_messageToJson](msg);
+    let apiHelperService = apiHelper();
+    var apiUrl = '/messages';
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), reqObject)
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.sourceTrackingId == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
+        return apiResponse;
+      });
+  }
+
   // private methods
-  [_getAuthheader]() {
+
+  [_getAuthHeader]() {
     var token = 'Token token=' + this.apiKey;
     return token;
   }
@@ -52,7 +106,7 @@ class emailService {
     }
   }
 
-  [_convertMsgObjtoJSONReqObj](msg) {
+  [_messageToJson](msg) {
     var reqObjectJSON = {};
     var data = {};
     var message = {};
@@ -93,59 +147,6 @@ class emailService {
     reqObjectJSON.data = data;
 
     return JSON.stringify(reqObjectJSON);
-  }
-
-  // public methods
-
-  getEmailDisposition(sourceTrackingId) {
-    let apiHelperService = apiHelper();
-    var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
-    return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
-
-        if (
-          apiResponse != null &&
-          apiResponse.data != null &&
-          apiResponse.data.message != null &&
-          apiResponse.data.message.message_deliveries != null &&
-          apiResponse.data.message.message_deliveries.length > 0
-        ) {
-          for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-            if (message_deliveries.status.openedStatus == null) {
-              message_deliveries.status.openedStatus = 'unopened';
-            }
-          }
-        }
-        return apiResponse;
-      });
-  }
-
-  sendMessage(msg) {
-    var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
-    let apiHelperService = apiHelper();
-    var apiUrl = '/messages';
-    return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
-        return apiResponse;
-      });
   }
 }
 
