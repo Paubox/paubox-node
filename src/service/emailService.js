@@ -88,7 +88,7 @@ class emailService {
   }
 
   sendBulkMessages(messages) {
-    var reqObject = JSON.stringify({
+    var requestBody = JSON.stringify({
       data: {
         messages: messages.map((message) => message.toJSON()),
       },
@@ -98,7 +98,7 @@ class emailService {
     var apiUrl = '/bulk_messages';
 
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), reqObject)
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
