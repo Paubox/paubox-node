@@ -15,7 +15,6 @@ const testCredentials = {
   apiKey: 'api-key-12345',
 };
 
-
 describe('emailService.GetEmailDisposition', function () {
   let axiosStub;
 
@@ -208,30 +207,28 @@ describe('emailService.SendMessage', function () {
     const expectedPayload = JSON.stringify({
       data: {
         message: {
-          recipients: [
-            "person@example.com",
-          ],
-          cc: [
-            "accounts@authorized_domain.com"
-          ],
+          recipients: ['person@example.com'],
+          cc: ['accounts@authorized_domain.com'],
           bcc: null,
           headers: {
-            subject: "Test Email",
-            from: "reception@authorized_domain.com",
-            "reply-to": "reception@authorized_domain.com",
-            "List-Unsubscribe": null,
-            "List-Unsubscribe-Post": null,
+            subject: 'Test Email',
+            from: 'reception@authorized_domain.com',
+            'reply-to': 'reception@authorized_domain.com',
+            'List-Unsubscribe': null,
+            'List-Unsubscribe-Post': null,
           },
           allowNonTLS: false,
           forceSecureNotification: false,
           content: {
-            "text/plain": "Hello world!",
-            "text/html": Buffer.from("<html><body><h1>Hello world!</h1></body></html>").toString('base64')
+            'text/plain': 'Hello world!',
+            'text/html': Buffer.from('<html><body><h1>Hello world!</h1></body></html>').toString(
+              'base64',
+            ),
           },
-          attachments: null
-        }
-      }
-    })
+          attachments: null,
+        },
+      },
+    });
 
     let capturedConfig;
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
@@ -331,10 +328,10 @@ describe('emailService.SendBulkMessages', function () {
     html_content: '<html><body><h1>Hi Alice!</h1></body></html>',
     attachments: [
       {
-        fileName: "hello_alice.txt",
-        contentType: "text/plain",
-        content: "SGVsbG8gQm9iIQ=="
-      }
+        fileName: 'hello_alice.txt',
+        contentType: 'text/plain',
+        content: 'SGVsbG8gQm9iIQ==',
+      },
     ],
     list_unsubscribe: null,
     list_unsubscribe_post: null,
@@ -353,10 +350,10 @@ describe('emailService.SendBulkMessages', function () {
     html_content: '<html><body><h1>Hi Bob!</h1></body></html>',
     attachments: [
       {
-        fileName: "hello_bob.txt",
-        contentType: "text/plain",
-        content: "SGVsbG8gQm9iIQ=="
-      }
+        fileName: 'hello_bob.txt',
+        contentType: 'text/plain',
+        content: 'SGVsbG8gQm9iIQ==',
+      },
     ],
     list_unsubscribe: null,
     list_unsubscribe_post: null,
@@ -371,67 +368,61 @@ describe('emailService.SendBulkMessages', function () {
       data: {
         messages: [
           {
-            recipients: [
-              "alice@example.com",
-              "Alice Anderson <alice@host.com>"
-            ],
-            cc: [
-              "accounts@authorized_domain.com"
-            ],
+            recipients: ['alice@example.com', 'Alice Anderson <alice@host.com>'],
+            cc: ['accounts@authorized_domain.com'],
             bcc: null,
             headers: {
-              subject: "Hi Alice!",
-              from: "reception@authorized_domain.com",
-              "reply-to": "Reception <reception@authorized_domain.com>",
-              "List-Unsubscribe": null,
-              "List-Unsubscribe-Post": null
+              subject: 'Hi Alice!',
+              from: 'reception@authorized_domain.com',
+              'reply-to': 'Reception <reception@authorized_domain.com>',
+              'List-Unsubscribe': null,
+              'List-Unsubscribe-Post': null,
             },
             allowNonTLS: false,
             forceSecureNotification: false,
             content: {
-              "text/plain": "Hi Alice!",
-              "text/html": Buffer.from("<html><body><h1>Hi Alice!</h1></body></html>").toString('base64')
+              'text/plain': 'Hi Alice!',
+              'text/html': Buffer.from('<html><body><h1>Hi Alice!</h1></body></html>').toString(
+                'base64',
+              ),
             },
             attachments: [
               {
-                fileName: "hello_alice.txt",
-                contentType: "text/plain",
-                content: "SGVsbG8gQm9iIQ=="
-              }
-            ]
+                fileName: 'hello_alice.txt',
+                contentType: 'text/plain',
+                content: 'SGVsbG8gQm9iIQ==',
+              },
+            ],
           },
           {
-            recipients: [
-              "bob@example.com",
-              "Bob Brown <bob@host.com>"
-            ],
-            cc: [
-              "accounts@authorized_domain.com"
-            ],
+            recipients: ['bob@example.com', 'Bob Brown <bob@host.com>'],
+            cc: ['accounts@authorized_domain.com'],
             bcc: null,
             headers: {
-              subject: "Hi Bob!",
-              from: "reception@authorized_domain.com",
-              "reply-to": "Reception <reception@authorized_domain.com>",
-              "List-Unsubscribe": null,
-              "List-Unsubscribe-Post": null
+              subject: 'Hi Bob!',
+              from: 'reception@authorized_domain.com',
+              'reply-to': 'Reception <reception@authorized_domain.com>',
+              'List-Unsubscribe': null,
+              'List-Unsubscribe-Post': null,
             },
             allowNonTLS: false,
             forceSecureNotification: false,
             content: {
-              "text/plain": "Hi Bob!",
-              "text/html": Buffer.from("<html><body><h1>Hi Bob!</h1></body></html>").toString('base64')
+              'text/plain': 'Hi Bob!',
+              'text/html': Buffer.from('<html><body><h1>Hi Bob!</h1></body></html>').toString(
+                'base64',
+              ),
             },
             attachments: [
               {
-                fileName: "hello_bob.txt",
-                contentType: "text/plain",
-                content: "SGVsbG8gQm9iIQ=="
-              }
-            ]
-          }
-        ]
-      }
+                fileName: 'hello_bob.txt',
+                contentType: 'text/plain',
+                content: 'SGVsbG8gQm9iIQ==',
+              },
+            ],
+          },
+        ],
+      },
     });
 
     let capturedConfig;
@@ -441,16 +432,16 @@ describe('emailService.SendBulkMessages', function () {
         data: {
           messages: [
             {
-              sourceTrackingId: "3d38ab13-0af8-4028-bd45-999999999999",
+              sourceTrackingId: '3d38ab13-0af8-4028-bd45-999999999999',
               customHeaders: null,
-              data: "Service OK"
+              data: 'Service OK',
             },
             {
-              sourceTrackingId: "3d38ab13-0af8-4028-bd45-000000000000",
+              sourceTrackingId: '3d38ab13-0af8-4028-bd45-000000000000',
               customHeaders: null,
-              data: "Service OK"
-            }
-          ]
+              data: 'Service OK',
+            },
+          ],
         },
       });
     });
@@ -495,10 +486,10 @@ describe('emailService.SendBulkMessages', function () {
       errors: [
         {
           code: 400,
-          title: "Error Title",
-          details: "Description of error"
-        }
-      ]
+          title: 'Error Title',
+          details: 'Description of error',
+        },
+      ],
     };
 
     axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
@@ -522,6 +513,8 @@ describe('emailService.SendBulkMessages', function () {
     });
 
     const service = emailService(testCredentials);
-    await expect(service.sendBulkMessages([messageAlice, messageBob])).to.be.rejectedWith(emptyResponse);
+    await expect(service.sendBulkMessages([messageAlice, messageBob])).to.be.rejectedWith(
+      emptyResponse,
+    );
   });
 });

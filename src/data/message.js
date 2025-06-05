@@ -37,7 +37,7 @@ class Message {
         'text/html': this.safeBase64Encode(this.htmltext),
       },
       attachments: this.attachments,
-    }
+    };
   }
 
   // Safely base64 encodes a string, handling null and empty strings

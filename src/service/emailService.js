@@ -66,8 +66,8 @@ class emailService {
   sendMessage(msg) {
     var requestBody = JSON.stringify({
       data: {
-        message: msg.toJSON()
-      }
+        message: msg.toJSON(),
+      },
     });
 
     let apiHelperService = apiHelper();
@@ -90,9 +90,9 @@ class emailService {
   sendBulkMessages(messages) {
     var reqObject = JSON.stringify({
       data: {
-        messages: messages.map(message => message.toJSON())
-      }
-    })
+        messages: messages.map((message) => message.toJSON()),
+      },
+    });
 
     let apiHelperService = apiHelper();
     var apiUrl = '/bulk_messages';
