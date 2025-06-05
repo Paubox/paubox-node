@@ -237,7 +237,7 @@ var messageAlice = pbMail.message({
   subject: 'Hello Alice!',
   text_content: 'Hello Alice!',
   html_content: '<html><head></head><body><h1>Hello Alice!</h1></body></html>',
-})
+});
 
 // Create a Message for Bob
 var messageBob = pbMail.message({
@@ -246,7 +246,7 @@ var messageBob = pbMail.message({
   subject: 'Hello Bob!',
   text_content: 'Hello Bob!',
   html_content: '<html><head></head><body><h1>Hello Bob!</h1></body></html>',
-})
+});
 
 service
   .sendBulkMessages([messageAlice, messageBob])
