@@ -110,6 +110,4 @@ Run:
 npm run build
 ```
 
-Building does the following:
-
-Refer to [package.json](package.json) for more details.
+Refer to [package.json](package.json) for more details on what happens when building the code.
