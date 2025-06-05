@@ -2,7 +2,6 @@
 
 const apiHelper = require('./apiHelper.js');
 const _getAuthHeader = Symbol('getAuthHeader');
-const _returnForceSecureNotificationValue = Symbol('returnForceSecureNotificationValue');
 
 class emailService {
   constructor(config) {
@@ -118,22 +117,6 @@ class emailService {
   [_getAuthHeader]() {
     var token = 'Token token=' + this.apiKey;
     return token;
-  }
-
-  [_returnForceSecureNotificationValue](forceSecureNotification) {
-    var forceSecureNotificationValue = null;
-    if (forceSecureNotification == null || forceSecureNotification == '') {
-      return null;
-    } else {
-      forceSecureNotificationValue = forceSecureNotification.trim().toLowerCase();
-      if (forceSecureNotificationValue == 'true') {
-        return true;
-      } else if (forceSecureNotificationValue == 'false') {
-        return false;
-      } else {
-        return null;
-      }
-    }
   }
 }
 
