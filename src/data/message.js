@@ -17,26 +17,6 @@ class Message {
     this.listUnsubscribePost = options.list_unsubscribe_post;
   }
 
-  // Safely base64 encodes a string, handling null and empty strings
-  safeBase64Encode(text) {
-    if (text == null || text == '') {
-      return null;
-    } else {
-      return Buffer.from(text).toString('base64');
-    }
-  }
-
-  // Parses an input to a boolean value, always returns a boolean value.
-  parseBool(value) {
-    if (value === null || value === undefined || value === '') {
-      return false;
-    }
-    if (typeof value === 'boolean') {
-      return value;
-    }
-    return String(value).trim().toLowerCase() === 'true';
-  }
-
   // Convert Message object to JSON object in Paubox API format
   toJSON() {
     return {
@@ -58,6 +38,26 @@ class Message {
       },
       attachments: this.attachments,
     }
+  }
+
+  // Safely base64 encodes a string, handling null and empty strings
+  safeBase64Encode(text) {
+    if (text == null || text == '') {
+      return null;
+    } else {
+      return Buffer.from(text).toString('base64');
+    }
+  }
+
+  // Parses an input to a boolean value, always returns a boolean value.
+  parseBool(value) {
+    if (value === null || value === undefined || value === '') {
+      return false;
+    }
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    return String(value).trim().toLowerCase() === 'true';
   }
 }
 
