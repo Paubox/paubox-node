@@ -489,4 +489,39 @@ describe('emailService.SendBulkMessages', function () {
     const response = await service.sendBulkMessages([messageAlice, messageBob]);
     expect(response).to.deep.equal(validResponse);
   });
+
+  it('can return an error response for a bad request (HTTP 400)', async function () {
+    const errorResponse = {
+      errors: [
+        {
+          code: 400,
+          title: "Error Title",
+          details: "Description of error"
+        }
+      ]
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: errorResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.sendBulkMessages([messageAlice, messageBob]);
+    expect(response).to.deep.equal(errorResponse);
+  });
+
+  it('raises the API response as an error if no data is returned from the Paubox API', async function () {
+    const emptyResponse = {};
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: emptyResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.sendBulkMessages([messageAlice, messageBob])).to.be.rejectedWith(emptyResponse);
+  });
 });
