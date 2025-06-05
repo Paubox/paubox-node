@@ -2,7 +2,6 @@
 
 const apiHelper = require('./apiHelper.js');
 const _getAuthHeader = Symbol('getAuthHeader');
-const _messageToJson = Symbol('messageToJson');
 const _returnForceSecureNotificationValue = Symbol('returnForceSecureNotificationValue');
 
 class emailService {
@@ -65,11 +64,16 @@ class emailService {
   }
 
   sendMessage(msg) {
-    var reqObject = this[_messageToJson](msg);
+    var requestBody = JSON.stringify({
+      data: {
+        message: msg.toJSON()
+      }
+    });
+
     let apiHelperService = apiHelper();
     var apiUrl = '/messages';
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), reqObject)
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -125,49 +129,6 @@ class emailService {
         return null;
       }
     }
-  }
-
-  [_messageToJson](msg) {
-    var reqObjectJSON = {};
-    var data = {};
-    var message = {};
-    var content = {};
-    var headers = {};
-    var base64EncodedHtmlText = null;
-
-    headers.subject = msg.subject;
-    headers.from = msg.from;
-    headers['reply-to'] = msg.replyTo;
-    headers['List-Unsubscribe'] = msg.listUnsubscribe;
-    headers['List-Unsubscribe-Post'] = msg.listUnsubscribePost;
-
-    content['text/plain'] = msg.plaintext;
-
-    //base 64 encoding html text
-    if (msg.htmltext != null && msg.htmltext != '') {
-      base64EncodedHtmlText = Buffer.from(msg.htmltext).toString('base64');
-    }
-    content['text/html'] = base64EncodedHtmlText;
-
-    message.recipients = msg.to;
-    message.cc = msg.cc;
-    message.bcc = msg.bcc;
-    message.headers = headers;
-    message.allowNonTLS = msg.allowNonTLS;
-    message.content = content;
-    message.attachments = msg.attachments;
-
-    var forceSecureNotificationValue = this[_returnForceSecureNotificationValue](
-      msg.forceSecureNotification,
-    );
-    if (forceSecureNotificationValue != null) {
-      message.forceSecureNotification = forceSecureNotificationValue;
-    }
-
-    data.message = message;
-    reqObjectJSON.data = data;
-
-    return JSON.stringify(reqObjectJSON);
   }
 }
 
