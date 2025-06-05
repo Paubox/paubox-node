@@ -42,7 +42,7 @@ class Message {
 
   // Safely base64 encodes a string, handling null and empty strings
   safeBase64Encode(text) {
-    if (text == null || text == '') {
+    if (text === null || text === undefined || text === '') {
       return null;
     } else {
       return Buffer.from(text).toString('base64');
