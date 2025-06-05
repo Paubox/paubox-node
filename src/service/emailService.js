@@ -83,6 +83,27 @@ class emailService {
       });
   }
 
+  sendBulkMessages(messages) {
+    var reqObject = {}
+    let apiHelperService = apiHelper();
+    var apiUrl = '/bulk_messages';
+
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), reqObject)
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.messages == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
+
+        return apiResponse;
+      });
+  }
+
   // private methods
 
   [_getAuthHeader]() {

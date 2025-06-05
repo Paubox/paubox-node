@@ -203,6 +203,56 @@ describe('emailService.SendMessage', function () {
     axiosStub.restore();
   });
 
+  it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
+    const expectedPayload = JSON.stringify({
+      data: {
+        message: {
+          recipients: [
+            "person@example.com",
+          ],
+          cc: [
+            "accounts@authorized_domain.com"
+          ],
+          bcc: null,
+          headers: {
+            subject: "Test Email",
+            from: "reception@authorized_domain.com",
+            "reply-to": "reception@authorized_domain.com",
+            "List-Unsubscribe": null,
+            "List-Unsubscribe-Post": null,
+          },
+          allowNonTLS: false,
+          content: {
+            "text/plain": "Hello world!",
+            "text/html": Buffer.from("<html><body><h1>Hello world!</h1></body></html>").toString('base64')
+          },
+          attachments: null
+        }
+      }
+    })
+
+    let capturedConfig;
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      capturedConfig = config;
+      return Promise.resolve({
+        data: {
+          sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
+          customHeaders: {
+            'X-Custom-Header': 'value',
+          },
+          data: 'Service OK',
+        },
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await service.sendMessage(message);
+
+    expect(capturedConfig.method).to.equal('POST');
+    expect(capturedConfig.url).to.equal('/messages');
+    expect(capturedConfig.data).to.deep.equal(expectedPayload);
+  });
+
   it('can return a successful response', async function () {
     const validResponse = {
       sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
