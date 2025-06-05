@@ -88,7 +88,12 @@ class emailService {
   }
 
   sendBulkMessages(messages) {
-    var reqObject = {}
+    var reqObject = JSON.stringify({
+      data: {
+        messages: messages.map(message => message.toJSON())
+      }
+    })
+
     let apiHelperService = apiHelper();
     var apiUrl = '/bulk_messages';
 

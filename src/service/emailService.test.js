@@ -366,7 +366,7 @@ describe('emailService.SendBulkMessages', function () {
     axiosStub.restore();
   });
 
-  it.skip('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
+  it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
     const expectedPayload = JSON.stringify({
       data: {
         messages: [
@@ -383,6 +383,8 @@ describe('emailService.SendBulkMessages', function () {
               subject: "Hi Alice!",
               from: "reception@authorized_domain.com",
               "reply-to": "Reception <reception@authorized_domain.com>",
+              "List-Unsubscribe": null,
+              "List-Unsubscribe-Post": null
             },
             allowNonTLS: false,
             forceSecureNotification: false,
@@ -411,6 +413,8 @@ describe('emailService.SendBulkMessages', function () {
               subject: "Hi Bob!",
               from: "reception@authorized_domain.com",
               "reply-to": "Reception <reception@authorized_domain.com>",
+              "List-Unsubscribe": null,
+              "List-Unsubscribe-Post": null
             },
             allowNonTLS: false,
             forceSecureNotification: false,
