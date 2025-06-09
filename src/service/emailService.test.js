@@ -582,22 +582,9 @@ describe('emailService.createDynamicTemplate', function () {
     };
 
     let capturedConfig;
-    let formDataPromise;
 
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
       capturedConfig = config;
-
-      // Create a promise that will resolve with the complete form data
-      formDataPromise = new Promise((resolve) => {
-        let capturedData = '';
-        config.data.on('data', (chunk) => {
-          capturedData += chunk;
-        });
-        config.data.on('end', () => {
-          resolve(capturedData);
-        });
-      });
-
       return Promise.resolve({
         data: validResponse,
       });
@@ -631,22 +618,9 @@ describe('emailService.createDynamicTemplate', function () {
     };
 
     let capturedConfig;
-    let formDataPromise;
 
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
       capturedConfig = config;
-
-      // Create a promise that will resolve with the complete form data
-      formDataPromise = new Promise((resolve) => {
-        let capturedData = '';
-        config.data.on('data', (chunk) => {
-          capturedData += chunk;
-        });
-        config.data.on('end', () => {
-          resolve(capturedData);
-        });
-      });
-
       return Promise.resolve({
         data: validResponse,
       });
@@ -659,5 +633,46 @@ describe('emailService.createDynamicTemplate', function () {
     expect(capturedConfig.method).to.equal('POST');
     expect(capturedConfig.url).to.equal('/dynamic_templates');
     expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
+  });
+
+  it('can respond to server errors', async function () {
+    const templateName = 'template_name';
+    const templateContent = '<html><body><h1>Hello {{firstName}}!</h1></body></html>';
+    const errorResponse = {
+      error: 'Template body is invalid.',
+    };
+
+    let capturedConfig;
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      capturedConfig = config;
+      return Promise.resolve({
+        data: errorResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.createDynamicTemplate(templateName, templateContent);
+
+    expect(response).to.deep.equal(errorResponse);
+    expect(capturedConfig.method).to.equal('POST');
+    expect(capturedConfig.url).to.equal('/dynamic_templates');
+    expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
+  });
+
+  it('raises the API response as an error if no data is returned from the Paubox API', async function () {
+    const templateName = 'template_name';
+    const templateContent = '<html><body><h1>Hello {{firstName}}!</h1></body></html>';
+    const emptyResponse = {};
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: emptyResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.createDynamicTemplate(templateName, templateContent)).to.be.rejectedWith(
+      emptyResponse,
+    );
   });
 });
