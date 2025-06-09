@@ -184,7 +184,12 @@ class emailService {
     return apiHelperService
       .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
       .then((response) => {
-        if (response.message == null && response.params == null && response.errors == null && response.error == null) {
+        if (
+          response.message == null &&
+          response.params == null &&
+          response.errors == null &&
+          response.error == null
+        ) {
           throw response;
         }
         return response;

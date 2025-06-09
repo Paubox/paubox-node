@@ -309,16 +309,16 @@ const pbMail = require('paubox-node');
 const service = pbMail.emailService();
 
 app.post('/api/create-dynamic-template', upload.single('templateFile'), async (req, res) => {
-    try {
-        const { templateName } = req.body;
-        const templateFile = req.file;
+  try {
+    const { templateName } = req.body;
+    const templateFile = req.file;
 
-        const content = templateFile.buffer;
-        const response = await service.createDynamicTemplate(templateName, content);
-        res.json(response);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    const content = templateFile.buffer;
+    const response = await service.createDynamicTemplate(templateName, content);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 ```
 
