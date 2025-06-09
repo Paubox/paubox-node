@@ -1,18 +1,20 @@
 'use strict';
 
 const axios = require('axios');
+const FormData = require('form-data');
 
 class apiHelper {
-  constructor() {}
+  constructor() { }
 
   callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
     };
 
-    // If reqBody is FormData, let it set its own content-type header
-    // This is important because FormData needs to include the boundary
-    if (!(reqBody instanceof FormData)) {
+    // If reqBody is FormData, use its headers
+    if (reqBody instanceof FormData) {
+      Object.assign(apiHeaders, reqBody.getHeaders());
+    } else {
       apiHeaders['Content-type'] = 'application/json';
     }
 
@@ -21,13 +23,16 @@ class apiHelper {
       headers: apiHeaders,
     });
 
+    // If it's FormData, we need to pass the entire form object
+    const data = reqBody instanceof FormData ? reqBody : reqBody;
+
     return axiosInstance({
       method: 'POST',
       url: apiUrl,
-      data: reqBody,
-      // If it's FormData, make sure we don't transform it
+      data: data,
+      // Don't transform FormData
       transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
-      headers: apiHeaders,
+      headers: apiHeaders
     })
       .then((response) => {
         return response.data;
