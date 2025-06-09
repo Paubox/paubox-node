@@ -588,9 +588,9 @@ describe('emailService.createDynamicTemplate', function () {
       capturedConfig = config;
 
       // Create a promise that will resolve with the complete form data
-      formDataPromise = new Promise(resolve => {
+      formDataPromise = new Promise((resolve) => {
         let capturedData = '';
-        config.data.on('data', chunk => {
+        config.data.on('data', (chunk) => {
           capturedData += chunk;
         });
         config.data.on('end', () => {
