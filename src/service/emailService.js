@@ -157,12 +157,12 @@ class emailService {
     if (Buffer.isBuffer(templateContent) || templateContent instanceof Stream) {
       formData.append('template', templateContent, {
         filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template'
+        contentType: 'text/x-handlebars-template',
       });
     } else if (typeof templateContent === 'string') {
       formData.append('template', templateContent, {
         filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template'
+        contentType: 'text/x-handlebars-template',
       });
     } else {
       throw new Error('templateContent must be a Buffer, Stream, or string');

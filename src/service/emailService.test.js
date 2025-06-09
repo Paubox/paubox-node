@@ -535,7 +535,8 @@ describe('emailService.createDynamicTemplate', function () {
           tempfile: '#<File:0x00007ff371046a70>',
           original_filename: 'template_name.hbs',
           content_type: 'text/x-handlebars-template',
-          headers: 'Content-Disposition: form-data; name=\"data[body]\"; filename=\"template_name.hbs\"\r\nContent-Type: text/x-handlebars-template\r\n',
+          headers:
+            'Content-Disposition: form-data; name="data[body]"; filename="template_name.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
         },
       },
     };

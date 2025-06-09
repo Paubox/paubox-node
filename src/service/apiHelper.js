@@ -3,7 +3,7 @@
 const axios = require('axios');
 
 class apiHelper {
-  constructor() { }
+  constructor() {}
 
   callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
@@ -27,7 +27,7 @@ class apiHelper {
       data: reqBody,
       // If it's FormData, make sure we don't transform it
       transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
-      headers: apiHeaders
+      headers: apiHeaders,
     })
       .then((response) => {
         return response.data;
