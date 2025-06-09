@@ -30,6 +30,15 @@ class emailService {
 
   // public methods
 
+  // Get the disposition of an email message with a given sourceTrackingId
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#get-email-disposition
+  //
+  // sourceTrackingId is the sourceTrackingId of the message which is returned from the sendMessage or sendBulkMessages
+  // methods.
+  //
+  // returns a promise that resolves to the response from the API
+  //
   getEmailDisposition(sourceTrackingId) {
     let apiHelperService = apiHelper();
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
@@ -62,6 +71,14 @@ class emailService {
       });
   }
 
+  // Send an email message
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#send-message
+  //
+  // msg is a Message object
+  //
+  // returns a promise that resolves to the response from the API
+  //
   sendMessage(msg) {
     var requestBody = JSON.stringify({
       data: {
@@ -86,6 +103,14 @@ class emailService {
       });
   }
 
+  // Send multiple email messages
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages
+  //
+  // messages is an array of Message objects
+  //
+  // returns a promise that resolves to the response from the API
+  //
   sendBulkMessages(messages) {
     var requestBody = JSON.stringify({
       data: {
@@ -110,6 +135,23 @@ class emailService {
 
         return apiResponse;
       });
+  }
+
+  // Create a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates/#create-a-dynamic-template
+  //
+  // templateName is the name of the template
+  //
+  // templateContent can be:
+  //   - a string of the template content
+  //   - a Buffer containing the template content
+  //   - a Stream (for streaming uploads)
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  createDynamicTemplate(templateName, templateContent) {
+    throw new Error('Not implemented');
   }
 
   // private methods

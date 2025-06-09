@@ -15,7 +15,7 @@ const testCredentials = {
   apiKey: 'api-key-12345',
 };
 
-describe('emailService.GetEmailDisposition', function () {
+describe('emailService.getEmailDisposition', function () {
   let axiosStub;
 
   this.afterEach(() => {
@@ -181,7 +181,7 @@ describe('emailService.GetEmailDisposition', function () {
   });
 });
 
-describe('emailService.SendMessage', function () {
+describe('emailService.sendMessage', function () {
   let axiosStub;
   const message = Message({
     from: 'reception@authorized_domain.com',
@@ -312,7 +312,7 @@ describe('emailService.SendMessage', function () {
   });
 });
 
-describe('emailService.SendBulkMessages', function () {
+describe('emailService.sendBulkMessages', function () {
   let axiosStub;
 
   const messageAlice = Message({
@@ -516,5 +516,38 @@ describe('emailService.SendBulkMessages', function () {
     await expect(service.sendBulkMessages([messageAlice, messageBob])).to.be.rejectedWith(
       emptyResponse,
     );
+  });
+});
+
+describe('emailService.createDynamicTemplate', function () {
+  let axiosStub;
+
+  this.afterEach(() => {
+    axiosStub.restore();
+  });
+
+  it('can create a dynamic template', async function () {
+    const validResponse = {
+      message: 'Template template_name created!',
+      params: {
+        name: 'template_name',
+        body: {
+          tempfile: '#<File:0x00007ff371046a70>',
+          original_filename: 'template_name.hbs',
+          content_type: 'text/x-handlebars-template',
+          headers: 'Content-Disposition: form-data; name=\"data[body]\"; filename=\"template_name.hbs\"\r\nContent-Type: text/x-handlebars-template\r\n',
+        },
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.createDynamicTemplate('template_name', 'template_name.hbs');
+    expect(response).to.deep.equal(validResponse);
   });
 });
