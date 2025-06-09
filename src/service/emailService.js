@@ -151,7 +151,34 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   createDynamicTemplate(templateName, templateContent) {
-    throw new Error('Not implemented');
+    const formData = new FormData();
+    formData.append('data[name]', templateName);
+
+    if (Buffer.isBuffer(templateContent) || templateContent instanceof Stream) {
+      formData.append('template', templateContent, {
+        filename: `${templateName}.hbs`,
+        contentType: 'text/x-handlebars-template'
+      });
+    } else if (typeof templateContent === 'string') {
+      formData.append('template', templateContent, {
+        filename: `${templateName}.hbs`,
+        contentType: 'text/x-handlebars-template'
+      });
+    } else {
+      throw new Error('templateContent must be a Buffer, Stream, or string');
+    }
+
+    let apiHelperService = apiHelper();
+    const apiUrl = '/dynamic_templates';
+
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+      .then((response) => {
+        if (!response.data && !response.template && !response.errors) {
+          throw response;
+        }
+        return response;
+      });
   }
 
   // private methods
