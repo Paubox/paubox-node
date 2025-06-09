@@ -4,14 +4,13 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 class apiHelper {
-  constructor() {}
+  constructor() { }
 
   callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
     };
 
-    // If reqBody is FormData, use its headers
     if (reqBody instanceof FormData) {
       Object.assign(apiHeaders, reqBody.getHeaders());
     } else {
@@ -23,14 +22,10 @@ class apiHelper {
       headers: apiHeaders,
     });
 
-    // If it's FormData, we need to pass the entire form object
-    const data = reqBody instanceof FormData ? reqBody : reqBody;
-
     return axiosInstance({
       method: 'POST',
       url: apiUrl,
-      data: data,
-      // Don't transform FormData
+      data: reqBody,
       transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
       headers: apiHeaders,
     })
