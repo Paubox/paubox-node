@@ -1,6 +1,7 @@
 'use strict';
 
 const apiHelper = require('./apiHelper.js');
+const Stream = require('stream');
 const _getAuthHeader = Symbol('getAuthHeader');
 
 class emailService {
