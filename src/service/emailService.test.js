@@ -611,4 +611,53 @@ describe('emailService.createDynamicTemplate', function () {
     expect(capturedConfig.url).to.equal('/dynamic_templates');
     expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
   });
+
+  it('can create a dynamic template by passing in a Buffer', async function () {
+    const templateName = 'template_name';
+    const buffer = Buffer.from('<html><body><h1>Hello {{firstName}}!</h1></body></html>');
+
+    const validResponse = {
+      message: 'Template template_name created!',
+      params: {
+        name: 'template_name',
+        body: {
+          tempfile: '#<File:0x00007ff371046a70>',
+          original_filename: 'template.hbs',
+          content_type: 'text/x-handlebars-template',
+          headers:
+            'Content-Disposition: form-data; name="data[body]"; filename="template.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
+        },
+      },
+    };
+
+    let capturedConfig;
+    let formDataPromise;
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      capturedConfig = config;
+
+      // Create a promise that will resolve with the complete form data
+      formDataPromise = new Promise((resolve) => {
+        let capturedData = '';
+        config.data.on('data', (chunk) => {
+          capturedData += chunk;
+        });
+        config.data.on('end', () => {
+          resolve(capturedData);
+        });
+      });
+
+      return Promise.resolve({
+        data: validResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.createDynamicTemplate(templateName, buffer);
+
+    expect(response).to.deep.equal(validResponse);
+    expect(capturedConfig.method).to.equal('POST');
+    expect(capturedConfig.url).to.equal('/dynamic_templates');
+    expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
+  });
 });
