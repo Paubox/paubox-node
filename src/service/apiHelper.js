@@ -4,7 +4,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 class apiHelper {
-  constructor() { }
+  constructor() {}
 
   callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
