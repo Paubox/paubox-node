@@ -25,6 +25,8 @@ The API wrapper allows you to construct and send messages.
     - [Adding Attachments and Additional Headers](#adding-attachments-and-additional-headers)
   - [Send Bulk Messages](#send-bulk-messages)
   - [Get Email Disposition](#get-email-disposition)
+  - [Dynamic Templates](#dynamic-templates)
+    - [Create Dynamic Template](#create-dynamic-template)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -274,6 +276,49 @@ const service = pbMail.emailService();
 
 service.getEmailDisposition('SOURCE_TRACKING_ID').then(function (response) {
   console.log('Get Email Disposition method Response: ' + JSON.stringify(response));
+});
+```
+
+### Dynamic Templates
+
+#### Create Dynamic Template
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#create-a-dynamic-template).
+
+You can create a dynamic template by passing in a string, a file Buffer, or file Stream.
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+const templateName = 'your_template_name';
+const templateContent = '<html><body><h1>Hello {{firstName}}!</h1></body></html>';
+
+service.createDynamicTemplate(templateName, templateContent).then(function (response) {
+  console.log('Create Dynamic Template method Response: ' + JSON.stringify(response));
+});
+```
+
+In a simple express app, this could look something like this:
+
+```javascript
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+app.post('/api/create-dynamic-template', upload.single('templateFile'), async (req, res) => {
+    try {
+        const { templateName } = req.body;
+        const templateFile = req.file;
+
+        const content = templateFile.buffer;
+        const response = await service.createDynamicTemplate(templateName, content);
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 ```
 
