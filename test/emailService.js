@@ -1,299 +1,264 @@
-"use strict";
+const chai = require('chai');
+const { expect } = chai;
+const chaiAsPromised = require('chai-as-promised').default;
 
-require("dotenv").config();
-const expect = require("chai").expect;
-const emailService = require("../lib/service/emailService.js");
-var message = require("../lib/data/message.js");
-var fs = require('fs');
-var content = fs.readFileSync("./test/SendMessage_TestData.csv", "utf8");
+const sinon = require('sinon');
+const axios = require('axios');
 
-// Papa Parse for parsing CSV Files
-var Papa = require('papaparse');
-var sendCsvParsedData = Papa.parse(content);
+const emailService = require('../lib/service/emailService.js');
+const Message = require('../lib/data/message.js');
 
-const pauboxConfig = {
-    apiUsername: 'your-api-username',
-    apiKey: 'your-api-key',
-  };
+chai.use(chaiAsPromised);
 
-describe("emailService.GetEmailDisposition_ReturnSuccess", function () {
-    this.timeout(4000);
-    var apiResponse;
-    var testData = [
-        "1aed91d1-f7ce-4c3d-8df2-85ecd225a7fc",
-        "ce1e2143-474d-43ba-b829-17a26b8005e5"
-    ];
-    var i = 0;
+const testCredentials = {
+  apiUsername: 'authorized_domain',
+  apiKey: 'api-key-12345',
+};
 
-    beforeEach(function (done) {
+describe('emailService.GetEmailDisposition', function () {
+  let axiosStub;
 
-        // simulate async call w/ setTimeout
-        setTimeout(function () {
+  this.afterEach(() => {
+    axiosStub.restore();
+  });
 
-            let service = emailService();
-            service.getEmailDisposition(testData[i])
-                .then(function (response) {
-                    apiResponse = response;
-                    done();
-                })
-                .catch(error => {
-                    apiResponse = error;
-                    done();
-                });
-        }, 100);
+  it('can return a successful response with no message deliveries', async function () {
+    const validSourceTrackingId = '6e1cf9a4-7bde-4834-8200-ed424b50c8a7';
+
+    const validResponse = {
+      sourceTrackingId: validSourceTrackingId,
+      data: {
+        message: {
+          id: `${validSourceTrackingId}@authorized_domain.com`,
+          message_deliveries: [],
+        },
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
     });
 
-    afterEach(function () {
-        i = i + 1;
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(validSourceTrackingId);
+    expect(response).to.deep.equal(validResponse);
+  });
+
+  it('can return a successful response with message deliveries', async function () {
+    const validSourceTrackingId = '6e1cf9a4-7bde-4834-8200-ed424b50c8a7';
+
+    const validResponse = {
+      sourceTrackingId: validSourceTrackingId,
+      data: {
+        message: {
+          id: `${validSourceTrackingId}@authorized_domain.com`,
+          message_deliveries: [
+            {
+              recipient: 'recipient@host.com',
+              status: {
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
+                openedStatus: 'opened',
+                openedTime: 'Mon, 23 Apr 2018 13:27:51 -0700',
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
     });
 
-    for (var k = 0; k < testData.length; k++) {
-        it("should return successful response " + (k + 1), function () {
-            passIfGetResponseIsSuccessful(apiResponse);
-        });
-    }
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(validSourceTrackingId);
+    expect(response).to.deep.equal(validResponse);
+  });
+
+  it('defaults all openedStatus to unopened', async function () {
+    const validSourceTrackingId = '6e1cf9a4-7bde-4834-8200-ed424b50c8a7';
+
+    const validResponse = {
+      sourceTrackingId: validSourceTrackingId,
+      data: {
+        message: {
+          id: `${validSourceTrackingId}@authorized_domain.com`,
+          message_deliveries: [
+            {
+              recipient: 'recipient@host.com',
+              status: {
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
+                openedStatus: null, // This should be defaulted to unopened
+                openedTime: null,
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(validSourceTrackingId);
+
+    expect(response).to.deep.equal({
+      sourceTrackingId: validSourceTrackingId,
+      data: {
+        message: {
+          id: `${validSourceTrackingId}@authorized_domain.com`,
+          message_deliveries: [
+            {
+              recipient: 'recipient@host.com',
+              status: {
+                deliveryStatus: 'delivered',
+                deliveryTime: 'Mon, 23 Apr 2018 13:27:34 -0700',
+                openedStatus: 'unopened', // This has been changed from null to unopened
+                openedTime: null,
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('raises the API response as an error if no data is returned from the Paubox API', async function () {
+    const sourceTrackingId = '6e1cf9a4-7bde-4834-8200-ed424b50c8a7';
+
+    const emptyResponse = {
+      data: null,
+      sourceTrackingId: null,
+      errors: null,
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: emptyResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.getEmailDisposition(sourceTrackingId)).to.be.rejectedWith(emptyResponse);
+  });
+
+  it('can return an error response for a non-existent message (HTTP 404)', async function () {
+    const invalidSourceTrackingId = 'this-message-does-not-exist';
+
+    const notFoundResponse = {
+      data: {
+        errors: [
+          {
+            code: 404,
+            title: 'Message was not found',
+            details: 'Message with this tracking id was not found',
+          },
+        ],
+        sourceTrackingId: invalidSourceTrackingId,
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: notFoundResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.getEmailDisposition(invalidSourceTrackingId);
+
+    expect(response).to.deep.equal(notFoundResponse);
+  });
 });
 
-describe("emailService.GetEmailDisposition_ReturnError", function () {
-    this.timeout(3000);
-    var apiResponse;
-    var testData = [
-        null,
-        "",
-        " ",
-        "151515215"
-    ];
-    var i = 0;
+describe('emailService.SendMessage', function () {
+  let axiosStub;
+  const message = Message({
+    from: 'reception@authorized_domain.com',
+    reply_to: 'reception@authorized_domain.com',
+    to: ['person@example.com'],
+    cc: ['accounts@authorized_domain.com'],
+    bcc: null,
+    subject: 'Test Email',
+    allowNonTLS: false,
+    forceSecureNotification: false,
+    text_content: 'Hello world!',
+    html_content: '<html><body><h1>Hello world!</h1></body></html>',
+    attachments: null,
+    list_unsubscribe: null,
+    list_unsubscribe_post: null,
+  });
 
-    beforeEach(function (done) {
+  this.afterEach(() => {
+    axiosStub.restore();
+  });
 
-        // simulate async call w/ setTimeout
-        setTimeout(function () {
+  it('can return a successful response', async function () {
+    const validResponse = {
+      sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
+      customHeaders: {
+        'X-Custom-Header': 'value',
+      },
+      data: 'Service OK',
+    };
 
-            let service = emailService();
-            service.getEmailDisposition(testData[i])
-                .then(function (response) {
-                    apiResponse = response;
-                    done();
-                })
-                .catch(error => {
-                    apiResponse = error;
-                    done();
-                });
-        }, 100);
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: validResponse,
+      });
     });
 
-    afterEach(function () {
-        i = i + 1;
+    const service = emailService(testCredentials);
+    const response = await service.sendMessage(message);
+    expect(response).to.deep.equal(validResponse);
+  });
+
+  it('can return an error response for a bad request (HTTP 400)', async function () {
+    const badRequestResponse = {
+      errors: [
+        {
+          code: 400,
+          title: 'Error Title',
+          details: 'Description of error',
+        },
+      ],
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: badRequestResponse,
+      });
     });
 
-    for (var k = 0; k < testData.length; k++) {
-        it("should return error response " + (k + 1), function () {
-            passIfGetResponseHasError(apiResponse);
-        });
-    }
+    const service = emailService(testCredentials);
+    const response = await service.sendMessage(message);
+    expect(response).to.deep.equal(badRequestResponse);
+  });
 
+  it('raises the API response as an error if no data is returned from the Paubox API', async function () {
+    const emptyResponse = {
+      data: null,
+      sourceTrackingId: null,
+      errors: null,
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: emptyResponse,
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.sendMessage(message)).to.be.rejectedWith(emptyResponse);
+  });
 });
-
-describe("emailService.SendMessage_ReturnSuccess", function () {
-    this.timeout(4000);
-    var apiResponse;
-    var testData = sendMessage_TestData(true);
-    var i = 0;
-
-    beforeEach(function (done) {
-
-        // simulate async call w/ setTimeout
-        setTimeout(function () {
-
-            let service = emailService();
-            service.sendMessage(testData[i])
-                .then(function (response) {
-                    apiResponse = response;
-                    done();
-                })
-                .catch(error => {
-                    apiResponse = error;
-                    done();
-                });
-        }, 100);
-    });
-
-    afterEach(function () {
-        i = i + 1;
-    });
-
-    for (var k = 0; k < testData.length; k++)
-        it("should return successful response " + (k + 1), function () {
-            passIfPostResponseIsSuccessful(apiResponse);
-        });
-});
-
-describe("emailService.SendMessage_ReturnSuccess: Using Passed credentials as pauboxConfig", function () {
-    this.timeout(4000);
-    var apiResponse;
-    var testData = sendMessage_TestData(true);
-    var i = 0;
-
-    beforeEach(function (done) {
-
-        // simulate async call w/ setTimeout
-        setTimeout(function () {           
-            let service = emailService(pauboxConfig);
-            service.sendMessage(testData[i])
-                .then(function (response) {
-                    apiResponse = response;                    
-                    done();
-                })
-                .catch(error => {
-                    apiResponse = error;
-                    done();
-                });
-        }, 100);
-    });
-
-    afterEach(function () {
-        i = i + 1;
-    });
-
-    for (var k = 0; k < testData.length; k++)
-        it("should return successful response " + (k + 1), function () {
-            passIfPostResponseIsSuccessful(apiResponse);
-        });
-});
-
-describe("emailService.SendMessage_ReturnError", function () {
-    this.timeout(4000);
-    var apiResponse;
-    var testData = sendMessage_TestData(false)
-    var i = 0;
-
-    beforeEach(function (done) {
-
-        // simulate async call w/ setTimeout
-        setTimeout(function () {
-
-            let service = emailService();
-            service.sendMessage(testData[i])
-                .then(function (response) {
-                    apiResponse = response;
-                    done();
-                })
-                .catch(error => {
-                    apiResponse = error;
-                    done();
-                });
-        }, 100);
-    });
-
-    afterEach(function () {
-        i = i + 1;
-    });
-
-    for (var k = 0; k < testData.length; k++)
-        it("should return error response " + (k + 1), function () {
-            passIfPostResponseHasError(apiResponse);
-        });
-});
-
-function sendMessage_TestData(forSuccess) {
-    var csvData = sendCsvParsedData.data;
-    var arrMessages = [];
-
-    for (var j = 1; j < csvData.length; j++) {
-
-        var testMsgData = csvData[j];
-        if (forSuccess) {
-            if (testMsgData[15] != 'SUCCESS') // If Expected output is not Success , then skip the test data
-                continue;
-        }
-        else {
-            if (testMsgData[15] != 'ERROR')   // If Expected output is not Error , then skip the test data
-                continue;
-        }
-
-        var options = {
-            from: testMsgData[4],
-            to: [testMsgData[1]],
-            cc: [testMsgData[14]],
-            bcc: [testMsgData[2]],
-            reply_to: testMsgData[5],
-            subject: testMsgData[3],
-            allowNonTLS: testMsgData[6].toLowerCase() == 'true' ? true : false,
-            forceSecureNotification: testMsgData[13],
-            text_content: testMsgData[7] != null ? testMsgData[7] : null,
-            html_content: testMsgData[8] != null ? testMsgData[8] : null
-        };
-
-        if (testMsgData[9] > 0) {
-
-            var attachment = {};
-            attachment.fileName = testMsgData[10];
-            attachment.contentType = testMsgData[11];
-            attachment.content = testMsgData[12];
-
-            options.attachments = attachment;
-        }
-
-        var msg = message(options);
-        arrMessages.push(msg);
-    }
-    return arrMessages;
-}
-
-function passIfGetResponseIsSuccessful(apiResponse) {
-    if (apiResponse == null || apiResponse.data == null || apiResponse.data.message == null || apiResponse.data.message.id == null)
-        expect("Success").to.equal("Error");
-    else if (apiResponse.errors != null && apiResponse.errors.length > 0) {
-        expect("Success").to.equal("Error");
-    }
-    else if (apiResponse.data.message.message_deliveries != null && apiResponse.data.message.message_deliveries.length > 0) {
-        expect("Success").to.equal("Success");
-    }
-    else {
-        expect("Success").to.equal("Error");
-    }
-}
-
-function passIfGetResponseHasError(apiResponse) {
-    if (apiResponse == null || apiResponse.errors == null || apiResponse.errors.length <= 0)
-        expect("Error").to.equal("Success");
-    else {
-        if (apiResponse.errors[0].title == null) {
-            expect("Error").to.equal("Success");
-        }
-        else {
-            expect("Error").to.equal("Error");
-        }
-    }
-}
-
-
-function passIfPostResponseIsSuccessful(apiResponse) {
-    if (apiResponse != null) {
-        if (apiResponse.data != null && apiResponse.sourceTrackingId != null) {
-            expect("Success").to.equal("Success");
-        }
-        else {                        
-            expect("Success").to.equal("Error");
-        }
-    }
-    else {
-        expect("Success").to.equal("Error");
-    }
-}
-
-function passIfPostResponseHasError(apiResponse) {
-    if (apiResponse != null) {
-        if (apiResponse.errors != null && apiResponse.errors.length > 0) {
-            expect("Error").to.equal("Error");
-        }
-        else {
-            expect("Error").to.equal("Success");
-        }
-    }
-    else {
-        expect("Error").to.equal("Success");
-    }
-}
-

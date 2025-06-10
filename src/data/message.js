@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 class Message {
   constructor(options) {
@@ -15,9 +15,9 @@ class Message {
     this.attachments = options.attachments;
     this.listUnsubscribe = options.list_unsubscribe;
     this.listUnsubscribePost = options.list_unsubscribe_post;
-  }  
+  }
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
   return new Message(options);
 };
