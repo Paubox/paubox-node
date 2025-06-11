@@ -1,9 +1,7 @@
 'use strict';
 
 const apiHelper = require('./apiHelper.js');
-const _getAuthheader = Symbol('getAuthheader');
-const _convertMsgObjtoJSONReqObj = Symbol('convertMsgObjtoJSONReqObj');
-const _returnForceSecureNotificationValue = Symbol('returnForceSecureNotificationValue');
+const _getAuthHeader = Symbol('getAuthHeader');
 
 class emailService {
   constructor(config) {
@@ -30,78 +28,13 @@ class emailService {
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
   }
 
-  // private methods
-  [_getAuthheader]() {
-    var token = 'Token token=' + this.apiKey;
-    return token;
-  }
-
-  [_returnForceSecureNotificationValue](forceSecureNotification) {
-    var forceSecureNotificationValue = null;
-    if (forceSecureNotification == null || forceSecureNotification == '') {
-      return null;
-    } else {
-      forceSecureNotificationValue = forceSecureNotification.trim().toLowerCase();
-      if (forceSecureNotificationValue == 'true') {
-        return true;
-      } else if (forceSecureNotificationValue == 'false') {
-        return false;
-      } else {
-        return null;
-      }
-    }
-  }
-
-  [_convertMsgObjtoJSONReqObj](msg) {
-    var reqObjectJSON = {};
-    var data = {};
-    var message = {};
-    var content = {};
-    var headers = {};
-    var base64EncodedHtmlText = null;
-
-    headers.subject = msg.subject;
-    headers.from = msg.from;
-    headers['reply-to'] = msg.replyTo;
-    headers['List-Unsubscribe'] = msg.listUnsubscribe;
-    headers['List-Unsubscribe-Post'] = msg.listUnsubscribePost;
-
-    content['text/plain'] = msg.plaintext;
-
-    //base 64 encoding html text
-    if (msg.htmltext != null && msg.htmltext != '') {
-      base64EncodedHtmlText = Buffer.from(msg.htmltext).toString('base64');
-    }
-    content['text/html'] = base64EncodedHtmlText;
-
-    message.recipients = msg.to;
-    message.cc = msg.cc;
-    message.bcc = msg.bcc;
-    message.headers = headers;
-    message.allowNonTLS = msg.allowNonTLS;
-    message.content = content;
-    message.attachments = msg.attachments;
-
-    var forceSecureNotificationValue = this[_returnForceSecureNotificationValue](
-      msg.forceSecureNotification,
-    );
-    if (forceSecureNotificationValue != null) {
-      message.forceSecureNotification = forceSecureNotificationValue;
-    }
-
-    data.message = message;
-    reqObjectJSON.data = data;
-
-    return JSON.stringify(reqObjectJSON);
-  }
-
   // public methods
 
   getEmailDisposition(sourceTrackingId) {
     let apiHelperService = apiHelper();
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
     return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthheader]())
+      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
       .then((response) => {
         var apiResponse = response;
         if (
@@ -130,11 +63,16 @@ class emailService {
   }
 
   sendMessage(msg) {
-    var reqObject = this[_convertMsgObjtoJSONReqObj](msg);
+    var requestBody = JSON.stringify({
+      data: {
+        message: msg.toJSON(),
+      },
+    });
+
     let apiHelperService = apiHelper();
     var apiUrl = '/messages';
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthheader](), reqObject)
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -146,6 +84,39 @@ class emailService {
         }
         return apiResponse;
       });
+  }
+
+  sendBulkMessages(messages) {
+    var requestBody = JSON.stringify({
+      data: {
+        messages: messages.map((message) => message.toJSON()),
+      },
+    });
+
+    let apiHelperService = apiHelper();
+    var apiUrl = '/bulk_messages';
+
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
+      .then((response) => {
+        var apiResponse = response;
+        if (
+          apiResponse.data == null &&
+          apiResponse.messages == null &&
+          apiResponse.errors == null
+        ) {
+          throw apiResponse;
+        }
+
+        return apiResponse;
+      });
+  }
+
+  // private methods
+
+  [_getAuthHeader]() {
+    var token = 'Token token=' + this.apiKey;
+    return token;
   }
 }
 

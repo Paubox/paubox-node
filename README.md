@@ -18,12 +18,13 @@ The API wrapper allows you to construct and send messages.
   - [Getting Paubox API Credentials](#getting-paubox-api-credentials)
   - [Configuring API Credentials](#configuring-api-credentials)
 - [Usage](#usage)
-  - [Sending messages](#sending-messages)
-  - [Allowing non-TLS message delivery](#allowing-non-tls-message-delivery)
-  - [Forcing Secure Notifications](#forcing-secure-notifications)
-  - [Adding the List-Unsubscribe Header](#adding-the-list-unsubscribe-header)
-  - [Adding Attachments and Additional Headers](#adding-attachments-and-additional-headers)
-  - [Checking Email Dispositions](#checking-email-dispositions)
+  - [Send Message](#send-message)
+    - [Allowing non-TLS message delivery](#allowing-non-tls-message-delivery)
+    - [Forcing Secure Notifications](#forcing-secure-notifications)
+    - [Adding the List-Unsubscribe Header](#adding-the-list-unsubscribe-header)
+    - [Adding Attachments and Additional Headers](#adding-attachments-and-additional-headers)
+  - [Send Bulk Messages](#send-bulk-messages)
+  - [Get Email Disposition](#get-email-disposition)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -75,7 +76,9 @@ const service = pbMail.emailService(pauboxConfig);
 To send email, prepare a Message object and call the sendMessage method of
 emailService.
 
-### Sending messages
+### Send Message
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-message).
 
 ```javascript
 'use strict';
@@ -104,7 +107,7 @@ service
   });
 ```
 
-### Allowing non-TLS message delivery
+#### Allowing non-TLS message delivery
 
 If you want to send non-PHI mail that does not need to be HIPAA compliant, you can allow the message delivery to take place even if a TLS connection is unavailable.
 
@@ -129,7 +132,7 @@ var options = {
 var message = pbMail.message(options);
 ```
 
-### Forcing Secure Notifications
+#### Forcing Secure Notifications
 
 Paubox Secure Notifications allow an extra layer of security, especially when coupled with an organization's requirement for message recipients to use 2-factor authentication to read messages (this setting is available to org administrators in the Paubox Admin Panel).
 
@@ -154,7 +157,7 @@ var options = {
 var message = pbMail.message(options);
 ```
 
-### Adding the List-Unsubscribe Header
+#### Adding the List-Unsubscribe Header
 
 The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explanation and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
 
@@ -181,7 +184,7 @@ var options = {
 var message = pbMail.message(options);
 ```
 
-### Adding Attachments and Additional Headers
+#### Adding Attachments and Additional Headers
 
 ```javascript
 'use strict';
@@ -213,7 +216,53 @@ var options = {
 var message = pbMail.message(options);
 ```
 
-### Checking Email Dispositions
+### Send Bulk Messages
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages).
+
+> We recommend batches of 50 (fifty) or less. Source tracking ids are returned in order messages appear in the messages
+> array.
+
+```javascript
+'use strict';
+
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+// Create a Message for Alice
+var messageAlice = pbMail.message({
+  from: 'sender@domain.com',
+  to: ['alice@example.com'],
+  subject: 'Hello Alice!',
+  text_content: 'Hello Alice!',
+  html_content: '<html><head></head><body><h1>Hello Alice!</h1></body></html>',
+});
+
+// Create a Message for Bob
+var messageBob = pbMail.message({
+  from: 'sender@domain.com',
+  to: ['bob@example.com'],
+  subject: 'Hello Bob!',
+  text_content: 'Hello Bob!',
+  html_content: '<html><head></head><body><h1>Hello Bob!</h1></body></html>',
+});
+
+service
+  .sendBulkMessages([messageAlice, messageBob])
+  .then((response) => {
+    console.log('Send Message method Response: ' + JSON.stringify(response));
+  })
+  .catch((error) => {
+    console.log('Error in Send Message method: ' + JSON.stringify(error));
+  });
+```
+
+The same options as the [sendMessage](#send-message) method are available for the sendBulkMessages method.
+
+### Get Email Disposition
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#get-email-disposition).
 
 The SOURCE_TRACKING_ID of a message is returned in the response of the sendMessage method. To check the status for any email, use its source tracking id and call the getEmailDisposition method of emailService:
 

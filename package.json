@@ -8,12 +8,16 @@
     "npm": ">=10.9.0"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec",
-    "lint": "eslint .",
+    "test": "mocha 'src/**/*.test.js'",
+    "test:watch": "mocha 'src/**/*.test.js' --watch",
+    "test:debug": "mocha --inspect-brk 'src/**/*.test.js'",
+    "prelint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write '**/*.{js,json,md}'",
     "clean": "rm -rf lib/",
-    "build": "npm run clean && babel src -d lib && npm run format"
+    "build:babel": "babel src -d lib",
+    "build": "npm run lint && npm run format && npm run clean && npm run build:babel && prettier --write 'lib/**/*.{js,json}'"
   },
   "author": "Paubox <info@paubox.com> (http://www.paubox.com)",
   "license": "Apache-2.0",
