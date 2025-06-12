@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const axios = require('axios');
 const fs = require('fs');
 
-const emailService = require('./emailService.js');
+const emailService = require('../src/service/emailService.js');
 
 chai.use(chaiAsPromised);
 

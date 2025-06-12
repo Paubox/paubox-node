@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { expect } = chai;
-const Message = require('./message.js');
+const Message = require('../src/data/message.js');
 
 const message = Message({
   from: 'sender@authorized_domain.com',

@@ -5,8 +5,8 @@ const chaiAsPromised = require('chai-as-promised').default;
 const sinon = require('sinon');
 const axios = require('axios');
 
-const emailService = require('./emailService.js');
-const Message = require('../data/message.js');
+const emailService = require('../src/service/emailService.js');
+const Message = require('../src/data/message.js');
 
 chai.use(chaiAsPromised);
 
