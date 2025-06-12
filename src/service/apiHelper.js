@@ -1,6 +1,7 @@
 'use strict';
 
 const axios = require('axios');
+const FormData = require('form-data');
 
 class apiHelper {
   constructor() {}
@@ -8,15 +9,26 @@ class apiHelper {
   callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
-      'Content-type': 'application/json',
     };
+
+    if (reqBody instanceof FormData) {
+      Object.assign(apiHeaders, reqBody.getHeaders());
+    } else {
+      apiHeaders['Content-type'] = 'application/json';
+    }
 
     const axiosInstance = axios.create({
       baseURL: baseUrl,
       headers: apiHeaders,
     });
 
-    return axiosInstance({ method: 'POST', url: apiUrl, data: reqBody, headers: apiHeaders })
+    return axiosInstance({
+      method: 'POST',
+      url: apiUrl,
+      data: reqBody,
+      transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
+      headers: apiHeaders,
+    })
       .then((response) => {
         return response.data;
       })

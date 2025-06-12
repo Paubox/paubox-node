@@ -1,6 +1,8 @@
 'use strict';
 
 const apiHelper = require('./apiHelper.js');
+const Stream = require('stream');
+const FormData = require('form-data');
 const _getAuthHeader = Symbol('getAuthHeader');
 
 class emailService {
@@ -30,6 +32,15 @@ class emailService {
 
   // public methods
 
+  // Get the disposition of an email message with a given sourceTrackingId
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#get-email-disposition
+  //
+  // sourceTrackingId is the sourceTrackingId of the message which is returned from the sendMessage or sendBulkMessages
+  // methods.
+  //
+  // returns a promise that resolves to the response from the API
+  //
   getEmailDisposition(sourceTrackingId) {
     let apiHelperService = apiHelper();
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
@@ -62,6 +73,14 @@ class emailService {
       });
   }
 
+  // Send an email message
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#send-message
+  //
+  // msg is a Message object
+  //
+  // returns a promise that resolves to the response from the API
+  //
   sendMessage(msg) {
     var requestBody = JSON.stringify({
       data: {
@@ -86,6 +105,14 @@ class emailService {
       });
   }
 
+  // Send multiple email messages
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages
+  //
+  // messages is an array of Message objects
+  //
+  // returns a promise that resolves to the response from the API
+  //
   sendBulkMessages(messages) {
     var requestBody = JSON.stringify({
       data: {
@@ -109,6 +136,63 @@ class emailService {
         }
 
         return apiResponse;
+      });
+  }
+
+  // Create a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates/#create-a-dynamic-template
+  //
+  // templateName is the name of the template
+  //
+  // templateContent can be:
+  //   - a string of the template content
+  //   - a Buffer containing the template content
+  //   - a Stream (for streaming uploads)
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  createDynamicTemplate(templateName, templateContent) {
+    const formData = new FormData();
+    formData.append('data[name]', templateName);
+
+    if (Buffer.isBuffer(templateContent)) {
+      // For Buffer, we can append directly
+      formData.append('data[body]', templateContent, {
+        filename: `${templateName}.hbs`,
+        contentType: 'text/x-handlebars-template',
+      });
+    } else if (templateContent instanceof Stream) {
+      // For Stream, append directly
+      formData.append('data[body]', templateContent, {
+        filename: `${templateName}.hbs`,
+        contentType: 'text/x-handlebars-template',
+      });
+    } else if (typeof templateContent === 'string') {
+      // For string, convert to Buffer first
+      formData.append('data[body]', Buffer.from(templateContent), {
+        filename: `${templateName}.hbs`,
+        contentType: 'text/x-handlebars-template',
+      });
+    } else {
+      throw new Error('templateContent must be a Buffer, Stream, or string');
+    }
+
+    let apiHelperService = apiHelper();
+    const apiUrl = '/dynamic_templates';
+
+    return apiHelperService
+      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+      .then((response) => {
+        if (
+          response.message == null &&
+          response.params == null &&
+          response.errors == null &&
+          response.error == null
+        ) {
+          throw response;
+        }
+        return response;
       });
   }
 
