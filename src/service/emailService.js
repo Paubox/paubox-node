@@ -124,41 +124,18 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async createDynamicTemplate(templateName, templateContent) {
-    const formData = new FormData();
-    formData.append('data[name]', templateName);
-
-    if (Buffer.isBuffer(templateContent)) {
-      // For Buffer, we can append directly
-      formData.append('data[body]', templateContent, {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else if (templateContent instanceof Stream) {
-      // For Stream, append directly
-      formData.append('data[body]', templateContent, {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else if (typeof templateContent === 'string') {
-      // For string, convert to Buffer first
-      formData.append('data[body]', Buffer.from(templateContent), {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else {
-      throw new Error('templateContent must be a Buffer, Stream, or string');
-    }
-
-    const apiUrl = '/dynamic_templates';
+    const requestBody = this.#createFormData(templateName, templateContent);
 
     const response = await this.apiHelper
-      .post(this.baseURL, apiUrl, formData);
+      .post(this.baseURL, '/dynamic_templates', requestBody);
+
     if (response.message == null &&
       response.params == null &&
       response.errors == null &&
       response.error == null) {
       throw response;
     }
+
     return response;
   }
 
@@ -182,47 +159,17 @@ class emailService {
       return Promise.reject(new Error('At least one of templateName or templateContent must be provided'));
     }
 
-    const formData = new FormData();
-    if (templateName) {
-      formData.append('data[name]', templateName);
-    }
-
-    if (templateContent) {
-      if (Buffer.isBuffer(templateContent)) {
-        // For Buffer, we can append directly
-        formData.append('data[body]', templateContent, {
-          filename: `${templateName || 'template'}.hbs`,
-          contentType: 'text/x-handlebars-template',
-        });
-      } else if (templateContent instanceof Stream) {
-        // For Stream, append directly
-        formData.append('data[body]', templateContent, {
-          filename: `${templateName || 'template'}.hbs`,
-          contentType: 'text/x-handlebars-template',
-        });
-      } else if (typeof templateContent === 'string') {
-        // For string, convert to Buffer first
-        formData.append('data[body]', Buffer.from(templateContent), {
-          filename: `${templateName || 'template'}.hbs`,
-          contentType: 'text/x-handlebars-template',
-        });
-      } else {
-        throw new Error('templateContent must be a Buffer, Stream, or string');
-      }
-    }
-
-    const apiUrl = `/dynamic_templates/${templateId}`;
+    const requestBody = this.#createFormData(templateName, templateContent);
 
     const response = await this.apiHelper
-      .patch(this.baseURL, apiUrl, formData);
-    if (response.message == null &&
-      response.params == null &&
-      response.errors == null &&
-      response.error == null) {
+      .patch(this.baseURL, `/dynamic_templates/${templateId}`, requestBody);
+
+    if (response.message == null && response.params == null && response.errors == null && response.error == null) {
       throw response;
     } else if (response.error) {
       throw new Error(response.error);
     }
+
     return response;
   }
 
@@ -288,6 +235,40 @@ class emailService {
     }
 
     return response;
+  }
+
+  #createFormData(templateName = null, templateContent = null) {
+    const formData = new FormData();
+
+    if (templateName) {
+      formData.append('data[name]', templateName);
+    }
+
+    if (templateContent) {
+      if (Buffer.isBuffer(templateContent)) {
+        // For Buffer, we can append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (templateContent instanceof Stream) {
+        // For Stream, append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (typeof templateContent === 'string') {
+        // For string, convert to Buffer first
+        formData.append('data[body]', Buffer.from(templateContent), {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else {
+        throw new Error('templateContent must be a Buffer, Stream, or string');
+      }
+    }
+
+    return formData;
   }
 }
 
