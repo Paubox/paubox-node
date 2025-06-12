@@ -42,35 +42,28 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  getEmailDisposition(sourceTrackingId) {
+  async getEmailDisposition(sourceTrackingId) {
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
-    return this.apiHelper
-      .get(this.baseURL, apiUrl)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
+    const response = await this.apiHelper
+      .get(this.baseURL, apiUrl);
+    var apiResponse = response;
+    if (apiResponse.data == null &&
+      apiResponse.sourceTrackingId == null &&
+      apiResponse.errors == null) {
+      throw apiResponse;
+    }
+    if (apiResponse != null &&
+      apiResponse.data != null &&
+      apiResponse.data.message != null &&
+      apiResponse.data.message.message_deliveries != null &&
+      apiResponse.data.message.message_deliveries.length > 0) {
+      for (let message_deliveries of apiResponse.data.message.message_deliveries) {
+        if (message_deliveries.status.openedStatus == null) {
+          message_deliveries.status.openedStatus = 'unopened';
         }
-
-        if (
-          apiResponse != null &&
-          apiResponse.data != null &&
-          apiResponse.data.message != null &&
-          apiResponse.data.message.message_deliveries != null &&
-          apiResponse.data.message.message_deliveries.length > 0
-        ) {
-          for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-            if (message_deliveries.status.openedStatus == null) {
-              message_deliveries.status.openedStatus = 'unopened';
-            }
-          }
-        }
-        return apiResponse;
-      });
+      }
+    }
+    return apiResponse;
   }
 
   // Send an email message
@@ -81,7 +74,7 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  sendMessage(msg) {
+  async sendMessage(msg) {
     var requestBody = JSON.stringify({
       data: {
         message: msg.toJSON(),
@@ -89,19 +82,15 @@ class emailService {
     });
 
     var apiUrl = '/messages';
-    return this.apiHelper
-      .post(this.baseURL, apiUrl, requestBody)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
-        return apiResponse;
-      });
+    const response = await this.apiHelper
+      .post(this.baseURL, apiUrl, requestBody);
+    var apiResponse = response;
+    if (apiResponse.data == null &&
+      apiResponse.sourceTrackingId == null &&
+      apiResponse.errors == null) {
+      throw apiResponse;
+    }
+    return apiResponse;
   }
 
   // Send multiple email messages
@@ -112,7 +101,7 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  sendBulkMessages(messages) {
+  async sendBulkMessages(messages) {
     var requestBody = JSON.stringify({
       data: {
         messages: messages.map((message) => message.toJSON()),
@@ -121,20 +110,15 @@ class emailService {
 
     var apiUrl = '/bulk_messages';
 
-    return this.apiHelper
-      .post(this.baseURL, apiUrl, requestBody)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.messages == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
-
-        return apiResponse;
-      });
+    const response = await this.apiHelper
+      .post(this.baseURL, apiUrl, requestBody);
+    var apiResponse = response;
+    if (apiResponse.data == null &&
+      apiResponse.messages == null &&
+      apiResponse.errors == null) {
+      throw apiResponse;
+    }
+    return apiResponse;
   }
 
   // Create a dynamic template
@@ -150,7 +134,7 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  createDynamicTemplate(templateName, templateContent) {
+  async createDynamicTemplate(templateName, templateContent) {
     const formData = new FormData();
     formData.append('data[name]', templateName);
 
@@ -178,19 +162,15 @@ class emailService {
 
     const apiUrl = '/dynamic_templates';
 
-    return this.apiHelper
-      .post(this.baseURL, apiUrl, formData)
-      .then((response) => {
-        if (
-          response.message == null &&
-          response.params == null &&
-          response.errors == null &&
-          response.error == null
-        ) {
-          throw response;
-        }
-        return response;
-      });
+    const response = await this.apiHelper
+      .post(this.baseURL, apiUrl, formData);
+    if (response.message == null &&
+      response.params == null &&
+      response.errors == null &&
+      response.error == null) {
+      throw response;
+    }
+    return response;
   }
 
   // Update a dynamic template
@@ -208,7 +188,7 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  updateDynamicTemplate(templateId, templateName = null, templateContent = null) {
+  async updateDynamicTemplate(templateId, templateName = null, templateContent = null) {
     if (!templateName && !templateContent) {
       return Promise.reject(new Error('At least one of templateName or templateContent must be provided'));
     }
@@ -244,21 +224,17 @@ class emailService {
 
     const apiUrl = `/dynamic_templates/${templateId}`;
 
-    return this.apiHelper
-      .patch(this.baseURL, apiUrl, formData)
-      .then((response) => {
-        if (
-          response.message == null &&
-          response.params == null &&
-          response.errors == null &&
-          response.error == null
-        ) {
-          throw response;
-        } else if (response.error) {
-          throw new Error(response.error);
-        }
-        return response;
-      });
+    const response = await this.apiHelper
+      .patch(this.baseURL, apiUrl, formData);
+    if (response.message == null &&
+      response.params == null &&
+      response.errors == null &&
+      response.error == null) {
+      throw response;
+    } else if (response.error) {
+      throw new Error(response.error);
+    }
+    return response;
   }
 
   // List dynamic templates
@@ -267,17 +243,15 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  listDynamicTemplates() {
+  async listDynamicTemplates() {
     var apiUrl = '/dynamic_templates';
-    return this.apiHelper
-      .get(this.baseURL, apiUrl)
-      .then((response) => {
-        var apiResponse = response;
-        if (apiResponse instanceof Array) {
-          return apiResponse;
-        }
-        throw apiResponse;
-      });
+    const response = await this.apiHelper
+      .get(this.baseURL, apiUrl);
+    var apiResponse = response;
+    if (apiResponse instanceof Array) {
+      return apiResponse;
+    }
+    throw apiResponse;
   }
 
   // Get a dynamic template
@@ -288,7 +262,7 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  getDynamicTemplate(templateId) {
+  async getDynamicTemplate(templateId) {
 
     const expectedKeys = [
       'id',
@@ -301,19 +275,15 @@ class emailService {
     ];
 
     var apiUrl = `/dynamic_templates/${templateId}`;
-    return this.apiHelper
-      .get(this.baseURL, apiUrl)
-      .then((response) => {
-        if (response.error) {
-          throw new Error(response.error);
-        }
-
-        if (!expectedKeys.every((key) => key in response)) {
-          throw response;
-        }
-
-        return response;
-      });
+    const response = await this.apiHelper
+      .get(this.baseURL, apiUrl);
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    if (!expectedKeys.every((key) => key in response)) {
+      throw response;
+    }
+    return response;
   }
 
   // Delete a dynamic template
@@ -324,22 +294,18 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  deleteDynamicTemplate(templateId) {
+  async deleteDynamicTemplate(templateId) {
     let apiHelperService = apiHelper();
     var apiUrl = `/dynamic_templates/${templateId}`;
-    return apiHelperService
-      .delete(this.baseURL, apiUrl)
-      .then((response) => {
-        if (response.error) {
-          throw new Error(response.error);
-        }
-
-        if (response.message == null) {
-          throw response;
-        }
-
-        return response;
-      });
+    const response = await apiHelperService
+      .delete(this.baseURL, apiUrl);
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    if (response.message == null) {
+      throw response;
+    }
+    return response;
   }
 }
 
