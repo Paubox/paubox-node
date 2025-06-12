@@ -4,7 +4,6 @@ const chaiAsPromised = require('chai-as-promised').default;
 
 const sinon = require('sinon');
 const axios = require('axios');
-const fs = require('fs');
 
 const emailService = require('../src/service/emailService.js');
 
@@ -14,7 +13,6 @@ const testCredentials = {
   apiUsername: 'authorized_domain',
   apiKey: 'api-key-12345',
 };
-
 
 describe('emailService.updateDynamicTemplate', function () {
   let axiosStub;
@@ -29,17 +27,18 @@ describe('emailService.updateDynamicTemplate', function () {
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
     const validResponse = {
-      message: "Template new_name updated!",
+      message: 'Template new_name updated!',
       params: {
-        name: "new_name",
+        name: 'new_name',
         body: {
-          tempfile: "#<File:0x00007f61b560e028>",
-          original_filename: "new_file.hbs",
-          content_type: "text/x-handlebars-template",
-          headers: "Content-Disposition: form-data; name=\"data[body]\"; filename=\"new_file.hbs\"\r\nContent-Type: text/x-handlebars-template\r\n"
-        }
-      }
-    }
+          tempfile: '#<File:0x00007f61b560e028>',
+          original_filename: 'new_file.hbs',
+          content_type: 'text/x-handlebars-template',
+          headers:
+            'Content-Disposition: form-data; name="data[body]"; filename="new_file.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
+        },
+      },
+    };
 
     let capturedConfig;
 
@@ -59,16 +58,16 @@ describe('emailService.updateDynamicTemplate', function () {
     expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
   });
 
-  it('can update a dynamic template\'s name only', async function () {
+  it("can update a dynamic template's name only", async function () {
     const templateId = 123;
     const newName = 'Another New Name';
 
     const validResponse = {
-      message: "Template Another New Name updated!",
+      message: 'Template Another New Name updated!',
       params: {
-        name: "Another New Name"
-      }
-    }
+        name: 'Another New Name',
+      },
+    };
 
     let capturedConfig;
 
@@ -88,21 +87,22 @@ describe('emailService.updateDynamicTemplate', function () {
     expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
   });
 
-  it('can update a dynamic template\'s file only', async function () {
+  it("can update a dynamic template's file only", async function () {
     const templateId = 123;
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
     const validResponse = {
-      message: "Template  updated!",
+      message: 'Template  updated!',
       params: {
         body: {
-          tempfile: "#<File:0x00007f61b9b12d90>",
-          original_filename: "new_file.hbs",
-          content_type: "text/x-handlebars-template",
-          headers: "Content-Disposition: form-data; name=\"data[body]\"; filename=\"new_file.hbs\"\r\nContent-Type: text/x-handlebars-template\r\n"
-        }
-      }
-    }
+          tempfile: '#<File:0x00007f61b9b12d90>',
+          original_filename: 'new_file.hbs',
+          content_type: 'text/x-handlebars-template',
+          headers:
+            'Content-Disposition: form-data; name="data[body]"; filename="new_file.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
+        },
+      },
+    };
 
     let capturedConfig;
 
@@ -135,18 +135,19 @@ describe('emailService.updateDynamicTemplate', function () {
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
     const errorResponse = {
-      error: "param is missing or the value is empty"
-    }
+      error: 'param is missing or the value is empty',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: errorResponse,
       });
     });
 
     const service = emailService(testCredentials);
-    await expect(service.updateDynamicTemplate(templateId, newName, newFile)).to.be.rejectedWith(errorResponse);
+    await expect(service.updateDynamicTemplate(templateId, newName, newFile)).to.be.rejectedWith(
+      errorResponse,
+    );
   });
 
   it('raises the API response as an error if no data is returned from the Paubox API', async function () {
@@ -154,16 +155,17 @@ describe('emailService.updateDynamicTemplate', function () {
     const newName = 'new_name';
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
-    const emptyResponse = {}
+    const emptyResponse = {};
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: emptyResponse,
       });
     });
 
     const service = emailService(testCredentials);
-    await expect(service.updateDynamicTemplate(templateId, newName, newFile)).to.be.rejectedWith(emptyResponse);
+    await expect(service.updateDynamicTemplate(templateId, newName, newFile)).to.be.rejectedWith(
+      emptyResponse,
+    );
   });
 });

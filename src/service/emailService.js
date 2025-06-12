@@ -43,8 +43,10 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async getEmailDisposition(sourceTrackingId) {
-    const response = await this.apiHelper
-      .get(this.baseURL, `/message_receipt?sourceTrackingId=${sourceTrackingId}`);
+    const response = await this.apiHelper.get(
+      this.baseURL,
+      `/message_receipt?sourceTrackingId=${sourceTrackingId}`,
+    );
 
     if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
       throw response;
@@ -75,8 +77,7 @@ class emailService {
       },
     });
 
-    const response = await this.apiHelper
-      .post(this.baseURL, '/messages', requestBody);
+    const response = await this.apiHelper.post(this.baseURL, '/messages', requestBody);
 
     if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
       throw response;
@@ -100,8 +101,7 @@ class emailService {
       },
     });
 
-    const response = await this.apiHelper
-      .post(this.baseURL, '/bulk_messages', requestBody);
+    const response = await this.apiHelper.post(this.baseURL, '/bulk_messages', requestBody);
 
     if (response.data == null && response.messages == null && response.errors == null) {
       throw response;
@@ -126,13 +126,14 @@ class emailService {
   async createDynamicTemplate(templateName, templateContent) {
     const requestBody = this.#createFormData(templateName, templateContent);
 
-    const response = await this.apiHelper
-      .post(this.baseURL, '/dynamic_templates', requestBody);
+    const response = await this.apiHelper.post(this.baseURL, '/dynamic_templates', requestBody);
 
-    if (response.message == null &&
+    if (
+      response.message == null &&
       response.params == null &&
       response.errors == null &&
-      response.error == null) {
+      response.error == null
+    ) {
       throw response;
     }
 
@@ -156,15 +157,25 @@ class emailService {
   //
   async updateDynamicTemplate(templateId, templateName = null, templateContent = null) {
     if (!templateName && !templateContent) {
-      return Promise.reject(new Error('At least one of templateName or templateContent must be provided'));
+      return Promise.reject(
+        new Error('At least one of templateName or templateContent must be provided'),
+      );
     }
 
     const requestBody = this.#createFormData(templateName, templateContent);
 
-    const response = await this.apiHelper
-      .patch(this.baseURL, `/dynamic_templates/${templateId}`, requestBody);
+    const response = await this.apiHelper.patch(
+      this.baseURL,
+      `/dynamic_templates/${templateId}`,
+      requestBody,
+    );
 
-    if (response.message == null && response.params == null && response.errors == null && response.error == null) {
+    if (
+      response.message == null &&
+      response.params == null &&
+      response.errors == null &&
+      response.error == null
+    ) {
       throw response;
     } else if (response.error) {
       throw new Error(response.error);
@@ -180,8 +191,7 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async listDynamicTemplates() {
-    const response = await this.apiHelper
-      .get(this.baseURL, '/dynamic_templates');
+    const response = await this.apiHelper.get(this.baseURL, '/dynamic_templates');
 
     if (response instanceof Array) {
       return response;
@@ -199,10 +209,17 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async getDynamicTemplate(templateId) {
-    const response = await this.apiHelper
-      .get(this.baseURL, `/dynamic_templates/${templateId}`);
+    const response = await this.apiHelper.get(this.baseURL, `/dynamic_templates/${templateId}`);
 
-    const expectedKeys = ['id', 'name', 'api_customer_id', 'body', 'created_at', 'updated_at', 'metadata'];
+    const expectedKeys = [
+      'id',
+      'name',
+      'api_customer_id',
+      'body',
+      'created_at',
+      'updated_at',
+      'metadata',
+    ];
 
     if (response.error) {
       throw new Error(response.error);
@@ -223,8 +240,7 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async deleteDynamicTemplate(templateId) {
-    const response = await this.apiHelper
-      .delete(this.baseURL, `/dynamic_templates/${templateId}`);
+    const response = await this.apiHelper.delete(this.baseURL, `/dynamic_templates/${templateId}`);
 
     if (response.error) {
       throw new Error(response.error);

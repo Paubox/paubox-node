@@ -25,17 +25,16 @@ describe('emailService.getDynamicTemplate', function () {
     const templateId = 123;
 
     const validResponse = {
-      "id": templateId,
-      "name": "test_template",
-      "api_customer_id": 12,
-      "body": "<html><body><p>Hello {{first_name}} {{last_name}}!</p></body></html>",
-      "created_at": "2025-06-12T02:05:39.447-07:00",
-      "updated_at": "2025-06-12T02:05:39.447-07:00",
-      "metadata": {}
-    }
+      id: templateId,
+      name: 'test_template',
+      api_customer_id: 12,
+      body: '<html><body><p>Hello {{first_name}} {{last_name}}!</p></body></html>',
+      created_at: '2025-06-12T02:05:39.447-07:00',
+      updated_at: '2025-06-12T02:05:39.447-07:00',
+      metadata: {},
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: validResponse,
       });
@@ -50,11 +49,11 @@ describe('emailService.getDynamicTemplate', function () {
     const templateId = 123;
 
     const pauboxResponse = {
-      "error": "Couldn't find DynamicTemplate with 'id'=123 [WHERE \"dynamic_templates\".\"api_customer_id\" = $1]"
-    }
+      error:
+        'Couldn\'t find DynamicTemplate with \'id\'=123 [WHERE "dynamic_templates"."api_customer_id" = $1]',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: pauboxResponse,
       });
@@ -65,14 +64,14 @@ describe('emailService.getDynamicTemplate', function () {
   });
 
   it('raises an error if an invalid template id is used', async function () {
-    const templateId = "     123  ";
+    const templateId = '     123  ';
 
     const pauboxResponse = {
-      "error": "Couldn't find DynamicTemplate with 'id'=     123   [WHERE \"dynamic_templates\".\"api_customer_id\" = $1]"
-    }
+      error:
+        'Couldn\'t find DynamicTemplate with \'id\'=     123   [WHERE "dynamic_templates"."api_customer_id" = $1]',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: pauboxResponse,
       });
@@ -86,11 +85,10 @@ describe('emailService.getDynamicTemplate', function () {
     const templateId = 123;
 
     const pauboxResponse = {
-      "this": "is not what we expected"
-    }
+      this: 'is not what we expected',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: pauboxResponse,
       });

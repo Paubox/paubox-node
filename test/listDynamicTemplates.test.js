@@ -24,19 +24,18 @@ describe('emailService.listDynamicTemplates', function () {
   it('can list dynamic templates', async function () {
     const validResponse = [
       {
-        "id": 123,
-        "name": "test_template",
-        "api_customer_id": 12
+        id: 123,
+        name: 'test_template',
+        api_customer_id: 12,
       },
       {
-        "id": 124,
-        "name": "test_template_2",
-        "api_customer_id": 12
+        id: 124,
+        name: 'test_template_2',
+        api_customer_id: 12,
       },
     ];
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: validResponse,
       });
@@ -50,8 +49,7 @@ describe('emailService.listDynamicTemplates', function () {
   it('can list empty dynamic templates', async function () {
     const validResponse = [];
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: validResponse,
       });
@@ -63,10 +61,9 @@ describe('emailService.listDynamicTemplates', function () {
   });
 
   it('raises the API response if the response is not an array', async function () {
-    const invalidResponse = "Too many templates";
+    const invalidResponse = 'Too many templates';
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: invalidResponse,
       });

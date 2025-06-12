@@ -25,11 +25,10 @@ describe('emailService.deleteDynamicTemplate', function () {
     const templateId = 123;
 
     const validResponse = {
-      "message": "Template test_template deleted!"
+      message: 'Template test_template deleted!',
     };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: validResponse,
       });
@@ -44,11 +43,11 @@ describe('emailService.deleteDynamicTemplate', function () {
     const templateId = 123;
 
     const notFoundResponse = {
-      "error": "Couldn't find DynamicTemplate with 'id'=123 [WHERE \"dynamic_templates\".\"api_customer_id\" = $1]"
-    }
+      error:
+        'Couldn\'t find DynamicTemplate with \'id\'=123 [WHERE "dynamic_templates"."api_customer_id = $1]',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: notFoundResponse,
       });
@@ -62,11 +61,10 @@ describe('emailService.deleteDynamicTemplate', function () {
     const templateId = 123;
 
     const unexpectedResponse = {
-      "this": "is not what we expected"
-    }
+      this: 'is not what we expected',
+    };
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
         data: unexpectedResponse,
       });
