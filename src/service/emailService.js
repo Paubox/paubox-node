@@ -253,6 +253,31 @@ class emailService {
       });
   }
 
+  // Delete a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#delete-a-dynamic-template
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  deleteDynamicTemplate(templateId) {
+    let apiHelperService = apiHelper();
+    var apiUrl = `/dynamic_templates/${templateId}`;
+    return apiHelperService
+      .callToAPIByDelete(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .then((response) => {
+        if (response.error) {
+          throw new Error(response.error);
+        }
+
+        if (response.message == null) {
+          throw response;
+        }
+
+        return response;
+      });
+  }
 
   // private methods
 
