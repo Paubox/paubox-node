@@ -196,6 +196,26 @@ class emailService {
       });
   }
 
+  // List dynamic templates
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  listDynamicTemplates() {
+    let apiHelperService = apiHelper();
+    var apiUrl = '/dynamic_templates';
+    return apiHelperService
+      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .then((response) => {
+        var apiResponse = response;
+        if (apiResponse instanceof Array) {
+          return apiResponse;
+        }
+        throw apiResponse;
+      });
+  }
+
   // private methods
 
   [_getAuthHeader]() {
