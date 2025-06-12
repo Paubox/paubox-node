@@ -6,7 +6,7 @@ const FormData = require('form-data');
 class apiHelper {
   constructor() { }
 
-  callToAPIByPost(baseUrl, apiUrl, authHeader, reqBody) {
+  post(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
     };
@@ -50,7 +50,7 @@ class apiHelper {
       });
   }
 
-  callToAPIByPatch(baseUrl, apiUrl, authHeader, reqBody) {
+  patch(baseUrl, apiUrl, authHeader, reqBody) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
     };
@@ -94,7 +94,7 @@ class apiHelper {
       });
   }
 
-  callToAPIByGet(baseUrl, apiUrl, authHeader) {
+  get(baseUrl, apiUrl, authHeader) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
       'Content-type': 'application/json',
@@ -127,7 +127,7 @@ class apiHelper {
       });
   }
 
-  callToAPIByDelete(baseUrl, apiUrl, authHeader) {
+  delete(baseUrl, apiUrl, authHeader) {
     var apiHeaders = {
       Authorization: `${authHeader}`,
       'Content-type': 'application/json',

@@ -45,7 +45,7 @@ class emailService {
     let apiHelperService = apiHelper();
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
     return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
       .then((response) => {
         var apiResponse = response;
         if (
@@ -91,7 +91,7 @@ class emailService {
     let apiHelperService = apiHelper();
     var apiUrl = '/messages';
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
+      .post(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -124,7 +124,7 @@ class emailService {
     var apiUrl = '/bulk_messages';
 
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
+      .post(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -182,7 +182,7 @@ class emailService {
     const apiUrl = '/dynamic_templates';
 
     return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+      .post(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
       .then((response) => {
         if (
           response.message == null &&
@@ -249,7 +249,7 @@ class emailService {
     const apiUrl = `/dynamic_templates/${templateId}`;
 
     return apiHelperService
-      .callToAPIByPatch(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+      .patch(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
       .then((response) => {
         if (
           response.message == null &&
@@ -275,7 +275,7 @@ class emailService {
     let apiHelperService = apiHelper();
     var apiUrl = '/dynamic_templates';
     return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
       .then((response) => {
         var apiResponse = response;
         if (apiResponse instanceof Array) {
@@ -308,7 +308,7 @@ class emailService {
     ];
 
     return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
@@ -334,7 +334,7 @@ class emailService {
     let apiHelperService = apiHelper();
     var apiUrl = `/dynamic_templates/${templateId}`;
     return apiHelperService
-      .callToAPIByDelete(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .delete(this.baseURL, apiUrl, this[_getAuthHeader]())
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
