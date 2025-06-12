@@ -196,6 +196,75 @@ class emailService {
       });
   }
 
+  // Update a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#update-a-dynamic-template
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // templateName is the new name of the template
+  //
+  // templateContent is the new content of the template and can be:
+  //   - a string of the template content
+  //   - a Buffer containing the template content
+  //   - a Stream (for streaming uploads)
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  updateDynamicTemplate(templateId, templateName = null, templateContent = null) {
+    if (!templateName && !templateContent) {
+      return Promise.reject(new Error('At least one of templateName or templateContent must be provided'));
+    }
+
+    const formData = new FormData();
+    if (templateName) {
+      formData.append('data[name]', templateName);
+    }
+
+    if (templateContent) {
+      if (Buffer.isBuffer(templateContent)) {
+        // For Buffer, we can append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (templateContent instanceof Stream) {
+        // For Stream, append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (typeof templateContent === 'string') {
+        // For string, convert to Buffer first
+        formData.append('data[body]', Buffer.from(templateContent), {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else {
+        throw new Error('templateContent must be a Buffer, Stream, or string');
+      }
+    }
+
+    let apiHelperService = apiHelper();
+    const apiUrl = `/dynamic_templates/${templateId}`;
+
+    return apiHelperService
+      .callToAPIByPatch(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+      .then((response) => {
+        if (
+          response.message == null &&
+          response.params == null &&
+          response.errors == null &&
+          response.error == null
+        ) {
+          throw response;
+        } else if (response.error) {
+          throw new Error(response.error);
+        }
+        return response;
+      });
+  }
+
   // List dynamic templates
   //
   // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates
