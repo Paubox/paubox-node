@@ -3,7 +3,6 @@
 const apiHelper = require('./apiHelper.js');
 const Stream = require('stream');
 const FormData = require('form-data');
-const _getAuthHeader = Symbol('getAuthHeader');
 
 class emailService {
   constructor(config) {
@@ -28,6 +27,8 @@ class emailService {
     this.port = 443;
     this.version = 'v1';
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
+
+    this.apiHelper = apiHelper(`Token token=${this.apiKey}`);
   }
 
   // public methods
@@ -42,10 +43,9 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   getEmailDisposition(sourceTrackingId) {
-    let apiHelperService = apiHelper();
     var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
-    return apiHelperService
-      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
+    return this.apiHelper
+      .get(this.baseURL, apiUrl)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -88,10 +88,9 @@ class emailService {
       },
     });
 
-    let apiHelperService = apiHelper();
     var apiUrl = '/messages';
-    return apiHelperService
-      .post(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
+    return this.apiHelper
+      .post(this.baseURL, apiUrl, requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -120,11 +119,10 @@ class emailService {
       },
     });
 
-    let apiHelperService = apiHelper();
     var apiUrl = '/bulk_messages';
 
-    return apiHelperService
-      .post(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
+    return this.apiHelper
+      .post(this.baseURL, apiUrl, requestBody)
       .then((response) => {
         var apiResponse = response;
         if (
@@ -178,11 +176,10 @@ class emailService {
       throw new Error('templateContent must be a Buffer, Stream, or string');
     }
 
-    let apiHelperService = apiHelper();
     const apiUrl = '/dynamic_templates';
 
-    return apiHelperService
-      .post(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+    return this.apiHelper
+      .post(this.baseURL, apiUrl, formData)
       .then((response) => {
         if (
           response.message == null &&
@@ -245,11 +242,10 @@ class emailService {
       }
     }
 
-    let apiHelperService = apiHelper();
     const apiUrl = `/dynamic_templates/${templateId}`;
 
-    return apiHelperService
-      .patch(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
+    return this.apiHelper
+      .patch(this.baseURL, apiUrl, formData)
       .then((response) => {
         if (
           response.message == null &&
@@ -272,10 +268,9 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   listDynamicTemplates() {
-    let apiHelperService = apiHelper();
     var apiUrl = '/dynamic_templates';
-    return apiHelperService
-      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
+    return this.apiHelper
+      .get(this.baseURL, apiUrl)
       .then((response) => {
         var apiResponse = response;
         if (apiResponse instanceof Array) {
@@ -294,8 +289,6 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   getDynamicTemplate(templateId) {
-    let apiHelperService = apiHelper();
-    var apiUrl = `/dynamic_templates/${templateId}`;
 
     const expectedKeys = [
       'id',
@@ -307,8 +300,9 @@ class emailService {
       'metadata',
     ];
 
-    return apiHelperService
-      .get(this.baseURL, apiUrl, this[_getAuthHeader]())
+    var apiUrl = `/dynamic_templates/${templateId}`;
+    return this.apiHelper
+      .get(this.baseURL, apiUrl)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
@@ -334,7 +328,7 @@ class emailService {
     let apiHelperService = apiHelper();
     var apiUrl = `/dynamic_templates/${templateId}`;
     return apiHelperService
-      .delete(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .delete(this.baseURL, apiUrl)
       .then((response) => {
         if (response.error) {
           throw new Error(response.error);
@@ -346,13 +340,6 @@ class emailService {
 
         return response;
       });
-  }
-
-  // private methods
-
-  [_getAuthHeader]() {
-    var token = 'Token token=' + this.apiKey;
-    return token;
   }
 }
 
