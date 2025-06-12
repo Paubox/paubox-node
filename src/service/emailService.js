@@ -216,6 +216,44 @@ class emailService {
       });
   }
 
+  // Get a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-one-of-your-orgs-dynamic-templates
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  getDynamicTemplate(templateId) {
+    let apiHelperService = apiHelper();
+    var apiUrl = `/dynamic_templates/${templateId}`;
+
+    const expectedKeys = [
+      'id',
+      'name',
+      'api_customer_id',
+      'body',
+      'created_at',
+      'updated_at',
+      'metadata',
+    ];
+
+    return apiHelperService
+      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
+      .then((response) => {
+        if (response.error) {
+          throw new Error(response.error);
+        }
+
+        if (!expectedKeys.every((key) => key in response)) {
+          throw response;
+        }
+
+        return response;
+      });
+  }
+
+
   // private methods
 
   [_getAuthHeader]() {
