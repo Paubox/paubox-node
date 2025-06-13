@@ -54,7 +54,7 @@ describe('emailService.getDynamicTemplate', function () {
         message: errorMessage,
         response: {
           status: 500,
-        }
+        },
       });
     });
 

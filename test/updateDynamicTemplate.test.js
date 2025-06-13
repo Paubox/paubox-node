@@ -150,6 +150,28 @@ describe('emailService.updateDynamicTemplate', function () {
     );
   });
 
+  it('raises an error if a 500 error is returned', async function () {
+    const templateId = 123;
+    const newName = 'new_name';
+    const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
+
+    const errorMessage = "Couldn't find DynamicTemplate with 'id'=123";
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.reject({
+        message: errorMessage,
+        response: {
+          status: 500,
+        },
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await expect(service.updateDynamicTemplate(templateId, newName, newFile)).to.be.rejectedWith(
+      errorMessage,
+    );
+  });
+
   it('raises the API response as an error if no data is returned from the Paubox API', async function () {
     const templateId = 123;
     const newName = 'new_name';
