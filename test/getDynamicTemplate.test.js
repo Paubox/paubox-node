@@ -47,20 +47,19 @@ describe('emailService.getDynamicTemplate', function () {
 
   it('raises an error if the template is not found', async function () {
     const templateId = 123;
-
-    const pauboxResponse = {
-      error:
-        'Couldn\'t find DynamicTemplate with \'id\'=123 [WHERE "dynamic_templates"."api_customer_id" = $1]',
-    };
+    const errorMessage = "Couldn't find DynamicTemplate with 'id'=123";
 
     axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({
-        data: pauboxResponse,
+      return Promise.reject({
+        message: errorMessage,
+        response: {
+          status: 500,
+        }
       });
     });
 
     const service = emailService(testCredentials);
-    await expect(service.getDynamicTemplate(templateId)).to.be.rejectedWith(pauboxResponse.error);
+    await expect(service.getDynamicTemplate(templateId)).to.be.rejectedWith(errorMessage);
   });
 
   it('raises an error if an invalid template id is used', async function () {
