@@ -8,9 +8,9 @@
     "npm": ">=10.9.0"
   },
   "scripts": {
-    "test": "mocha 'src/**/*.test.js'",
-    "test:watch": "mocha 'src/**/*.test.js' --watch",
-    "test:debug": "mocha --inspect-brk 'src/**/*.test.js'",
+    "test": "mocha 'test/**/*.test.js'",
+    "test:watch": "mocha 'test/**/*.test.js' --watch",
+    "test:debug": "mocha --inspect-brk 'test/**/*.test.js'",
     "prelint": "eslint .",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
