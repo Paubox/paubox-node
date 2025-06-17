@@ -10,16 +10,50 @@ class Message {
     this.subject = options.subject;
     this.allowNonTLS = options.allowNonTLS || false;
     this.forceSecureNotification = options.forceSecureNotification;
-    this.plaintext = options.text_content;
-    this.htmltext = options.html_content;
     this.attachments = options.attachments;
     this.listUnsubscribe = options.list_unsubscribe;
     this.listUnsubscribePost = options.list_unsubscribe_post;
+
+    // Email content for non-templated messages (https://docs.paubox.com/docs/paubox_email_api/messages#send-message)
+    this.plaintext = options.text_content;
+    this.htmltext = options.html_content;
+
+    // Email content for templated messages (https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message)
+    this.templateName = options.template_name;
+    this.templateValues = options.template_values;
+
+    this.validate();
+  }
+
+  // Performs some validation on the message object, throwing an error if the message is invalid.
+  //
+  // Messages must:
+  // - have either templated or non-templated content fields, but not both.
+  // - have template values if a template name is provided.
+  // - have valid JSON for template values.
+  //
+  validate() {
+    const hasTemplate = this.templateName && this.templateValues;
+    const hasContent = this.plaintext || this.htmltext;
+
+    if (hasTemplate && hasContent) {
+      throw new Error('Message cannot have both template and content fields');
+    }
+
+    if (!hasTemplate && !hasContent) {
+      throw new Error('Message must have either template or content fields');
+    }
+
+    if (hasTemplate) {
+      if (typeof this.templateValues !== 'object') {
+        throw new Error('Template values must be a valid JSON object');
+      }
+    }
   }
 
   // Convert Message object to JSON object in Paubox API format
   toJSON() {
-    return {
+    let base = {
       recipients: this.to,
       cc: this.cc,
       bcc: this.bcc,
@@ -32,12 +66,21 @@ class Message {
       },
       allowNonTLS: this.parseBool(this.allowNonTLS),
       forceSecureNotification: this.parseBool(this.forceSecureNotification),
-      content: {
-        'text/plain': this.plaintext,
-        'text/html': this.safeBase64Encode(this.htmltext),
-      },
-      attachments: this.attachments,
     };
+
+    if (this.templateName && this.templateValues) {
+      base = { ...base, template_name: this.templateName, template_values: this.templateValues };
+    } else {
+      base = { ...base, content: { 'text/plain': this.plaintext, 'text/html': this.safeBase64Encode(this.htmltext) } };
+    }
+
+    if (this.attachments) {
+      base = { ...base, attachments: this.attachments };
+    } else {
+      base = { ...base, attachments: null };
+    }
+
+    return base;
   }
 
   // Safely base64 encodes a string, handling null and empty strings

@@ -31,7 +31,7 @@ The API wrapper allows you to construct and send messages.
     - [Delete Dynamic Template](#delete-dynamic-template)
     - [Get Dynamic Template](#get-dynamic-template)
     - [List Dynamic Templates](#list-dynamic-templates)
-    - [Send an Email using a Dynamic Template](#send-an-email-using-a-dynamic-template)
+    - [Send a Dynamically Templated Message](#send-a-dynamically-templated-message)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -86,6 +86,9 @@ emailService.
 ### Send Message
 
 Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-message).
+
+Please also see [Sending a Dynamically Templated Message](#send-a-dynamically-templated-message) for sending a message
+using a dynamic template.
 
 ```javascript
 'use strict';
@@ -424,7 +427,54 @@ service.listDynamicTemplates().then(function (response) {
 });
 ```
 
-#### Send an Email using a Dynamic Template
+#### Send a Dynamically Templated Message
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message).
+
+This is similar to the [sendMessage](#send-message) method, but you pass in `template_name` and `template_values`
+instead of `text_content` and `html_content` when constructing the `Message` object.
+
+For example, assume you have a dynamic template named `welcome_email` with the following content:
+
+```html
+<html>
+  <body>
+    <h1>Welcome {{firstName}} {{lastName}}!</h1>
+  </body>
+</html>
+```
+
+You can send a message using this template by doing the following:
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+const templateName = 'welcome_email';
+const templateValues = {
+  firstName: 'John',
+  lastName: 'Doe',
+};
+
+var message = pbMail.message({
+  from: 'sender@domain.com',
+  to: ['recipient@example.com'],
+  subject: 'Welcome!',
+  template_name: templateName,
+  template_values: templateValues,
+});
+
+service
+  .sendTemplatedMessage(message)
+  .then((response) => {
+    console.log('Send Templated Message method Response: ' + JSON.stringify(response));
+  })
+  .catch((error) => {
+    console.log('Error in Send Templated Message method: ' + JSON.stringify(error));
+  });
+```
 
 ## Supported Node Versions
 
