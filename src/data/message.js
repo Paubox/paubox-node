@@ -7,16 +7,16 @@
  *
  * @param {string} options.from - Required. The sender's email address. Should be from a domain that you have authorized.
  * @param {string[]} options.to - Required. Array of recipient email addresses
-*
-* For non-templated messages, one of these is required:
-* @param {string} [options.text_content] - Plain text content of the email. Defaults to null.
-* @param {string} [options.html_content] - HTML content of the email. Defaults to null.
-*
-* For templated messages, both of these are required:
-* @param {string} [options.template_name] - Name of the template to use. Defaults to null.
-* @param {Object} [options.template_values] - JSON object containing template variables. Defaults to null.
-*
-* Optional fields:
+ *
+ * For non-templated messages, one of these is required:
+ * @param {string} [options.text_content] - Plain text content of the email. Defaults to null.
+ * @param {string} [options.html_content] - HTML content of the email. Defaults to null.
+ *
+ * For templated messages, both of these are required:
+ * @param {string} [options.template_name] - Name of the template to use. Defaults to null.
+ * @param {Object} [options.template_values] - JSON object containing template variables. Defaults to null.
+ *
+ * Optional fields:
  * @param {string} [options.subject] - Optional. The email subject. Defaults to null.
  * @param {string} [options.reply_to] - Reply-to email address. Defaults to null.
  * @param {string[]} [options.cc] - Array of CC recipient email addresses. Defaults to null.
