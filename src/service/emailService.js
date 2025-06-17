@@ -3,6 +3,8 @@
 const apiHelper = require('./apiHelper.js');
 const Stream = require('stream');
 const FormData = require('form-data');
+const Message = require('../data/message.js');
+const TemplatedMessage = require('../data/templatedMessage.js');
 
 class emailService {
   constructor(config) {
@@ -68,15 +70,13 @@ class emailService {
   //
   // msg is a Message object
   //
-  // This method is for sending non-templated messages. For templated messages, use sendTemplatedMessage() instead.
+  // This method is for sending (non-templated) Messages. For templated messages, use sendTemplatedMessage() instead.
   //
   // returns a promise that resolves to the response from the API
   //
   async sendMessage(msg) {
-    if (msg.isTemplated) {
-      throw new Error(
-        'Message cannot be a templated message. Please use sendTemplatedMessage() instead.',
-      );
+    if (!msg || msg.constructor.name !== 'Message') {
+      throw new Error('Message must be a Message object');
     }
 
     var requestBody = {
@@ -98,15 +98,15 @@ class emailService {
   //
   // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message
   //
-  // msg is a Message object
+  // msg is a TemplatedMessage object
   //
-  // This method is for sending templated messages. For non-templated messages, use sendMessage() instead.
+  // This method is for sending TemplatedMessages. For non-templated messages, use sendMessage() instead.
   //
   // returns a promise that resolves to the response from the API
   //
   async sendTemplatedMessage(msg) {
-    if (!msg.isTemplated) {
-      throw new Error('Message must be a templated message. Please use sendMessage() instead.');
+    if (!msg || msg.constructor.name !== 'TemplatedMessage') {
+      throw new Error('Message must be a TemplatedMessage object');
     }
 
     var requestBody = {

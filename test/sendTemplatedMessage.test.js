@@ -7,6 +7,7 @@ const axios = require('axios');
 
 const emailService = require('../src/service/emailService.js');
 const Message = require('../src/data/message.js');
+const TemplatedMessage = require('../src/data/templatedMessage.js');
 
 chai.use(chaiAsPromised);
 
@@ -17,7 +18,7 @@ const testCredentials = {
 
 describe('emailService.sendTemplatedMessage', function () {
   let axiosStub;
-  const validTemplatedMessage = Message({
+  const validTemplatedMessage = TemplatedMessage({
     from: 'reception@authorized_domain.com',
     reply_to: 'reception@authorized_domain.com',
     to: ['person@example.com'],
@@ -161,7 +162,7 @@ describe('emailService.sendTemplatedMessage', function () {
 
     const service = emailService(testCredentials);
     await expect(service.sendTemplatedMessage(nonTemplatedMessage)).to.be.rejectedWith(
-      'Message must be a templated message. Please use sendMessage() instead.',
+      'Message must be a TemplatedMessage object',
     );
   });
 });

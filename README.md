@@ -435,9 +435,6 @@ service.listDynamicTemplates().then(function (response) {
 
 Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message).
 
-This is similar to the [sendMessage](#send-message) method, but you pass in `template_name` and `template_values`
-instead of `text_content` and `html_content` when constructing the `Message` object.
-
 For example, assume you have a dynamic template named `welcome_email` with the following content:
 
 ```html
@@ -462,7 +459,7 @@ const templateValues = {
   lastName: 'Doe',
 };
 
-var message = pbMail.message({
+var templatedMessage = pbMail.templatedMessage({
   from: 'sender@domain.com',
   to: ['recipient@example.com'],
   subject: 'Welcome!',
@@ -471,7 +468,7 @@ var message = pbMail.message({
 });
 
 service
-  .sendTemplatedMessage(message)
+  .sendTemplatedMessage(templatedMessage)
   .then((response) => {
     console.log('Send Templated Message method Response: ' + JSON.stringify(response));
   })

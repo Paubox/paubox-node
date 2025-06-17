@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { expect } = chai;
-const Message = require('../src/data/message.js');
+const Message = require('../src/data/message');
 
 const message = Message({
   from: 'sender@authorized_domain.com',
@@ -87,84 +87,7 @@ describe('Message.toJSON', function () {
 });
 
 describe('Message.validate', function () {
-  it('throws an error if both templated and non-templated content fields are provided', function () {
-    const invalidOptions = {
-      from: 'sender@authorized_domain.com',
-      reply_to: 'sender@authorized_domain.com',
-      to: ['recipient@host.com'],
-      cc: null,
-      bcc: null,
-      subject: 'Invalid Message',
-      text_content: 'Invalid message',
-      html_content: '<html><body><h1>Invalid message</h1></body></html>',
-      template_name: 'test_template',
-      template_values: { name: 'John' },
-    };
-
-    expect(() => Message(invalidOptions)).to.throw(
-      'Message cannot have both template and content fields',
-    );
-  });
-
-  it('throws an error if neither templated nor non-templated content fields are provided', function () {
-    const invalidOptions = {
-      from: 'sender@authorized_domain.com',
-      reply_to: 'sender@authorized_domain.com',
-      to: ['recipient@host.com'],
-      cc: null,
-      bcc: null,
-      subject: 'Invalid Message',
-    };
-
-    expect(() => Message(invalidOptions)).to.throw(
-      'Message must have either template or content fields',
-    );
-  });
-
-  it('throws an error if template values are not a valid JSON object', function () {
-    const invalidOptions = {
-      from: 'sender@authorized_domain.com',
-      reply_to: 'sender@authorized_domain.com',
-      to: ['recipient@host.com'],
-      cc: null,
-      bcc: null,
-      subject: 'Invalid Message',
-      template_name: 'test_template',
-      template_values: 'this_is_not_a_valid_json_object',
-    };
-
-    expect(() => Message(invalidOptions)).to.throw('Template values must be a valid JSON object');
-  });
-
-  it('can construct a valid templated message with valid template values', function () {
-    const validTemplatedOptions = {
-      from: 'sender@authorized_domain.com',
-      reply_to: 'sender@authorized_domain.com',
-      to: ['recipient@host.com'],
-      cc: null,
-      bcc: null,
-      subject: 'Welcome!',
-      template_name: 'welcome_email',
-      template_values: {
-        firstName: 'John',
-        lastName: 'Doe',
-      },
-    };
-
-    const message = Message(validTemplatedOptions);
-
-    expect(message.templateName).to.equal('welcome_email');
-    expect(message.templateValues).to.deep.equal({
-      firstName: 'John',
-      lastName: 'Doe',
-    });
-    expect(message.plaintext).to.be.null;
-    expect(message.htmltext).to.be.null;
-
-    expect(message.isTemplated).to.be.true;
-  });
-
-  it('can construct a valid non-templated message', function () {
+  it('can construct a valid message', function () {
     const validNonTemplatedOptions = {
       from: 'sender@authorized_domain.com',
       reply_to: 'sender@authorized_domain.com',
@@ -178,12 +101,23 @@ describe('Message.validate', function () {
 
     const message = Message(validNonTemplatedOptions);
 
-    expect(message.templateName).to.be.null;
-    expect(message.templateValues).to.be.null;
     expect(message.plaintext).to.equal('Hello John Doe!');
     expect(message.htmltext).to.equal('<html><body><h1>Hello John Doe!</h1></body></html>');
+  });
 
-    expect(message.isTemplated).to.be.false;
+  it('throws an error if neither plaintext nor html text are provided', function () {
+    const invalidOptions = {
+      from: 'sender@authorized_domain.com',
+      reply_to: 'sender@authorized_domain.com',
+      to: ['recipient@host.com'],
+      cc: null,
+      bcc: null,
+      subject: 'Invalid Message',
+    };
+
+    expect(() => Message(invalidOptions)).to.throw(
+      'Message must have either plaintext or html text',
+    );
   });
 
   it('throws an error if the from address is not specified', function () {
@@ -207,7 +141,7 @@ describe('Message.validate', function () {
       html_content: '<html><body><h1>Invalid message</h1></body></html>',
     };
 
-    expect(() => Message(invalidOptions)).to.throw('To address(es) are required');
+    expect(() => Message(invalidOptions)).to.throw('One or more to addresses are required');
   });
 
   it('has sane defaults for optional fields', function () {
