@@ -45,11 +45,15 @@ class Message {
     }
 
     if (hasTemplate) {
+      this.isTemplated = true;
       if (typeof this.templateValues !== 'object') {
         throw new Error('Template values must be a valid JSON object');
       }
+    } else {
+      this.isTemplated = false;
     }
   }
+
 
   // Convert Message object to JSON object in Paubox API format
   toJSON() {

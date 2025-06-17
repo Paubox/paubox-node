@@ -147,7 +147,17 @@ describe('Message.validate', function () {
       },
     };
 
-    expect(() => Message(validTemplatedOptions)).to.not.throw();
+    const message = Message(validTemplatedOptions);
+
+    expect(message.templateName).to.equal('welcome_email');
+    expect(message.templateValues).to.deep.equal({
+      firstName: 'John',
+      lastName: 'Doe',
+    });
+    expect(message.plaintext).to.be.undefined;
+    expect(message.htmltext).to.be.undefined;
+
+    expect(message.isTemplated).to.be.true;
   });
 
   it('can construct a valid non-templated message', function () {
@@ -162,6 +172,13 @@ describe('Message.validate', function () {
       html_content: '<html><body><h1>Hello John Doe!</h1></body></html>',
     };
 
-    expect(() => Message(validNonTemplatedOptions)).to.not.throw();
+    const message = Message(validNonTemplatedOptions);
+
+    expect(message.templateName).to.be.undefined;
+    expect(message.templateValues).to.be.undefined;
+    expect(message.plaintext).to.equal('Hello John Doe!');
+    expect(message.htmltext).to.equal('<html><body><h1>Hello John Doe!</h1></body></html>');
+
+    expect(message.isTemplated).to.be.false;
   });
 });
