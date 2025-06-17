@@ -79,11 +79,11 @@ class emailService {
       );
     }
 
-    var requestBody = JSON.stringify({
+    var requestBody = {
       data: {
         message: msg.toJSON(),
       },
-    });
+    };
 
     const response = await this.apiHelper.post(this.baseURL, '/messages', requestBody);
 
@@ -109,13 +109,13 @@ class emailService {
       throw new Error('Message must be a templated message. Please use sendMessage() instead.');
     }
 
-    var requestBody = JSON.stringify({
+    var requestBody = {
       data: {
         template_name: msg.templateName,
         template_values: JSON.stringify(msg.templateValues),
         message: msg.toJSON(),
       },
-    });
+    };
 
     const response = await this.apiHelper.post(this.baseURL, '/templated_messages', requestBody);
 
@@ -135,11 +135,11 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async sendBulkMessages(messages) {
-    const requestBody = JSON.stringify({
+    const requestBody = {
       data: {
         messages: messages.map((message) => message.toJSON()),
       },
-    });
+    };
 
     const response = await this.apiHelper.post(this.baseURL, '/bulk_messages', requestBody);
 

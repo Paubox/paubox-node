@@ -43,7 +43,7 @@ describe('emailService.sendTemplatedMessage', function () {
   });
 
   it('posts the correct JSON payload to the correct Paubox API endpoint for a templated message', async function () {
-    const expectedPayload = JSON.stringify({
+    const expectedPayload = {
       data: {
         template_name: 'welcome_email',
         template_values: JSON.stringify({
@@ -66,7 +66,7 @@ describe('emailService.sendTemplatedMessage', function () {
           attachments: null,
         },
       },
-    });
+    };
 
     let capturedConfig;
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
