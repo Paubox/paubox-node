@@ -3,7 +3,6 @@
 const apiHelper = require('./apiHelper.js');
 const Stream = require('stream');
 const FormData = require('form-data');
-const _getAuthHeader = Symbol('getAuthHeader');
 
 class emailService {
   constructor(config) {
@@ -28,6 +27,8 @@ class emailService {
     this.port = 443;
     this.version = 'v1';
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
+
+    this.apiHelper = apiHelper(`Token token=${this.apiKey}`);
   }
 
   // public methods
@@ -41,36 +42,24 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  getEmailDisposition(sourceTrackingId) {
-    let apiHelperService = apiHelper();
-    var apiUrl = '/message_receipt?sourceTrackingId=' + sourceTrackingId;
-    return apiHelperService
-      .callToAPIByGet(this.baseURL, apiUrl, this[_getAuthHeader]())
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
+  async getEmailDisposition(sourceTrackingId) {
+    const response = await this.apiHelper.get(
+      this.baseURL,
+      `/message_receipt?sourceTrackingId=${sourceTrackingId}`,
+    );
 
-        if (
-          apiResponse != null &&
-          apiResponse.data != null &&
-          apiResponse.data.message != null &&
-          apiResponse.data.message.message_deliveries != null &&
-          apiResponse.data.message.message_deliveries.length > 0
-        ) {
-          for (let message_deliveries of apiResponse.data.message.message_deliveries) {
-            if (message_deliveries.status.openedStatus == null) {
-              message_deliveries.status.openedStatus = 'unopened';
-            }
-          }
+    if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
+      throw response;
+    }
+    if (response?.data?.message?.message_deliveries?.length > 0) {
+      for (let message_deliveries of response.data.message.message_deliveries) {
+        if (message_deliveries.status.openedStatus == null) {
+          message_deliveries.status.openedStatus = 'unopened';
         }
-        return apiResponse;
-      });
+      }
+    }
+
+    return response;
   }
 
   // Send an email message
@@ -81,28 +70,20 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  sendMessage(msg) {
+  async sendMessage(msg) {
     var requestBody = JSON.stringify({
       data: {
         message: msg.toJSON(),
       },
     });
 
-    let apiHelperService = apiHelper();
-    var apiUrl = '/messages';
-    return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.sourceTrackingId == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
-        return apiResponse;
-      });
+    const response = await this.apiHelper.post(this.baseURL, '/messages', requestBody);
+
+    if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
+      throw response;
+    }
+
+    return response;
   }
 
   // Send multiple email messages
@@ -113,30 +94,20 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  sendBulkMessages(messages) {
-    var requestBody = JSON.stringify({
+  async sendBulkMessages(messages) {
+    const requestBody = JSON.stringify({
       data: {
         messages: messages.map((message) => message.toJSON()),
       },
     });
 
-    let apiHelperService = apiHelper();
-    var apiUrl = '/bulk_messages';
+    const response = await this.apiHelper.post(this.baseURL, '/bulk_messages', requestBody);
 
-    return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), requestBody)
-      .then((response) => {
-        var apiResponse = response;
-        if (
-          apiResponse.data == null &&
-          apiResponse.messages == null &&
-          apiResponse.errors == null
-        ) {
-          throw apiResponse;
-        }
+    if (response.data == null && response.messages == null && response.errors == null) {
+      throw response;
+    }
 
-        return apiResponse;
-      });
+    return response;
   }
 
   // Create a dynamic template
@@ -152,55 +123,165 @@ class emailService {
   //
   // returns a promise that resolves to the response from the API
   //
-  createDynamicTemplate(templateName, templateContent) {
-    const formData = new FormData();
-    formData.append('data[name]', templateName);
+  async createDynamicTemplate(templateName, templateContent) {
+    const requestBody = this.createFormData(templateName, templateContent);
 
-    if (Buffer.isBuffer(templateContent)) {
-      // For Buffer, we can append directly
-      formData.append('data[body]', templateContent, {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else if (templateContent instanceof Stream) {
-      // For Stream, append directly
-      formData.append('data[body]', templateContent, {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else if (typeof templateContent === 'string') {
-      // For string, convert to Buffer first
-      formData.append('data[body]', Buffer.from(templateContent), {
-        filename: `${templateName}.hbs`,
-        contentType: 'text/x-handlebars-template',
-      });
-    } else {
-      throw new Error('templateContent must be a Buffer, Stream, or string');
+    const response = await this.apiHelper.post(this.baseURL, '/dynamic_templates', requestBody);
+
+    if (
+      response.message == null &&
+      response.params == null &&
+      response.errors == null &&
+      response.error == null
+    ) {
+      throw response;
     }
 
-    let apiHelperService = apiHelper();
-    const apiUrl = '/dynamic_templates';
-
-    return apiHelperService
-      .callToAPIByPost(this.baseURL, apiUrl, this[_getAuthHeader](), formData)
-      .then((response) => {
-        if (
-          response.message == null &&
-          response.params == null &&
-          response.errors == null &&
-          response.error == null
-        ) {
-          throw response;
-        }
-        return response;
-      });
+    return response;
   }
 
-  // private methods
+  // Update a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#update-a-dynamic-template
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // templateName is the new name of the template
+  //
+  // templateContent is the new content of the template and can be:
+  //   - a string of the template content
+  //   - a Buffer containing the template content
+  //   - a Stream (for streaming uploads)
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  async updateDynamicTemplate(templateId, templateName = null, templateContent = null) {
+    if (!templateName && !templateContent) {
+      return Promise.reject(
+        new Error('At least one of templateName or templateContent must be provided'),
+      );
+    }
 
-  [_getAuthHeader]() {
-    var token = 'Token token=' + this.apiKey;
-    return token;
+    const requestBody = this.createFormData(templateName, templateContent);
+
+    const response = await this.apiHelper.patch(
+      this.baseURL,
+      `/dynamic_templates/${templateId}`,
+      requestBody,
+    );
+
+    if (
+      response.message == null &&
+      response.params == null &&
+      response.errors == null &&
+      response.error == null
+    ) {
+      throw response;
+    } else if (response.error) {
+      throw new Error(response.error);
+    }
+
+    return response;
+  }
+
+  // List dynamic templates
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  async listDynamicTemplates() {
+    const response = await this.apiHelper.get(this.baseURL, '/dynamic_templates');
+
+    if (response instanceof Array) {
+      return response;
+    }
+
+    throw response;
+  }
+
+  // Get a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-one-of-your-orgs-dynamic-templates
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  async getDynamicTemplate(templateId) {
+    const response = await this.apiHelper.get(this.baseURL, `/dynamic_templates/${templateId}`);
+
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    if (typeof response !== 'object') {
+      throw new Error(response);
+    }
+
+    const expectedKeys = ['id', 'name', 'api_customer_id', 'body'];
+
+    if (!expectedKeys.every((key) => key in response)) {
+      throw new Error(response);
+    }
+
+    return response;
+  }
+
+  // Delete a dynamic template
+  //
+  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#delete-a-dynamic-template
+  //
+  // templateId is the id of the template as returned from the listDynamicTemplates method
+  //
+  // returns a promise that resolves to the response from the API
+  //
+  async deleteDynamicTemplate(templateId) {
+    const response = await this.apiHelper.delete(this.baseURL, `/dynamic_templates/${templateId}`);
+
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    if (!response.message) {
+      throw response;
+    }
+
+    return response;
+  }
+
+  createFormData(templateName = null, templateContent = null) {
+    const formData = new FormData();
+
+    if (templateName) {
+      formData.append('data[name]', templateName);
+    }
+
+    if (templateContent) {
+      if (Buffer.isBuffer(templateContent)) {
+        // For Buffer, we can append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (templateContent instanceof Stream) {
+        // For Stream, append directly
+        formData.append('data[body]', templateContent, {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else if (typeof templateContent === 'string') {
+        // For string, convert to Buffer first
+        formData.append('data[body]', Buffer.from(templateContent), {
+          filename: `${templateName || 'template'}.hbs`,
+          contentType: 'text/x-handlebars-template',
+        });
+      } else {
+        throw new Error('templateContent must be a Buffer, Stream, or string');
+      }
+    }
+
+    return formData;
   }
 }
 
