@@ -27,6 +27,11 @@ The API wrapper allows you to construct and send messages.
   - [Get Email Disposition](#get-email-disposition)
   - [Dynamic Templates](#dynamic-templates)
     - [Create Dynamic Template](#create-dynamic-template)
+    - [Update Dynamic Template](#update-dynamic-template)
+    - [Delete Dynamic Template](#delete-dynamic-template)
+    - [Get Dynamic Template](#get-dynamic-template)
+    - [List Dynamic Templates](#list-dynamic-templates)
+    - [Send an Email using a Dynamic Template](#send-an-email-using-a-dynamic-template)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -321,6 +326,105 @@ app.post('/api/create-dynamic-template', upload.single('templateFile'), async (r
   }
 });
 ```
+
+#### Update Dynamic Template
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#update-a-dynamic-template).
+
+You can update a dynamic template's content and/or name:
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+const templateId = 123; // You would get this from the listDynamicTemplates method (see below)
+const templateName = 'New Name';
+const templateContent = '<html><body><h1>Hello {{firstName}}!</h1></body></html>'; // New content
+
+service.updateDynamicTemplate(templateId, templateName, templateContent).then(function (response) {
+  console.log('Update Dynamic Template method Response: ' + JSON.stringify(response));
+});
+
+// Or just update the content
+service.updateDynamicTemplate(templateId, null, templateContent).then(function (response) {
+  console.log('Update Dynamic Template method Response: ' + JSON.stringify(response));
+});
+```
+
+In a simple express app, this could look something like this:
+
+```javascript
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+app.patch('/api/update-dynamic-template/:templateId', upload.single('templateFile'), async (req, res) => {
+  try {
+    const { templateId } = req.params;
+    const { templateName } = req.body;
+    const templateFile = req.file;
+
+    const content = templateFile.buffer;
+    const response = await service.updateDynamicTemplate(templateId, templateName, content);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+```
+
+#### Delete Dynamic Template
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#delete-a-dynamic-template).
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+const templateId = 123; // You would get this from the listDynamicTemplates method (see below)
+
+service.deleteDynamicTemplate(templateId).then(function (response) {
+  console.log('Delete Dynamic Template method Response: ' + JSON.stringify(response));
+});
+```
+
+#### Get Dynamic Template
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-one-of-your-orgs-dynamic-templates).
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+const templateId = 123; // You would get this from the listDynamicTemplates method (see below)
+
+service.getDynamicTemplate(templateId).then(function (response) {
+  console.log('Get Dynamic Template method Response: ' + JSON.stringify(response));
+});
+```
+
+#### List Dynamic Templates
+
+Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates).
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+service.listDynamicTemplates().then(function (response) {
+  console.log('List Dynamic Templates method Response: ' + JSON.stringify(response));
+});
+```
+
+#### Send an Email using a Dynamic Template
 
 ## Supported Node Versions
 
