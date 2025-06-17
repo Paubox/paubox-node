@@ -22,6 +22,9 @@ class Message {
     this.templateName = options.template_name;
     this.templateValues = options.template_values;
 
+    // Determine if this is a templated message
+    this.isTemplated = Boolean(this.templateName && this.templateValues);
+
     this.validate();
   }
 
@@ -33,31 +36,27 @@ class Message {
   // - have valid JSON for template values.
   //
   validate() {
-    const hasTemplate = this.templateName && this.templateValues;
     const hasContent = this.plaintext || this.htmltext;
 
-    if (hasTemplate && hasContent) {
+    if (this.isTemplated && hasContent) {
       throw new Error('Message cannot have both template and content fields');
     }
 
-    if (!hasTemplate && !hasContent) {
+    if (!this.isTemplated && !hasContent) {
       throw new Error('Message must have either template or content fields');
     }
 
-    if (hasTemplate) {
-      this.isTemplated = true;
+    if (this.isTemplated) {
       if (typeof this.templateValues !== 'object') {
         throw new Error('Template values must be a valid JSON object');
       }
-    } else {
-      this.isTemplated = false;
     }
   }
 
 
   // Convert Message object to JSON object in Paubox API format
   toJSON() {
-    let base = {
+    let jsonContent = {
       recipients: this.to,
       cc: this.cc,
       bcc: this.bcc,
@@ -73,18 +72,24 @@ class Message {
     };
 
     if (this.templateName && this.templateValues) {
-      base = { ...base, template_name: this.templateName, template_values: this.templateValues };
+      jsonContent = { ...jsonContent, template_name: this.templateName, template_values: this.templateValues };
     } else {
-      base = { ...base, content: { 'text/plain': this.plaintext, 'text/html': this.safeBase64Encode(this.htmltext) } };
+      jsonContent = {
+        ...jsonContent,
+        content: {
+          'text/plain': this.plaintext,
+          'text/html': this.safeBase64Encode(this.htmltext),
+        },
+      };
     }
 
     if (this.attachments) {
-      base = { ...base, attachments: this.attachments };
+      jsonContent = { ...jsonContent, attachments: this.attachments };
     } else {
-      base = { ...base, attachments: null };
+      jsonContent = { ...jsonContent, attachments: null };
     }
 
-    return base;
+    return jsonContent;
   }
 
   // Safely base64 encodes a string, handling null and empty strings
