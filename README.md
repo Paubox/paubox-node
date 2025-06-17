@@ -471,12 +471,12 @@ var message = pbMail.message({
 });
 
 service
-  .sendMessage(message)
+  .sendTemplatedMessage(message)
   .then((response) => {
-    console.log('Send Message method Response: ' + JSON.stringify(response));
+    console.log('Send Templated Message method Response: ' + JSON.stringify(response));
   })
   .catch((error) => {
-    console.log('Error in Send Message method: ' + JSON.stringify(error));
+    console.log('Error in Send Templated Message method: ' + JSON.stringify(error));
   });
 ```
 
