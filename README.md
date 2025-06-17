@@ -363,19 +363,23 @@ require('dotenv').config();
 const pbMail = require('paubox-node');
 const service = pbMail.emailService();
 
-app.patch('/api/update-dynamic-template/:templateId', upload.single('templateFile'), async (req, res) => {
-  try {
-    const { templateId } = req.params;
-    const { templateName } = req.body;
-    const templateFile = req.file;
+app.patch(
+  '/api/update-dynamic-template/:templateId',
+  upload.single('templateFile'),
+  async (req, res) => {
+    try {
+      const { templateId } = req.params;
+      const { templateName } = req.body;
+      const templateFile = req.file;
 
-    const content = templateFile.buffer;
-    const response = await service.updateDynamicTemplate(templateId, templateName, content);
-    res.json(response);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+      const content = templateFile.buffer;
+      const response = await service.updateDynamicTemplate(templateId, templateName, content);
+      res.json(response);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+);
 ```
 
 #### Delete Dynamic Template
@@ -467,12 +471,12 @@ var message = pbMail.message({
 });
 
 service
-  .sendTemplatedMessage(message)
+  .sendMessage(message)
   .then((response) => {
-    console.log('Send Templated Message method Response: ' + JSON.stringify(response));
+    console.log('Send Message method Response: ' + JSON.stringify(response));
   })
   .catch((error) => {
-    console.log('Error in Send Templated Message method: ' + JSON.stringify(error));
+    console.log('Error in Send Message method: ' + JSON.stringify(error));
   });
 ```
 

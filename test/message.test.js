@@ -101,7 +101,9 @@ describe('Message.validate', function () {
       template_values: { name: 'John' },
     };
 
-    expect(() => Message(invalidOptions)).to.throw('Message cannot have both template and content fields');
+    expect(() => Message(invalidOptions)).to.throw(
+      'Message cannot have both template and content fields',
+    );
   });
 
   it('throws an error if neither templated nor non-templated content fields are provided', function () {
@@ -114,7 +116,9 @@ describe('Message.validate', function () {
       subject: 'Invalid Message',
     };
 
-    expect(() => Message(invalidOptions)).to.throw('Message must have either template or content fields');
+    expect(() => Message(invalidOptions)).to.throw(
+      'Message must have either template or content fields',
+    );
   });
 
   it('throws an error if template values are not a valid JSON object', function () {

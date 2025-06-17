@@ -36,6 +36,8 @@ class Message {
   // - have valid JSON for template values.
   //
   validate() {
+    // TODO: ADD OTHER VALIDATIONS HERE
+
     const hasContent = this.plaintext || this.htmltext;
 
     if (this.isTemplated && hasContent) {
@@ -52,7 +54,6 @@ class Message {
       }
     }
   }
-
 
   // Convert Message object to JSON object in Paubox API format
   toJSON() {
@@ -71,9 +72,7 @@ class Message {
       forceSecureNotification: this.parseBool(this.forceSecureNotification),
     };
 
-    if (this.templateName && this.templateValues) {
-      jsonContent = { ...jsonContent, template_name: this.templateName, template_values: this.templateValues };
-    } else {
+    if (!this.isTemplated) {
       jsonContent = {
         ...jsonContent,
         content: {
