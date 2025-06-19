@@ -71,11 +71,11 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async sendMessage(msg) {
-    var requestBody = JSON.stringify({
+    var requestBody = {
       data: {
         message: msg.toJSON(),
       },
-    });
+    };
 
     const response = await this.apiHelper.post(this.baseURL, '/messages', requestBody);
 
@@ -95,11 +95,11 @@ class emailService {
   // returns a promise that resolves to the response from the API
   //
   async sendBulkMessages(messages) {
-    const requestBody = JSON.stringify({
+    const requestBody = {
       data: {
         messages: messages.map((message) => message.toJSON()),
       },
-    });
+    };
 
     const response = await this.apiHelper.post(this.baseURL, '/bulk_messages', requestBody);
 

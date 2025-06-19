@@ -67,7 +67,7 @@ describe('emailService.sendBulkMessages', function () {
   });
 
   it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
-    const expectedPayload = JSON.stringify({
+    const expectedPayload = {
       data: {
         messages: [
           {
@@ -126,7 +126,7 @@ describe('emailService.sendBulkMessages', function () {
           },
         ],
       },
-    });
+    };
 
     let capturedConfig;
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {

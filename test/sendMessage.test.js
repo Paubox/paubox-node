@@ -38,7 +38,7 @@ describe('emailService.sendMessage', function () {
   });
 
   it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
-    const expectedPayload = JSON.stringify({
+    const expectedPayload = {
       data: {
         message: {
           recipients: ['person@example.com'],
@@ -62,7 +62,7 @@ describe('emailService.sendMessage', function () {
           attachments: null,
         },
       },
-    });
+    };
 
     let capturedConfig;
     axiosStub = sinon.stub(axios, 'create').returns(function (config) {
