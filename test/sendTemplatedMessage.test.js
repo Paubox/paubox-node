@@ -16,37 +16,47 @@ const testCredentials = {
   apiKey: 'api-key-12345',
 };
 
-describe('emailService.sendMessage', function () {
+describe('emailService.sendTemplatedMessage', function () {
   let axiosStub;
-  const message = Message({
+  const validTemplatedMessage = TemplatedMessage({
     from: 'reception@authorized_domain.com',
     reply_to: 'reception@authorized_domain.com',
     to: ['person@example.com'],
     cc: ['accounts@authorized_domain.com'],
     bcc: null,
-    subject: 'Test Email',
+    subject: 'Welcome!',
     allowNonTLS: false,
     forceSecureNotification: false,
-    text_content: 'Hello world!',
-    html_content: '<html><body><h1>Hello world!</h1></body></html>',
+    template_name: 'welcome_email',
+    template_values: {
+      firstName: 'John',
+      lastName: 'Doe',
+    },
     attachments: null,
     list_unsubscribe: null,
     list_unsubscribe_post: null,
   });
 
   this.afterEach(() => {
-    axiosStub.restore();
+    if (axiosStub) {
+      axiosStub.restore();
+    }
   });
 
-  it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
+  it('posts the correct JSON payload to the correct Paubox API endpoint for a templated message', async function () {
     const expectedPayload = {
       data: {
+        template_name: 'welcome_email',
+        template_values: JSON.stringify({
+          firstName: 'John',
+          lastName: 'Doe',
+        }), // Content is passed as a JSON string
         message: {
           recipients: ['person@example.com'],
           cc: ['accounts@authorized_domain.com'],
           bcc: null,
           headers: {
-            subject: 'Test Email',
+            subject: 'Welcome!',
             from: 'reception@authorized_domain.com',
             'reply-to': 'reception@authorized_domain.com',
             'List-Unsubscribe': null,
@@ -54,12 +64,6 @@ describe('emailService.sendMessage', function () {
           },
           allowNonTLS: false,
           forceSecureNotification: false,
-          content: {
-            'text/plain': 'Hello world!',
-            'text/html': Buffer.from('<html><body><h1>Hello world!</h1></body></html>').toString(
-              'base64',
-            ),
-          },
           attachments: null,
         },
       },
@@ -80,19 +84,16 @@ describe('emailService.sendMessage', function () {
     });
 
     const service = emailService(testCredentials);
-    await service.sendMessage(message);
+    await service.sendTemplatedMessage(validTemplatedMessage);
 
     expect(capturedConfig.method).to.equal('POST');
-    expect(capturedConfig.url).to.equal('/messages');
+    expect(capturedConfig.url).to.equal('/templated_messages');
     expect(capturedConfig.data).to.deep.equal(expectedPayload);
   });
 
   it('can return a successful response', async function () {
     const validResponse = {
-      sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
-      customHeaders: {
-        'X-Custom-Header': 'value',
-      },
+      sourceTrackingId: '36770949-12a9-1234-b12d-b27abaa123ea',
       data: 'Service OK',
     };
 
@@ -103,19 +104,19 @@ describe('emailService.sendMessage', function () {
     });
 
     const service = emailService(testCredentials);
-    const response = await service.sendMessage(message);
+    const response = await service.sendTemplatedMessage(validTemplatedMessage);
     expect(response).to.deep.equal(validResponse);
   });
 
   it('can return an error response for a bad request (HTTP 400)', async function () {
     const badRequestResponse = {
-      errors: [
-        {
-          code: 400,
-          title: 'Error Title',
-          details: 'Description of error',
-        },
-      ],
+      code: 400,
+      title: 'Invalid Request',
+      details: {
+        title: 'Missing values',
+        details: 'Length of data.message.recipients should be at least 1',
+        code: 400,
+      },
     };
 
     axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
@@ -125,8 +126,9 @@ describe('emailService.sendMessage', function () {
     });
 
     const service = emailService(testCredentials);
-    const response = await service.sendMessage(message);
-    expect(response).to.deep.equal(badRequestResponse);
+    await expect(service.sendTemplatedMessage(validTemplatedMessage)).to.be.rejectedWith(
+      badRequestResponse,
+    );
   });
 
   it('throws the API response as an error if no data is returned from the Paubox API', async function () {
@@ -143,25 +145,24 @@ describe('emailService.sendMessage', function () {
     });
 
     const service = emailService(testCredentials);
-    await expect(service.sendMessage(message)).to.be.rejectedWith(emptyResponse);
+    await expect(service.sendTemplatedMessage(validTemplatedMessage)).to.be.rejectedWith(
+      emptyResponse,
+    );
   });
 
-  it('throws an error if the Message object is a templated message', async function () {
-    const templatedMessage = TemplatedMessage({
+  it('throws an error if the Message object is not a templated message', async function () {
+    const nonTemplatedMessage = Message({
       from: 'reception@authorized_domain.com',
       reply_to: 'reception@authorized_domain.com',
       to: ['person@example.com'],
-      subject: 'Welcome!',
-      template_name: 'welcome_email',
-      template_values: {
-        firstName: 'John',
-        lastName: 'Doe',
-      },
+      subject: 'Test Email',
+      text_content: 'Hello world!',
+      html_content: '<html><body><h1>Hello world!</h1></body></html>',
     });
 
     const service = emailService(testCredentials);
-    await expect(service.sendMessage(templatedMessage)).to.be.rejectedWith(
-      'Message must be a Message object',
+    await expect(service.sendTemplatedMessage(nonTemplatedMessage)).to.be.rejectedWith(
+      'Message must be a TemplatedMessage object',
     );
   });
 });

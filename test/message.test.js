@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { expect } = chai;
-const Message = require('../src/data/message.js');
+const Message = require('../src/data/message');
 
 const message = Message({
   from: 'sender@authorized_domain.com',
@@ -83,5 +83,85 @@ describe('Message.toJSON', function () {
     };
 
     expect(message.toJSON()).to.deep.equal(expectedJSON);
+  });
+});
+
+describe('Message.validate', function () {
+  it('can construct a valid message', function () {
+    const validNonTemplatedOptions = {
+      from: 'sender@authorized_domain.com',
+      reply_to: 'sender@authorized_domain.com',
+      to: ['recipient@host.com'],
+      cc: null,
+      bcc: null,
+      subject: 'Welcome!',
+      text_content: 'Hello John Doe!',
+      html_content: '<html><body><h1>Hello John Doe!</h1></body></html>',
+    };
+
+    const message = Message(validNonTemplatedOptions);
+
+    expect(message.plaintext).to.equal('Hello John Doe!');
+    expect(message.htmltext).to.equal('<html><body><h1>Hello John Doe!</h1></body></html>');
+  });
+
+  it('throws an error if neither plaintext nor html text are provided', function () {
+    const invalidOptions = {
+      from: 'sender@authorized_domain.com',
+      reply_to: 'sender@authorized_domain.com',
+      to: ['recipient@host.com'],
+      cc: null,
+      bcc: null,
+      subject: 'Invalid Message',
+    };
+
+    expect(() => Message(invalidOptions)).to.throw(
+      'Message must have either plaintext or html text',
+    );
+  });
+
+  it('throws an error if the from address is not specified', function () {
+    const invalidOptions = {
+      reply_to: 'sender@authorized_domain.com',
+      to: ['recipient@host.com'],
+      subject: 'Invalid Message',
+      text_content: 'Invalid message',
+      html_content: '<html><body><h1>Invalid message</h1></body></html>',
+    };
+
+    expect(() => Message(invalidOptions)).to.throw('From address is required');
+  });
+
+  it('throws an error if the to addresses are not specified', function () {
+    const invalidOptions = {
+      from: 'sender@authorized_domain.com',
+      reply_to: 'sender@authorized_domain.com',
+      subject: 'Invalid Message',
+      text_content: 'Invalid message',
+      html_content: '<html><body><h1>Invalid message</h1></body></html>',
+    };
+
+    expect(() => Message(invalidOptions)).to.throw('One or more to addresses are required');
+  });
+
+  it('has sane defaults for optional fields', function () {
+    const validOptions = {
+      from: 'sender@authorized_domain.com',
+      to: ['recipient@host.com'],
+      text_content: 'Valid message',
+      html_content: '<html><body><h1>Valid message</h1></body></html>',
+    };
+
+    const message = Message(validOptions);
+
+    expect(message.replyTo).to.be.null;
+    expect(message.subject).to.be.null;
+    expect(message.cc).to.be.null;
+    expect(message.bcc).to.be.null;
+    expect(message.allowNonTLS).to.be.false;
+    expect(message.forceSecureNotification).to.be.false;
+    expect(message.attachments).to.be.null;
+    expect(message.listUnsubscribe).to.be.null;
+    expect(message.listUnsubscribePost).to.be.null;
   });
 });

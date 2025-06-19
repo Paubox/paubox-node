@@ -1,17 +1,15 @@
 'use strict';
 
 /**
- * Creates a new Message object for sending email messages through Paubox using the sendMessage and sendTemplatedMessage
- * methods.
- *
- * NOTE: For templated messages, use the TemplatedMessage object and the sendTemplatedMessage method.
+ * Creates a new TemplatedMessage object for sending email messages through Paubox using the sendTemplatedMessage
+ * method.
  *
  * @param {Object} options - Required. The message options
  *
  * @param {string} options.from - Required. The sender's email address. Should be from a domain that you have authorized.
  * @param {string[]} options.to - Required. Array of recipient email addresses
- * @param {string} options.text_content - Plain text content of the email.
- * @param {string} options.html_content - HTML content of the email.
+ * @param {string} options.template_name - Required. The name of the template to use.
+ * @param {Object} options.template_values - Required. The values to use for the template. Must be a valid JSON object.
  *
  * Optional fields:
  * @param {string} [options.subject] - Optional. The email subject. Defaults to null.
@@ -26,7 +24,7 @@
  *
  * @throws {Error} If validation fails
  */
-class Message {
+class TemplatedMessage {
   constructor(options) {
     this.from = options.from;
     this.to = options.to;
@@ -39,8 +37,8 @@ class Message {
     this.attachments = options.attachments || null;
     this.listUnsubscribe = options.list_unsubscribe || null;
     this.listUnsubscribePost = options.list_unsubscribe_post || null;
-    this.plaintext = options.text_content;
-    this.htmltext = options.html_content;
+    this.templateName = options.template_name;
+    this.templateValues = options.template_values;
 
     this.validate();
   }
@@ -50,7 +48,8 @@ class Message {
   // Messages must:
   //
   //   - have a from and to address
-  //   - have either or both text and html content
+  //   - have both a template name and template values
+  //   - have valid JSON for template values
   //
   validate() {
     if (!this.from) {
@@ -61,10 +60,12 @@ class Message {
       throw new Error('One or more to addresses are required');
     }
 
-    const hasContent = this.plaintext || this.htmltext;
+    if (!this.templateName) {
+      throw new Error('Template name is required');
+    }
 
-    if (!hasContent) {
-      throw new Error('Message must have either plaintext or html text');
+    if (typeof this.templateValues !== 'object') {
+      throw new Error('Template values must be a valid JSON object');
     }
   }
 
@@ -80,10 +81,6 @@ class Message {
         'reply-to': this.replyTo,
         'List-Unsubscribe': this.listUnsubscribe,
         'List-Unsubscribe-Post': this.listUnsubscribePost,
-      },
-      content: {
-        'text/plain': this.plaintext,
-        'text/html': this.safeBase64Encode(this.htmltext),
       },
       attachments: this.attachments,
       allowNonTLS: this.parseBool(this.allowNonTLS),
@@ -113,5 +110,5 @@ class Message {
 }
 
 module.exports = function (options) {
-  return new Message(options);
+  return new TemplatedMessage(options);
 };
