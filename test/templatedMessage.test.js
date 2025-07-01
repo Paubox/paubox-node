@@ -192,7 +192,9 @@ describe('TemplatedMessage.validate', function () {
       template_name: 'welcome_email',
     };
 
-    expect(() => TemplatedMessage(invalidOptions)).to.throw('Template values must be a valid JSON object');
+    expect(() => TemplatedMessage(invalidOptions)).to.throw(
+      'Template values must be a valid JSON object',
+    );
   });
 
   it('throws an error if the to addresses are not specified', function () {
@@ -207,7 +209,9 @@ describe('TemplatedMessage.validate', function () {
       },
     };
 
-    expect(() => TemplatedMessage(invalidOptions)).to.throw('One or more to addresses are required');
+    expect(() => TemplatedMessage(invalidOptions)).to.throw(
+      'One or more to addresses are required',
+    );
   });
 
   it('has sane defaults for optional fields', function () {
