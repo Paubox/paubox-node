@@ -3,8 +3,6 @@
 const apiHelper = require('./apiHelper.js');
 const Stream = require('stream');
 const FormData = require('form-data');
-const Message = require('../data/message.js');
-const TemplatedMessage = require('../data/templatedMessage.js');
 
 class emailService {
   constructor(config) {

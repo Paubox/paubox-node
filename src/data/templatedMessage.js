@@ -16,6 +16,7 @@
  * @param {string} [options.reply_to] - Reply-to email address. Defaults to null.
  * @param {string[]} [options.cc] - Array of CC recipient email addresses. Defaults to null.
  * @param {string[]} [options.bcc] - Array of BCC recipient email addresses. Defaults to null.
+ * @param {Object[]} [options.custom_headers={}] - JSON object of custom headers in the format { headerName: headerValue }. Defaults to empty object.
  * @param {boolean} [options.allowNonTLS=false] - Whether to allow non-TLS message delivery. Defaults to false.
  * @param {boolean} [options.forceSecureNotification=false] - Whether to force secure notifications. Defaults to false.
  * @param {Array<Object>} [options.attachments] - Array of attachment objects. Defaults to null.
@@ -32,6 +33,7 @@ class TemplatedMessage {
     this.cc = options.cc || null;
     this.bcc = options.bcc || null;
     this.subject = options.subject || null;
+    this.customHeaders = options.custom_headers || {};
     this.allowNonTLS = options.allowNonTLS || false;
     this.forceSecureNotification = options.forceSecureNotification || false;
     this.attachments = options.attachments || null;
@@ -70,6 +72,10 @@ class TemplatedMessage {
   }
 
   // Convert Message object to JSON object in Paubox API format
+  //
+  // NOTE: `templateName` and `templateValues` are not included in the JSON object here, they are included in the
+  //       request body when sending the message (see `emailService.sendTemplatedMessage`)
+  //
   toJSON() {
     return {
       recipients: this.to,
@@ -81,6 +87,7 @@ class TemplatedMessage {
         'reply-to': this.replyTo,
         'List-Unsubscribe': this.listUnsubscribe,
         'List-Unsubscribe-Post': this.listUnsubscribePost,
+        ...this.customHeaders,
       },
       attachments: this.attachments,
       allowNonTLS: this.parseBool(this.allowNonTLS),
