@@ -22,7 +22,8 @@ The API wrapper allows you to construct and send messages.
     - [Allowing non-TLS message delivery](#allowing-non-tls-message-delivery)
     - [Forcing Secure Notifications](#forcing-secure-notifications)
     - [Adding the List-Unsubscribe Header](#adding-the-list-unsubscribe-header)
-    - [Adding Attachments and Additional Headers](#adding-attachments-and-additional-headers)
+    - [Adding Attachments](#adding-attachments)
+    - [Adding Custom Headers](#adding-custom-headers)
   - [Send Bulk Messages](#send-bulk-messages)
   - [Get Email Disposition](#get-email-disposition)
   - [Dynamic Templates](#dynamic-templates)
@@ -194,7 +195,7 @@ var options = {
 var message = pbMail.message(options);
 ```
 
-#### Adding Attachments and Additional Headers
+#### Adding Attachments
 
 ```javascript
 'use strict';
@@ -226,6 +227,44 @@ var options = {
 var message = pbMail.message(options);
 ```
 
+#### Adding Custom Headers
+
+You can add custom headers to a message by passing a `custom_headers` object to the message options.
+
+As mentioned in the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages/#send-message), custom
+headers must be prepended with `x-`.
+
+```javascript
+'use strict';
+
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.emailService();
+
+var options = {
+  from: 'sender@domain.com',
+  to: ['recipient@example.com'],
+  subject: 'Testing custom headers',
+  custom_headers: {
+    'X-Custom-Header-1': 'Value 1',
+    'X-Custom-Header-2': 'Value 2',
+  },
+  text_content: 'Hello World!',
+  html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
+};
+
+var message = pbMail.message(options);
+
+service
+  .sendMessage(message)
+  .then((response) => {
+    console.log('Send Message method Response: ' + JSON.stringify(response));
+  })
+  .catch((error) => {
+    console.log('Error in Send Message method: ' + JSON.stringify(error));
+  });
+```
+
 ### Send Bulk Messages
 
 Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages).
@@ -253,6 +292,10 @@ var messageAlice = pbMail.message({
 var messageBob = pbMail.message({
   from: 'sender@domain.com',
   to: ['bob@example.com'],
+  custom_headers: { // Custom headers are also supported for bulk messages, and can differ per message
+    'X-Custom-Header-1': 'Value 1',
+    'X-Custom-Header-2': 'Value 2',
+  },
   subject: 'Hello Bob!',
   text_content: 'Hello Bob!',
   html_content: '<html><head></head><body><h1>Hello Bob!</h1></body></html>',
@@ -268,7 +311,8 @@ service
   });
 ```
 
-The same options as the [sendMessage](#send-message) method are available for the sendBulkMessages method.
+The same options as the [sendMessage](#send-message) method are available for the sendBulkMessages method, including
+custom headers.
 
 ### Get Email Disposition
 
@@ -476,6 +520,8 @@ service
     console.log('Error in Send Templated Message method: ' + JSON.stringify(error));
   });
 ```
+
+**Note**: Custom headers are currently not supported for templated messages.
 
 ## Supported Node Versions
 
