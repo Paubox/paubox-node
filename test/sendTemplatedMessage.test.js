@@ -25,6 +25,10 @@ describe('emailService.sendTemplatedMessage', function () {
     cc: ['accounts@authorized_domain.com'],
     bcc: null,
     subject: 'Welcome!',
+    custom_headers: {
+      'X-Custom-Header-1': 'value 1',
+      'X-Custom-Header-2': 'value 2',
+    },
     allowNonTLS: false,
     forceSecureNotification: false,
     template_name: 'welcome_email',
@@ -43,7 +47,7 @@ describe('emailService.sendTemplatedMessage', function () {
     }
   });
 
-  it('posts the correct JSON payload to the correct Paubox API endpoint for a templated message', async function () {
+  it('posts the correct JSON payload (including custom headers) to the correct Paubox API endpoint for a templated message', async function () {
     const expectedPayload = {
       data: {
         template_name: 'welcome_email',
@@ -61,6 +65,8 @@ describe('emailService.sendTemplatedMessage', function () {
             'reply-to': 'reception@authorized_domain.com',
             'List-Unsubscribe': null,
             'List-Unsubscribe-Post': null,
+            'X-Custom-Header-1': 'value 1',
+            'X-Custom-Header-2': 'value 2',
           },
           allowNonTLS: false,
           forceSecureNotification: false,
