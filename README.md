@@ -241,6 +241,8 @@ headers must be prepended with `X-` (or `x-`). Custom headers should be passed a
 }
 ```
 
+Full example:
+
 ```javascript
 'use strict';
 
