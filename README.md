@@ -232,7 +232,14 @@ var message = pbMail.message(options);
 You can add custom headers to a message by passing a `custom_headers` object to the message options.
 
 As mentioned in the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages/#send-message), custom
-headers must be prepended with `x-`.
+headers must be prepended with `X-` (or `x-`). Custom headers should be passed as a JSON object as a key-value pair. Example:
+
+```json
+{
+  "X-My-First-Header": "My First Value",
+  "X-My-Second-Header": "My Second Value"
+}
+```
 
 ```javascript
 'use strict';
@@ -246,8 +253,8 @@ var options = {
   to: ['recipient@example.com'],
   subject: 'Testing custom headers',
   custom_headers: {
-    'X-Custom-Header-1': 'Value 1',
-    'X-Custom-Header-2': 'Value 2',
+    "X-My-First-Header": "My First Value",
+    "X-My-Second-Header": "My Second Value",
   },
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
