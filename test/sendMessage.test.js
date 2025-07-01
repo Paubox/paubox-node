@@ -71,9 +71,7 @@ describe('emailService.sendMessage', function () {
       return Promise.resolve({
         data: {
           sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
-          customHeaders: {
-            'X-Custom-Header': 'value',
-          },
+          customHeaders: {},
           data: 'Service OK',
         },
       });
@@ -90,9 +88,7 @@ describe('emailService.sendMessage', function () {
   it('can return a successful response', async function () {
     const validResponse = {
       sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
-      customHeaders: {
-        'X-Custom-Header': 'value',
-      },
+      customHeaders: {},
       data: 'Service OK',
     };
 
@@ -163,5 +159,77 @@ describe('emailService.sendMessage', function () {
     await expect(service.sendMessage(templatedMessage)).to.be.rejectedWith(
       'Message must be a Message object',
     );
+  });
+
+  it('can send a message with custom headers', async function () {
+    const messageWithCustomHeaders = Message({
+      from: 'reception@authorized_domain.com',
+      reply_to: 'reception@authorized_domain.com',
+      to: ['person@example.com'],
+      cc: ['accounts@authorized_domain.com'],
+      bcc: null,
+      subject: 'Test Email',
+      custom_headers: {
+        'X-Custom-Header-1': 'value 1',
+        'X-Custom-Header-2': 'value 2',
+      },
+      allowNonTLS: false,
+      forceSecureNotification: false,
+      text_content: 'Hello world!',
+      html_content: '<html><body><h1>Hello world!</h1></body></html>',
+      attachments: null,
+      list_unsubscribe: null,
+      list_unsubscribe_post: null,
+    });
+
+    const expectedPayload = {
+      data: {
+        message: {
+          recipients: ['person@example.com'],
+          cc: ['accounts@authorized_domain.com'],
+          bcc: null,
+          headers: {
+            subject: 'Test Email',
+            from: 'reception@authorized_domain.com',
+            'reply-to': 'reception@authorized_domain.com',
+            'List-Unsubscribe': null,
+            'List-Unsubscribe-Post': null,
+            'X-Custom-Header-1': 'value 1',
+            'X-Custom-Header-2': 'value 2',
+          },
+          allowNonTLS: false,
+          forceSecureNotification: false,
+          content: {
+            'text/plain': 'Hello world!',
+            'text/html': Buffer.from('<html><body><h1>Hello world!</h1></body></html>').toString(
+              'base64',
+            ),
+          },
+          attachments: null,
+        },
+      },
+    };
+
+    let capturedConfig;
+    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
+      capturedConfig = config;
+      return Promise.resolve({
+        data: {
+          sourceTrackingId: '3d38ab13-0af8-4028-bd45-52e882e0d584',
+          customHeaders: {
+            'X-Custom-Header-1': 'value 1',
+            'X-Custom-Header-2': 'value 2',
+          },
+          data: 'Service OK',
+        },
+      });
+    });
+
+    const service = emailService(testCredentials);
+    await service.sendMessage(messageWithCustomHeaders);
+
+    expect(capturedConfig.method).to.equal('POST');
+    expect(capturedConfig.url).to.equal('/messages');
+    expect(capturedConfig.data).to.deep.equal(expectedPayload);
   });
 });
