@@ -1,8 +1,8 @@
 const chai = require('chai');
 const { expect } = chai;
-const Message = require('../src/data/message');
+const TemplatedMessage = require('../src/data/templatedMessage');
 
-const message = Message({
+const templatedMessage = TemplatedMessage({
   from: 'sender@authorized_domain.com',
   reply_to: 'Sender Name <sender@authorized_domain.com>',
   to: ['recipient@host.com', 'Recipient Name <recipient2@host.com>'],
@@ -12,8 +12,11 @@ const message = Message({
   subject: 'Test Email',
   allowNonTLS: false,
   forceSecureNotification: false,
-  text_content: 'Hello world!',
-  html_content: '<html><body><h1>Hello world!</h1></body></html>',
+  template_name: 'welcome_email',
+  template_values: {
+    firstName: 'John',
+    lastName: 'Doe',
+  },
   attachments: [
     {
       fileName: 'hello_world.txt',
@@ -25,35 +28,35 @@ const message = Message({
   list_unsubscribe_post: null,
 });
 
-describe('Message.parseBool', function () {
+describe('TemplatedMessage.parseBool', function () {
   it('can return a boolean value for boolean values', function () {
-    expect(message.parseBool(true)).to.equal(true);
-    expect(message.parseBool(false)).to.equal(false);
+    expect(templatedMessage.parseBool(true)).to.equal(true);
+    expect(templatedMessage.parseBool(false)).to.equal(false);
   });
 
   it('can return a boolean value for string values', function () {
-    expect(message.parseBool('true')).to.equal(true);
-    expect(message.parseBool('TRUE')).to.equal(true);
-    expect(message.parseBool('True')).to.equal(true);
-    expect(message.parseBool('  True   ')).to.equal(true);
-    expect(message.parseBool('     true   ')).to.equal(true);
-    expect(message.parseBool('false')).to.equal(false);
-    expect(message.parseBool('FALSE')).to.equal(false);
-    expect(message.parseBool('False')).to.equal(false);
-    expect(message.parseBool('  False   ')).to.equal(false);
-    expect(message.parseBool('     false   ')).to.equal(false);
+    expect(templatedMessage.parseBool('true')).to.equal(true);
+    expect(templatedMessage.parseBool('TRUE')).to.equal(true);
+    expect(templatedMessage.parseBool('True')).to.equal(true);
+    expect(templatedMessage.parseBool('  True   ')).to.equal(true);
+    expect(templatedMessage.parseBool('     true   ')).to.equal(true);
+    expect(templatedMessage.parseBool('false')).to.equal(false);
+    expect(templatedMessage.parseBool('FALSE')).to.equal(false);
+    expect(templatedMessage.parseBool('False')).to.equal(false);
+    expect(templatedMessage.parseBool('  False   ')).to.equal(false);
+    expect(templatedMessage.parseBool('     false   ')).to.equal(false);
   });
 
   it('can return a boolean value for other values', function () {
-    expect(message.parseBool('')).to.equal(false);
-    expect(message.parseBool(null)).to.equal(false);
-    expect(message.parseBool(undefined)).to.equal(false);
-    expect(message.parseBool(0)).to.equal(false);
-    expect(message.parseBool('Something else')).to.equal(false);
+    expect(templatedMessage.parseBool('')).to.equal(false);
+    expect(templatedMessage.parseBool(null)).to.equal(false);
+    expect(templatedMessage.parseBool(undefined)).to.equal(false);
+    expect(templatedMessage.parseBool(0)).to.equal(false);
+    expect(templatedMessage.parseBool('Something else')).to.equal(false);
   });
 });
 
-describe('Message.toJSON', function () {
+describe('TemplatedMessage.toJSON', function () {
   it('returns the correct JSON object', function () {
     const expectedJSON = {
       recipients: ['recipient@host.com', 'Recipient Name <recipient2@host.com>'],
@@ -68,12 +71,6 @@ describe('Message.toJSON', function () {
       },
       allowNonTLS: false,
       forceSecureNotification: false,
-      content: {
-        'text/plain': 'Hello world!',
-        'text/html': Buffer.from('<html><body><h1>Hello world!</h1></body></html>').toString(
-          'base64',
-        ),
-      },
       attachments: [
         {
           fileName: 'hello_world.txt',
@@ -83,25 +80,28 @@ describe('Message.toJSON', function () {
       ],
     };
 
-    expect(message.toJSON()).to.deep.equal(expectedJSON);
+    expect(templatedMessage.toJSON()).to.deep.equal(expectedJSON);
   });
 
   it('returns the correct JSON object with custom headers', function () {
-    const messageWithCustomHeaders = Message({
+    const templatedMessageWithCustomHeaders = TemplatedMessage({
       from: 'sender@authorized_domain.com',
       reply_to: 'Sender Name <sender@authorized_domain.com>',
       to: ['recipient@host.com', 'Recipient Name <recipient2@host.com>'],
       cc: ['accounts@authorized_domain.com'],
       bcc: ['recipient3@host.com', 'Recipient Name <recipient4@host.com>'],
       custom_headers: {
-        'X-Custom-Header-1': 'Custom Header Value 1',
-        'X-Custom-Header-2': 'Custom Header Value 2',
+        'X-Custom-Header-1': 'Custom Value 1',
+        'X-Custom-Header-2': 'Custom Value 2',
       },
       subject: 'Test Email',
       allowNonTLS: false,
       forceSecureNotification: false,
-      text_content: 'Hello world!',
-      html_content: '<html><body><h1>Hello world!</h1></body></html>',
+      template_name: 'welcome_email',
+      template_values: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
       attachments: [
         {
           fileName: 'hello_world.txt',
@@ -123,17 +123,11 @@ describe('Message.toJSON', function () {
         'reply-to': 'Sender Name <sender@authorized_domain.com>',
         'List-Unsubscribe': null,
         'List-Unsubscribe-Post': null,
-        'X-Custom-Header-1': 'Custom Header Value 1',
-        'X-Custom-Header-2': 'Custom Header Value 2',
+        'X-Custom-Header-1': 'Custom Value 1',
+        'X-Custom-Header-2': 'Custom Value 2',
       },
       allowNonTLS: false,
       forceSecureNotification: false,
-      content: {
-        'text/plain': 'Hello world!',
-        'text/html': Buffer.from('<html><body><h1>Hello world!</h1></body></html>').toString(
-          'base64',
-        ),
-      },
       attachments: [
         {
           fileName: 'hello_world.txt',
@@ -143,12 +137,12 @@ describe('Message.toJSON', function () {
       ],
     };
 
-    expect(messageWithCustomHeaders.toJSON()).to.deep.equal(expectedJSON);
+    expect(templatedMessageWithCustomHeaders.toJSON()).to.deep.equal(expectedJSON);
   });
 });
 
-describe('Message.validate', function () {
-  it('can construct a valid message', function () {
+describe('TemplatedMessage.validate', function () {
+  it('can construct a valid templated message', function () {
     const validOptions = {
       from: 'sender@authorized_domain.com',
       reply_to: 'sender@authorized_domain.com',
@@ -156,17 +150,23 @@ describe('Message.validate', function () {
       cc: null,
       bcc: null,
       subject: 'Welcome!',
-      text_content: 'Hello John Doe!',
-      html_content: '<html><body><h1>Hello John Doe!</h1></body></html>',
+      template_name: 'welcome_email',
+      template_values: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
     };
 
-    const message = Message(validOptions);
+    const message = TemplatedMessage(validOptions);
 
-    expect(message.plaintext).to.equal('Hello John Doe!');
-    expect(message.htmltext).to.equal('<html><body><h1>Hello John Doe!</h1></body></html>');
+    expect(message.templateName).to.equal('welcome_email');
+    expect(message.templateValues).to.deep.equal({
+      firstName: 'John',
+      lastName: 'Doe',
+    });
   });
 
-  it('throws an error if neither plaintext nor html text are provided', function () {
+  it('throws an error if the template name is not specified', function () {
     const invalidOptions = {
       from: 'sender@authorized_domain.com',
       reply_to: 'sender@authorized_domain.com',
@@ -174,23 +174,27 @@ describe('Message.validate', function () {
       cc: null,
       bcc: null,
       subject: 'Invalid Message',
+      template_values: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
     };
 
-    expect(() => Message(invalidOptions)).to.throw(
-      'Message must have either plaintext or html text',
-    );
+    expect(() => TemplatedMessage(invalidOptions)).to.throw('Template name is required');
   });
 
-  it('throws an error if the from address is not specified', function () {
+  it('throws an error if the template values are not specified', function () {
     const invalidOptions = {
+      from: 'sender@authorized_domain.com',
       reply_to: 'sender@authorized_domain.com',
       to: ['recipient@host.com'],
       subject: 'Invalid Message',
-      text_content: 'Invalid message',
-      html_content: '<html><body><h1>Invalid message</h1></body></html>',
+      template_name: 'welcome_email',
     };
 
-    expect(() => Message(invalidOptions)).to.throw('From address is required');
+    expect(() => TemplatedMessage(invalidOptions)).to.throw(
+      'Template values must be a valid JSON object',
+    );
   });
 
   it('throws an error if the to addresses are not specified', function () {
@@ -198,32 +202,40 @@ describe('Message.validate', function () {
       from: 'sender@authorized_domain.com',
       reply_to: 'sender@authorized_domain.com',
       subject: 'Invalid Message',
-      text_content: 'Invalid message',
-      html_content: '<html><body><h1>Invalid message</h1></body></html>',
+      template_name: 'welcome_email',
+      template_values: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
     };
 
-    expect(() => Message(invalidOptions)).to.throw('One or more to addresses are required');
+    expect(() => TemplatedMessage(invalidOptions)).to.throw(
+      'One or more to addresses are required',
+    );
   });
 
   it('has sane defaults for optional fields', function () {
     const minimalOptions = {
       from: 'sender@authorized_domain.com',
       to: ['recipient@host.com'],
-      text_content: 'Valid message',
-      html_content: '<html><body><h1>Valid message</h1></body></html>',
+      template_name: 'welcome_email',
+      template_values: {
+        firstName: 'John',
+        lastName: 'Doe',
+      },
     };
 
-    const message = Message(minimalOptions);
+    const templatedMessage = TemplatedMessage(minimalOptions);
 
-    expect(message.replyTo).to.be.null;
-    expect(message.subject).to.be.null;
-    expect(message.cc).to.be.null;
-    expect(message.bcc).to.be.null;
-    expect(message.customHeaders).to.deep.equal({});
-    expect(message.allowNonTLS).to.be.false;
-    expect(message.forceSecureNotification).to.be.false;
-    expect(message.attachments).to.be.null;
-    expect(message.listUnsubscribe).to.be.null;
-    expect(message.listUnsubscribePost).to.be.null;
+    expect(templatedMessage.replyTo).to.be.null;
+    expect(templatedMessage.subject).to.be.null;
+    expect(templatedMessage.cc).to.be.null;
+    expect(templatedMessage.bcc).to.be.null;
+    expect(templatedMessage.customHeaders).to.deep.equal({});
+    expect(templatedMessage.allowNonTLS).to.be.false;
+    expect(templatedMessage.forceSecureNotification).to.be.false;
+    expect(templatedMessage.attachments).to.be.null;
+    expect(templatedMessage.listUnsubscribe).to.be.null;
+    expect(templatedMessage.listUnsubscribePost).to.be.null;
   });
 });

@@ -25,6 +25,9 @@ describe('emailService.sendBulkMessages', function () {
     cc: ['accounts@authorized_domain.com'],
     bcc: null,
     subject: 'Hi Alice!',
+    custom_headers: {
+      'X-Custom-Header': 'value alice',
+    },
     allowNonTLS: false,
     forceSecureNotification: false,
     text_content: 'Hi Alice!',
@@ -47,6 +50,10 @@ describe('emailService.sendBulkMessages', function () {
     cc: ['accounts@authorized_domain.com'],
     bcc: null,
     subject: 'Hi Bob!',
+    custom_headers: {
+      'X-Custom-Header-1': 'value bob 1',
+      'X-Custom-Header-2': 'value bob 2',
+    },
     allowNonTLS: false,
     forceSecureNotification: false,
     text_content: 'Hi Bob!',
@@ -66,7 +73,7 @@ describe('emailService.sendBulkMessages', function () {
     axiosStub.restore();
   });
 
-  it('posts the correct JSON payload to the correct Paubox API endpoint', async function () {
+  it('posts the correct JSON payload (including custom headers) to the correct Paubox API endpoint', async function () {
     const expectedPayload = {
       data: {
         messages: [
@@ -80,6 +87,7 @@ describe('emailService.sendBulkMessages', function () {
               'reply-to': 'Reception <reception@authorized_domain.com>',
               'List-Unsubscribe': null,
               'List-Unsubscribe-Post': null,
+              'X-Custom-Header': 'value alice',
             },
             allowNonTLS: false,
             forceSecureNotification: false,
@@ -107,6 +115,8 @@ describe('emailService.sendBulkMessages', function () {
               'reply-to': 'Reception <reception@authorized_domain.com>',
               'List-Unsubscribe': null,
               'List-Unsubscribe-Post': null,
+              'X-Custom-Header-1': 'value bob 1',
+              'X-Custom-Header-2': 'value bob 2',
             },
             allowNonTLS: false,
             forceSecureNotification: false,

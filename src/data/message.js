@@ -1,5 +1,7 @@
 'use strict';
 
+const BaseMessage = require('./baseMessage');
+
 /**
  * Creates a new Message object for sending email messages through Paubox using the sendMessage and sendTemplatedMessage
  * methods.
@@ -18,6 +20,7 @@
  * @param {string} [options.reply_to] - Reply-to email address. Defaults to null.
  * @param {string[]} [options.cc] - Array of CC recipient email addresses. Defaults to null.
  * @param {string[]} [options.bcc] - Array of BCC recipient email addresses. Defaults to null.
+ * @param {Object[]} [options.custom_headers={}] - JSON object of custom headers in the format { headerName: headerValue }. Defaults to empty object.
  * @param {boolean} [options.allowNonTLS=false] - Whether to allow non-TLS message delivery. Defaults to false.
  * @param {boolean} [options.forceSecureNotification=false] - Whether to force secure notifications. Defaults to false.
  * @param {Array<Object>} [options.attachments] - Array of attachment objects. Defaults to null.
@@ -26,14 +29,17 @@
  *
  * @throws {Error} If validation fails
  */
-class Message {
+class Message extends BaseMessage {
   constructor(options) {
+    super();
+
     this.from = options.from;
     this.to = options.to;
     this.replyTo = options.reply_to || null;
     this.cc = options.cc || null;
     this.bcc = options.bcc || null;
     this.subject = options.subject || null;
+    this.customHeaders = options.custom_headers || {};
     this.allowNonTLS = options.allowNonTLS || false;
     this.forceSecureNotification = options.forceSecureNotification || false;
     this.attachments = options.attachments || null;
@@ -80,6 +86,7 @@ class Message {
         'reply-to': this.replyTo,
         'List-Unsubscribe': this.listUnsubscribe,
         'List-Unsubscribe-Post': this.listUnsubscribePost,
+        ...this.customHeaders,
       },
       content: {
         'text/plain': this.plaintext,
@@ -89,26 +96,6 @@ class Message {
       allowNonTLS: this.parseBool(this.allowNonTLS),
       forceSecureNotification: this.parseBool(this.forceSecureNotification),
     };
-  }
-
-  // Safely base64 encodes a string, handling null and empty strings
-  safeBase64Encode(text) {
-    if (text === null || text === undefined || text === '') {
-      return null;
-    } else {
-      return Buffer.from(text).toString('base64');
-    }
-  }
-
-  // Parses an input to a boolean value, always returns a boolean value.
-  parseBool(value) {
-    if (value === null || value === undefined || value === '') {
-      return false;
-    }
-    if (typeof value === 'boolean') {
-      return value;
-    }
-    return String(value).trim().toLowerCase() === 'true';
   }
 }
 
