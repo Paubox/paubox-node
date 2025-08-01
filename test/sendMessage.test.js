@@ -7,7 +7,6 @@ const axios = require('axios');
 
 const emailService = require('../src/service/emailService.js');
 const Message = require('../src/data/message.js');
-const TemplatedMessage = require('../src/data/templatedMessage.js');
 
 chai.use(chaiAsPromised);
 
@@ -142,23 +141,18 @@ describe('emailService.sendMessage', function () {
     await expect(service.sendMessage(message)).to.be.rejectedWith(emptyResponse);
   });
 
-  it('throws an error if the Message object is a templated message', async function () {
-    const templatedMessage = TemplatedMessage({
-      from: 'reception@authorized_domain.com',
-      reply_to: 'reception@authorized_domain.com',
-      to: ['person@example.com'],
-      subject: 'Welcome!',
-      template_name: 'welcome_email',
-      template_values: {
-        firstName: 'John',
-        lastName: 'Doe',
-      },
-    });
-
-    const service = emailService(testCredentials);
-    await expect(service.sendMessage(templatedMessage)).to.be.rejectedWith(
-      'Message must be a Message object',
-    );
+  it('throws an error if the Message object does not have required Message properties (duck typing)', function () {
+    // Remove text_content and html_content to trigger validation error
+    expect(() =>
+      Message({
+        from: 'reception@authorized_domain.com',
+        reply_to: 'reception@authorized_domain.com',
+        to: ['person@example.com'],
+        subject: 'Welcome!',
+        // text_content: undefined,
+        // html_content: undefined,
+      }),
+    ).to.throw('Message must have either plaintext or html text');
   });
 
   it('can send a message with custom headers', async function () {

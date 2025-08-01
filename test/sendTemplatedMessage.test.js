@@ -168,7 +168,7 @@ describe('emailService.sendTemplatedMessage', function () {
 
     const service = emailService(testCredentials);
     await expect(service.sendTemplatedMessage(nonTemplatedMessage)).to.be.rejectedWith(
-      'Message must be a TemplatedMessage object',
+      'Message must implement toJSON(), have a templateName (string), and templateValues (object)',
     );
   });
 });
