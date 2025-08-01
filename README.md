@@ -255,8 +255,8 @@ var options = {
   to: ['recipient@example.com'],
   subject: 'Testing custom headers',
   custom_headers: {
-    "X-My-First-Header": "My First Value",
-    "X-My-Second-Header": "My Second Value",
+    'X-My-First-Header': 'My First Value',
+    'X-My-Second-Header': 'My Second Value',
   },
   text_content: 'Hello World!',
   html_content: '<html><head></head><body><h1>Hello World!</h1></body></html>',
@@ -301,7 +301,8 @@ var messageAlice = pbMail.message({
 var messageBob = pbMail.message({
   from: 'sender@domain.com',
   to: ['bob@example.com'],
-  custom_headers: { // Custom headers are also supported for bulk messages, and can differ per message
+  custom_headers: {
+    // Custom headers are also supported for bulk messages, and can differ per message
     'X-Custom-Header-1': 'Value 1',
     'X-Custom-Header-2': 'Value 2',
   },

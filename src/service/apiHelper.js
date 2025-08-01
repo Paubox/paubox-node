@@ -27,11 +27,9 @@ class apiHelper {
       data: reqBody,
       transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
       headers: headers,
-    })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => this.handleError(error));
+    }).then((response) => {
+      return response.data;
+    });
   }
 
   patch(baseUrl, apiUrl, reqBody) {
@@ -52,11 +50,9 @@ class apiHelper {
       data: reqBody,
       transformRequest: reqBody instanceof FormData ? [(data) => data] : undefined,
       headers: headers,
-    })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => this.handleError(error));
+    }).then((response) => {
+      return response.data;
+    });
   }
 
   get(baseUrl, apiUrl) {
@@ -67,11 +63,9 @@ class apiHelper {
       headers: headers,
     });
 
-    return axiosInstance({ method: 'GET', url: apiUrl, data: null })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => this.handleError(error));
+    return axiosInstance({ method: 'GET', url: apiUrl, data: null }).then((response) => {
+      return response.data;
+    });
   }
 
   delete(baseUrl, apiUrl) {
@@ -82,29 +76,9 @@ class apiHelper {
       headers: headers,
     });
 
-    return axiosInstance({ method: 'DELETE', url: apiUrl, data: null })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => this.handleError(error));
-  }
-
-  // Private method to handle errors
-  handleError(error) {
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      if (error.response.status == 500) return error.message;
-      else return error.response.data;
-    } else if (error.request) {
-      // The request was made but no response was received
-      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-      // http.ClientRequest in node.js
-      return error.request;
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      return error.message;
-    }
+    return axiosInstance({ method: 'DELETE', url: apiUrl, data: null }).then((response) => {
+      return response.data;
+    });
   }
 }
 
