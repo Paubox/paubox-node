@@ -38,7 +38,7 @@ The API wrapper allows you to construct and send messages.
 - [License](#license)
 - [Copyright](#copyright)
 
-Further documentation can be found at [docs.paubox.com](https://docs.paubox.com/docs/paubox_email_api/introduction/).
+Further documentation can be found at [docs.paubox.com](https://docs.paubox.com/welcome).
 
 ## Installation
 
@@ -86,7 +86,7 @@ emailService.
 
 ### Send Message
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-message).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/messages).
 
 Please also see [Sending a Dynamically Templated Message](#send-a-dynamically-templated-message) for sending a message
 using a dynamic template.
@@ -170,7 +170,7 @@ var message = pbMail.message(options);
 
 #### Adding the List-Unsubscribe Header
 
-The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explanation and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/docs/paubox_email_api/messages/#list-unsubscribe)
+The List-Unsubscribe header provides the recipient with the option to easily opt-out of receiving any future communications. A more detailed explanation and usage guide for this header can be found at our [docs here.](https://docs.paubox.com/email-api/messages)
 
 This header can be used by adding the `list_unsubscribe: '<Email Unsubscribe Address>, <Web Unsubscribe URL'` and `list_unsubscribe_post: 'List-Unsubscribe=One-Click'` key-value pairs to the options object as follows:
 
@@ -231,7 +231,7 @@ var message = pbMail.message(options);
 
 You can add custom headers to a message by passing a `custom_headers` object to the message options.
 
-As mentioned in the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages/#send-message), custom
+As mentioned in the [API Documentation](https://docs.paubox.com/email-api/messages), custom
 headers must be prepended with `X-` (or `x-`). Custom headers should be passed as a JSON object as a key-value pair. Example:
 
 ```json
@@ -276,7 +276,7 @@ service
 
 ### Send Bulk Messages
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/bulk-messages).
 
 > We recommend batches of 50 (fifty) or less. Source tracking ids are returned in order messages appear in the messages
 > array.
@@ -326,7 +326,7 @@ custom headers.
 
 ### Get Email Disposition
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/messages#get-email-disposition).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/message-receipt).
 
 The SOURCE_TRACKING_ID of a message is returned in the response of the sendMessage method. To check the status for any email, use its source tracking id and call the getEmailDisposition method of emailService:
 
@@ -345,7 +345,7 @@ service.getEmailDisposition('SOURCE_TRACKING_ID').then(function (response) {
 
 #### Create Dynamic Template
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#create-a-dynamic-template).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/dynamic-templates/create).
 
 You can create a dynamic template by passing in a string, a file Buffer, or file Stream.
 
@@ -386,7 +386,7 @@ app.post('/api/create-dynamic-template', upload.single('templateFile'), async (r
 
 #### Update Dynamic Template
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#update-a-dynamic-template).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/dynamic-templates/update).
 
 You can update a dynamic template's content and/or name:
 
@@ -438,7 +438,7 @@ app.patch(
 
 #### Delete Dynamic Template
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#delete-a-dynamic-template).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/dynamic-templates/delete).
 
 ```javascript
 'use strict';
@@ -455,7 +455,7 @@ service.deleteDynamicTemplate(templateId).then(function (response) {
 
 #### Get Dynamic Template
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-one-of-your-orgs-dynamic-templates).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/dynamic-templates/get).
 
 ```javascript
 'use strict';
@@ -472,7 +472,7 @@ service.getDynamicTemplate(templateId).then(function (response) {
 
 #### List Dynamic Templates
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/dynamic-templates).
 
 ```javascript
 'use strict';
@@ -487,7 +487,7 @@ service.listDynamicTemplates().then(function (response) {
 
 #### Send a Dynamically Templated Message
 
-Please also see the [API Documentation](https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message).
+Please also see the [API Documentation](https://docs.paubox.com/email-api/templated-messages).
 
 For example, assume you have a dynamic template named `welcome_email` with the following content:
 

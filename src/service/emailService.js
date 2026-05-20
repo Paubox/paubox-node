@@ -35,7 +35,7 @@ class emailService {
 
   // Get the disposition of an email message with a given sourceTrackingId
   //
-  // https://docs.paubox.com/docs/paubox_email_api/messages#get-email-disposition
+  // https://docs.paubox.com/email-api/message-receipt
   //
   // sourceTrackingId is the sourceTrackingId of the message which is returned from the sendMessage or sendBulkMessages
   // methods.
@@ -64,7 +64,7 @@ class emailService {
 
   // Send an email message
   //
-  // https://docs.paubox.com/docs/paubox_email_api/messages#send-message
+  // https://docs.paubox.com/email-api/messages
   //
   // msg is a Message object
   //
@@ -93,7 +93,7 @@ class emailService {
 
   // Send a templated email message
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#send-a-dynamically-templated-message
+  // https://docs.paubox.com/email-api/templated-messages
   //
   // msg is a TemplatedMessage object
   //
@@ -132,7 +132,7 @@ class emailService {
 
   // Send multiple email messages
   //
-  // https://docs.paubox.com/docs/paubox_email_api/messages#send-bulk-messages
+  // https://docs.paubox.com/email-api/bulk-messages
   //
   // messages is an array of Message objects
   //
@@ -156,7 +156,7 @@ class emailService {
 
   // Create a dynamic template
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates/#create-a-dynamic-template
+  // https://docs.paubox.com/email-api/dynamic-templates/create
   //
   // templateName is the name of the template
   //
@@ -186,7 +186,7 @@ class emailService {
 
   // Update a dynamic template
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#update-a-dynamic-template
+  // https://docs.paubox.com/email-api/dynamic-templates/update
   //
   // templateId is the id of the template as returned from the listDynamicTemplates method
   //
@@ -230,7 +230,7 @@ class emailService {
 
   // List dynamic templates
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-all-your-orgs-dynamic-templates
+  // https://docs.paubox.com/email-api/dynamic-templates
   //
   // returns a promise that resolves to the response from the API
   //
@@ -246,7 +246,7 @@ class emailService {
 
   // Get a dynamic template
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#view-one-of-your-orgs-dynamic-templates
+  // https://docs.paubox.com/email-api/dynamic-templates/get
   //
   // templateId is the id of the template as returned from the listDynamicTemplates method
   //
@@ -274,7 +274,7 @@ class emailService {
 
   // Delete a dynamic template
   //
-  // https://docs.paubox.com/docs/paubox_email_api/dynamic_templates#delete-a-dynamic-template
+  // https://docs.paubox.com/email-api/dynamic-templates/delete
   //
   // templateId is the id of the template as returned from the listDynamicTemplates method
   //
