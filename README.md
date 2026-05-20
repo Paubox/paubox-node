@@ -6,7 +6,7 @@
 
 # Paubox NodeJS <!-- omit from toc -->
 
-This is the official NodeJS wrapper for the [Paubox Email API](https://www.paubox.com/solutions/email-api).
+This is the official NodeJS wrapper for the [Paubox Email API](https://www.paubox.com/products/paubox-email-api).
 
 The Paubox Email API allows your application to send secure,
 compliant email via Paubox and track deliveries and opens.
@@ -50,7 +50,7 @@ npm install --save paubox-node
 
 ### Getting Paubox API Credentials
 
-You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/join/see-pricing?unit=messages#paubox-email-api).
+You will need to have a Paubox account. You can [sign up here](https://www.paubox.com/pricing/paubox-email-api).
 
 Once you have an account, follow the instructions on the Rest API dashboard to verify domain ownership and generate API credentials.
 
