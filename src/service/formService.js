@@ -4,7 +4,7 @@ const axios = require('axios');
 
 class formService {
   constructor() {
-    this.baseURL = 'https://next.paubox.com';
+    this.baseURL = 'https://apx.paubox.com/forms';
   }
 
   // Get the full form definition (HTML, JSON schema, CSS) for a given form.

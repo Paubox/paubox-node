@@ -153,7 +153,7 @@ const pbMail = require('paubox-node');
 const service = pbMail.formService();
 ```
 
-Base URL: `https://next.paubox.com`
+Base URL: `https://apx.paubox.com/forms`
 
 ---
 

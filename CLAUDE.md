@@ -37,7 +37,7 @@ index.js                 # Public exports: emailService, formService, message, t
 ### formService
 
 - No credentials required — these are public endpoints called by form respondents.
-- Base URL: `https://next.paubox.com`.
+- Base URL: `https://apx.paubox.com/forms`.
 - Uses `axios.create` directly (no `apiHelper`) since there is no auth header.
 - `getForm` validates that the response contains an `id` field before returning.
 - `submitForm` sends JSON and resolves to `null` on HTTP 201 (no response body).
