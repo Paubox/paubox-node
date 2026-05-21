@@ -1,9 +1,14 @@
 const emailService = require('./lib/service/emailService.js');
+const formService = require('./lib/service/formService.js');
 const message = require('./lib/data/message.js');
 const templatedMessage = require('./lib/data/templatedMessage.js');
 
 module.exports.emailService = function (config) {
   return new emailService(config);
+};
+
+module.exports.formService = function () {
+  return new formService();
 };
 
 module.exports.message = function (options) {

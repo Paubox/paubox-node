@@ -33,6 +33,9 @@ The API wrapper allows you to construct and send messages.
     - [Get Dynamic Template](#get-dynamic-template)
     - [List Dynamic Templates](#list-dynamic-templates)
     - [Send a Dynamically Templated Message](#send-a-dynamically-templated-message)
+  - [Paubox Forms](#paubox-forms)
+    - [Get Form](#get-form)
+    - [Submit Form](#submit-form)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -532,6 +535,96 @@ service
 ```
 
 **Note**: Custom headers are currently not supported for templated messages.
+
+### Paubox Forms
+
+Paubox Forms endpoints are **public** — no API key or username is required. Use `pbMail.formService()` to get a service instance.
+
+#### Get Form
+
+Please also see the [API Documentation](https://docs.paubox.com/forms/get-form).
+
+Returns the full form definition (HTML, JSON schema, CSS) for a given form. This is typically called before rendering a form embed.
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.formService();
+
+const formId = '550e8400-e29b-41d4-a716-446655440000';
+
+service
+  .getForm(formId)
+  .then((form) => {
+    console.log('Get Form Response: ' + JSON.stringify(form));
+    // form.form_html contains the renderable HTML
+    // form.form_json contains the field schema
+  })
+  .catch((error) => {
+    console.log('Error in Get Form: ' + JSON.stringify(error));
+  });
+```
+
+#### Submit Form
+
+Please also see the [API Documentation](https://docs.paubox.com/forms/submit-form).
+
+Submits a respondent's answers for a form. The keys in `formData` should match the form's field schema (`form_json`). Returns `null` on success (HTTP 201 No Content). Maximum request size is 250 MB to support file attachments.
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.formService();
+
+const formId = '550e8400-e29b-41d4-a716-446655440000';
+
+const formData = {
+  first_name: 'Jane',
+  last_name: 'Smith',
+  email: 'jane@example.com',
+};
+
+service
+  .submitForm(formId, formData)
+  .then(() => {
+    console.log('Form submitted successfully');
+  })
+  .catch((error) => {
+    console.log('Error submitting form: ' + JSON.stringify(error));
+  });
+```
+
+To submit a form with file attachments, pass an array of attachment objects with `name` (filename) and `content` (base64-encoded file content):
+
+```javascript
+'use strict';
+const fs = require('fs');
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.formService();
+
+const formId = '550e8400-e29b-41d4-a716-446655440000';
+
+const formData = { first_name: 'Jane' };
+
+const attachments = [
+  {
+    name: 'consent.pdf',
+    content: fs.readFileSync('./consent.pdf').toString('base64'),
+  },
+];
+
+service
+  .submitForm(formId, formData, attachments)
+  .then(() => {
+    console.log('Form submitted successfully');
+  })
+  .catch((error) => {
+    console.log('Error submitting form: ' + JSON.stringify(error));
+  });
+```
 
 ## Supported Node Versions
 
