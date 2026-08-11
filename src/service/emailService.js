@@ -24,7 +24,6 @@ class emailService {
     this.apiUser = config.apiUsername;
     this.protocol = 'https:';
     this.host = 'api.paubox.net';
-    this.port = 443;
     this.version = 'v1';
     this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
 
