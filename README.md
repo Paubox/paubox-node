@@ -36,6 +36,7 @@ The API wrapper allows you to construct and send messages.
   - [Paubox Forms](#paubox-forms)
     - [Get Form](#get-form)
     - [Submit Form](#submit-form)
+    - [Authenticated form management](#authenticated-form-management)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -538,7 +539,7 @@ service
 
 ### Paubox Forms
 
-Paubox Forms endpoints are **public** — no API key or username is required. Use `pbMail.formService()` to get a service instance.
+The Paubox Forms endpoints for fetching a form definition and submitting responses are **public** — no API key or username is required. Use `pbMail.formService()` to get a service instance. Form-management endpoints require a scoped API key — see [Authenticated form management](#authenticated-form-management) below.
 
 #### Get Form
 
@@ -626,6 +627,166 @@ service
   });
 ```
 
+#### Authenticated form management
+
+The form-management methods require a **scoped API key with the `forms` scope**. Pass it as `{ apiKey }` when creating the service, or set the `FORMS_API_KEY` environment variable:
+
+```bash
+echo "FORMS_API_KEY='YOUR_SCOPED_API_KEY'" >> .env
+```
+
+```javascript
+'use strict';
+require('dotenv').config();
+const pbMail = require('paubox-node');
+const service = pbMail.formService(); // reads FORMS_API_KEY from the environment
+
+// Or pass the key explicitly:
+// const service = pbMail.formService({ apiKey: 'your-scoped-api-key' });
+```
+
+Calling an authenticated method without an API key throws an error. The public `getForm` and `submitForm` methods work with or without a key.
+
+List forms, with optional filtering, ordering, and pagination:
+
+```javascript
+service
+  .listForms({ search: 'intake', order_by: 'updated_at', order: 'desc', page: 1, items: 25 })
+  .then((response) => {
+    console.log('Forms: ' + JSON.stringify(response.results));
+    console.log('Page info: ' + JSON.stringify(response.page_info));
+  })
+  .catch((error) => {
+    console.log('Error listing forms: ' + JSON.stringify(error));
+  });
+```
+
+Get a single form by id (unlike the public `getForm`, this returns any of the customer's forms, including archived and inactive ones):
+
+```javascript
+const formId = '550e8400-e29b-41d4-a716-446655440000';
+
+service
+  .getFormById(formId)
+  .then((form) => {
+    console.log('Form: ' + JSON.stringify(form));
+  })
+  .catch((error) => {
+    console.log('Error getting form: ' + JSON.stringify(error));
+  });
+```
+
+Create a form:
+
+```javascript
+service
+  .createForm({
+    title: 'Patient Intake',
+    form_json: { fields: [{ label: 'First Name', type: 'text' }] },
+    customer_id: 123,
+    version: 1,
+    description: 'New patient intake form',
+    recipient: 'intake@example.com',
+    active: true,
+  })
+  .then((response) => {
+    console.log('New form id: ' + response.id);
+  })
+  .catch((error) => {
+    console.log('Error creating form: ' + JSON.stringify(error));
+  });
+```
+
+Update a form (only the provided keys are changed; omitted keys are left unchanged):
+
+```javascript
+const formId = '550e8400-e29b-41d4-a716-446655440000';
+
+service
+  .updateForm(formId, { title: 'Patient Intake (v2)', active: false })
+  .then((response) => {
+    console.log('Update Form Response: ' + JSON.stringify(response));
+  })
+  .catch((error) => {
+    console.log('Error updating form: ' + JSON.stringify(error));
+  });
+```
+
+Archive or unarchive a form (archiving also sets `active` to `false`):
+
+```javascript
+service.archiveForm(formId).then((response) => {
+  console.log(response.detail); // "Form archived."
+});
+
+service.unarchiveForm(formId).then((response) => {
+  console.log(response.detail); // "Form unarchived."
+});
+```
+
+Copy a form (the copy gets a fresh id, no vanity URL, and a submission count of 0):
+
+```javascript
+service
+  .copyForm(formId, 'Patient Intake (copy)')
+  .then((newForm) => {
+    console.log('New form: ' + JSON.stringify(newForm));
+  })
+  .catch((error) => {
+    console.log('Error copying form: ' + JSON.stringify(error));
+  });
+```
+
+Get aggregate form statistics (defaults to the API key's customer when no customer ID is given):
+
+```javascript
+service.getFormStats().then((stats) => {
+  console.log('Active forms: ' + stats.active_form_count);
+  console.log('Total submissions: ' + stats.total_submission_count);
+  console.log('Submissions in the last 7 days: ' + stats.submissions_last_7_days);
+});
+```
+
+List a form's submissions:
+
+```javascript
+service
+  .listSubmissions(formId, { order: 'desc', page: 1, items: 50 })
+  .then((response) => {
+    console.log('Submissions: ' + JSON.stringify(response.data));
+    console.log('Total: ' + response.total);
+  })
+  .catch((error) => {
+    console.log('Error listing submissions: ' + JSON.stringify(error));
+  });
+```
+
+Export submissions as CSV — all of a form's submissions, or a single one:
+
+```javascript
+const fs = require('fs');
+
+service.exportSubmissionsCsv(formId).then((csv) => {
+  fs.writeFileSync('./submissions.csv', csv);
+});
+
+// Export a single submission
+const submissionId = 'b3b8c7e2-1d2f-4c5a-9e8d-7f6a5b4c3d2e';
+service.exportSubmissionsCsv(formId, submissionId).then((csv) => {
+  fs.writeFileSync('./submission.csv', csv);
+});
+```
+
+Export a single submission as a PDF:
+
+```javascript
+const fs = require('fs');
+
+service.exportSubmissionPdf(formId, submissionId).then((pdf) => {
+  fs.writeFileSync('./submission.pdf', Buffer.from(pdf));
+});
+```
+
 ## Supported Node Versions
 
 Currently supported Node versions are:
@@ -644,6 +805,7 @@ See [LICENSE](LICENSE)
 ## Copyright
 
 Copyright &copy; 2025, Paubox, Inc.
+
 ## 💬 Community & support
 
 Questions, ideas, or want to share what you built? Join the **[Paubox Community](https://github.com/Paubox/community/discussions)** — the single home for discussions across every Paubox SDK and API.

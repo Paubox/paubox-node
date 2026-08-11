@@ -5,7 +5,7 @@
 `paubox-node` is the official Node.js SDK for the Paubox platform. It exposes two services:
 
 - **emailService** — authenticated REST client for the Paubox Email API (`api.paubox.net/v1/`). Sends messages, tracks delivery, and manages dynamic Handlebars templates.
-- **formService** — unauthenticated REST client for the Paubox Forms API (`next.paubox.com`). Fetches form definitions and submits form responses.
+- **formService** — REST client for the Paubox Forms API (`next.paubox.com`). Fetches form definitions and submits form responses without credentials, and also supports authenticated form-management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF exports) via an optional scoped API key.
 
 ## Repository layout
 
@@ -18,7 +18,7 @@ src/
   service/
     apiHelper.js         # Axios wrapper with Authorization header injection
     emailService.js      # Email + template API methods
-    formService.js       # Forms API methods (no auth)
+    formService.js       # Forms API methods (public + authenticated management)
 lib/                     # Babel-compiled output of src/ — not edited by hand
 test/                    # Mocha test suite (one file per public method)
 index.js                 # Public exports: emailService, formService, message, templatedMessage
@@ -36,12 +36,13 @@ index.js                 # Public exports: emailService, formService, message, t
 
 ### formService
 
-- No credentials required — these are public endpoints called by form respondents.
 - Base URL: `https://apx.paubox.com/forms`.
-- Uses `axios.create` directly (no `apiHelper`) since there is no auth header.
+- Uses `axios.create` directly (no `apiHelper`).
+- `getForm` and `submitForm` remain unauthenticated — public endpoints called by form respondents; they never send an Authorization header.
 - `getForm` validates that the response contains an `id` field before returning.
 - `submitForm` sends JSON and resolves to `null` on HTTP 201 (no response body).
 - Supports file attachments up to 250 MB via base64-encoded content in the request body.
+- Form-management methods (`listForms`, `getFormById`, `createForm`, `updateForm`, `archiveForm`, `unarchiveForm`, `copyForm`, `getFormStats`, `listSubmissions`, `exportSubmissionsCsv`, `exportSubmissionPdf`) require a scoped API key with the `forms` scope, passed as `{ apiKey }` to the constructor or via the `FORMS_API_KEY` env var, and sent as `Authorization: Bearer <apiKey>`. They throw if no key is configured.
 
 ### Data models
 

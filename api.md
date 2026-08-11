@@ -146,12 +146,23 @@ List all dynamic templates for the account.
 
 ## formService
 
-Create a service instance for Paubox Forms. **No API credentials required.**
+Create a service instance for Paubox Forms.
+
+The public methods (`getForm`, `submitForm`) require **no API credentials**:
 
 ```javascript
 const pbMail = require('paubox-node');
 const service = pbMail.formService();
 ```
+
+The form-management methods require a **scoped API key with the `forms` scope**, passed as `{ apiKey }` to `pbMail.formService()` or via the `FORMS_API_KEY` environment variable:
+
+```javascript
+const pbMail = require('paubox-node');
+const service = pbMail.formService({ apiKey: 'your-scoped-api-key' });
+```
+
+Calling an authenticated method without an API key throws an error.
 
 Base URL: `https://apx.paubox.com/forms`
 
@@ -216,6 +227,190 @@ Each attachment object:
 **Throws:** Rejects with the API error on HTTP 400 (missing `form_data`) or 404 (form not found).
 
 **Docs:** https://docs.paubox.com/forms/submit-form
+
+---
+
+### listForms(params)
+
+List the customer's forms with optional filtering, ordering, and pagination. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type      | Description                                                         |
+| --------- | --------- | ------------------------------------------------------------------- |
+| `params`  | `object?` | Optional query parameters; only provided keys are sent (see below). |
+
+Supported `params` keys:
+
+| Key           | Type      | Description                                                                        |
+| ------------- | --------- | ---------------------------------------------------------------------------------- |
+| `customer_id` | `number`  | Filter by customer ID.                                                             |
+| `form_id`     | `string`  | Filter by form UUID.                                                               |
+| `search`      | `string`  | Search term.                                                                       |
+| `order`       | `string`  | `'asc'` or `'desc'` (server default: `desc`).                                      |
+| `order_by`    | `string`  | `'title'`, `'updated_at'`, or `'submission_count'` (server default: `created_at`). |
+| `archived`    | `boolean` | Filter by archived state.                                                          |
+| `active`      | `boolean` | Filter by active state.                                                            |
+| `page`        | `number`  | Page number (server default: 1).                                                   |
+| `items`       | `number`  | Items per page (server default: 50, max: 100).                                     |
+
+**Returns:** `Promise<object>` — `{ results, page_info }` where `results` is an array of form objects and `page_info` is `{ count, pages, page, items }`.
+
+---
+
+### getFormById(formId)
+
+Get a single form by UUID. Unlike `getForm`, this returns any of the customer's forms, including archived and inactive ones. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type     | Description                   |
+| --------- | -------- | ----------------------------- |
+| `formId`  | `string` | UUID of the form to retrieve. |
+
+**Returns:** `Promise<object>` — the form object.
+
+---
+
+### createForm(formAttributes)
+
+Create a new form. Requires a scoped API key with the `forms` scope.
+
+| Parameter        | Type     | Description                              |
+| ---------------- | -------- | ---------------------------------------- |
+| `formAttributes` | `object` | Attributes for the new form (see below). |
+
+Supported `formAttributes` keys:
+
+| Key                            | Type      | Required | Description                                  |
+| ------------------------------ | --------- | -------- | -------------------------------------------- |
+| `title`                        | `string`  | Yes      | Form title.                                  |
+| `form_json`                    | `object`  | Yes      | JSON schema describing form fields.          |
+| `customer_id`                  | `number`  | Yes      | Owning customer ID.                          |
+| `version`                      | `number`  | Yes      | Form version number.                         |
+| `description`                  | `string`  | No       | Optional description.                        |
+| `form_html`                    | `string`  | No       | Renderable HTML for the form.                |
+| `form_css`                     | `string`  | No       | CSS styles for the form.                     |
+| `recipient`                    | `string`  | No       | Recipient of form submissions.               |
+| `signable`                     | `boolean` | No       | Whether the form includes a signature field. |
+| `signature_confirmation_label` | `string`  | No       | Label for signature confirmation.            |
+| `subscription_list_id`         | `number`  | No       | Associated subscription list ID.             |
+| `type`                         | `string`  | No       | Form type classification.                    |
+| `active`                       | `boolean` | No       | Whether the form accepts submissions.        |
+| `submission_count`             | `number`  | No       | Initial submission count.                    |
+
+Only provided keys are sent.
+
+**Returns:** `Promise<object>` — `{ id }` with the UUID of the new form.
+
+---
+
+### updateForm(formId, updates)
+
+Update an existing form. PATCH semantics: only the provided keys are changed; omitted keys are left unchanged server-side. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type     | Description                             |
+| --------- | -------- | --------------------------------------- |
+| `formId`  | `string` | UUID of the form to update.             |
+| `updates` | `object` | At least one updatable key (see below). |
+
+Updatable keys: `title`, `description`, `form_json`, `vanity_url`, `recipient`, `active`, `subscription_list_id`.
+
+**Returns:** `Promise<object>` — `{ detail, form_id }`.
+
+---
+
+### archiveForm(formId)
+
+Archive a form. The server also sets `active` to `false`. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type     | Description                  |
+| --------- | -------- | ---------------------------- |
+| `formId`  | `string` | UUID of the form to archive. |
+
+**Returns:** `Promise<object>` — `{ detail }`.
+
+---
+
+### unarchiveForm(formId)
+
+Unarchive a previously archived form. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type     | Description                    |
+| --------- | -------- | ------------------------------ |
+| `formId`  | `string` | UUID of the form to unarchive. |
+
+**Returns:** `Promise<object>` — `{ detail }`.
+
+---
+
+### copyForm(formId, title)
+
+Copy an existing form to a new form with the given title. The copy gets a fresh `id`, a `null` `vanity_url`, and a `submission_count` of 0. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type     | Description               |
+| --------- | -------- | ------------------------- |
+| `formId`  | `string` | UUID of the form to copy. |
+| `title`   | `string` | Title for the new form.   |
+
+**Returns:** `Promise<object>` — the new form object.
+
+---
+
+### getFormStats(customerId)
+
+Get aggregate form statistics for a customer. Requires a scoped API key with the `forms` scope.
+
+| Parameter    | Type      | Description                                                           |
+| ------------ | --------- | --------------------------------------------------------------------- |
+| `customerId` | `number?` | Optional; when omitted the server defaults to the API key's customer. |
+
+**Returns:** `Promise<object>` — `{ active_form_count, total_submission_count, submissions_last_7_days }`.
+
+---
+
+### listSubmissions(formId, params)
+
+List a form's submissions with optional filtering, ordering, and pagination. Requires a scoped API key with the `forms` scope.
+
+| Parameter | Type      | Description                                                         |
+| --------- | --------- | ------------------------------------------------------------------- |
+| `formId`  | `string`  | UUID of the form whose submissions to list.                         |
+| `params`  | `object?` | Optional query parameters; only provided keys are sent (see below). |
+
+Supported `params` keys:
+
+| Key             | Type     | Description                                         |
+| --------------- | -------- | --------------------------------------------------- |
+| `submission_id` | `string` | Filter to a single submission UUID.                 |
+| `order_by`      | `string` | `'submitter_email'` (server default: `created_at`). |
+| `order`         | `string` | `'asc'` or `'desc'`.                                |
+| `page`          | `number` | Page number.                                        |
+| `items`         | `number` | Items per page (max: 100).                          |
+
+**Returns:** `Promise<object>` — `{ data, total, page, items }` where `data` is an array of submission objects (`id`, `form_id`, `form_data` (JSON string), `storage_type`, `storage_url`, `submitter_email`, `recipients`, `attachment_name`, `attachment_url`, `attachment_type`, `attachment`, `created_at`).
+
+---
+
+### exportSubmissionsCsv(formId, submissionId)
+
+Export a form's submissions as CSV (a `Created At` column followed by the form's field labels). Requires a scoped API key with the `forms` scope.
+
+| Parameter      | Type      | Description                                                |
+| -------------- | --------- | ---------------------------------------------------------- |
+| `formId`       | `string`  | UUID of the form whose submissions to export.              |
+| `submissionId` | `string?` | Optional; when provided, only that submission is exported. |
+
+**Returns:** `Promise<string>` — the CSV content.
+
+---
+
+### exportSubmissionPdf(formId, submissionId)
+
+Export a single submission as a PDF. Requires a scoped API key with the `forms` scope.
+
+| Parameter      | Type     | Description                                 |
+| -------------- | -------- | ------------------------------------------- |
+| `formId`       | `string` | UUID of the form the submission belongs to. |
+| `submissionId` | `string` | UUID of the submission to export.           |
+
+**Returns:** `Promise<Buffer | ArrayBuffer>` — the binary PDF content.
 
 ---
 
