@@ -647,17 +647,37 @@ const service = pbMail.formService(); // reads FORMS_API_KEY from the environmen
 
 Calling an authenticated method without an API key throws an error. The public `getForm` and `submitForm` methods work with or without a key.
 
-List forms, with optional filtering, ordering, and pagination:
+The service targets production (`https://apx.paubox.com/forms`) by default. To point it at another environment, pass `{ baseURL }` or set the `FORMS_BASE_URL` environment variable (config wins over the env var):
+
+```javascript
+const service = pbMail.formService({
+  apiKey: 'your-scoped-api-key',
+  baseURL: 'https://apx.staging.paubox.com/forms',
+});
+```
+
+> **Do not log the whole error object.** A failed authenticated request produces an error whose request config would otherwise carry your `Authorization` header and request body. This SDK strips the `Authorization` header off propagated errors, but you should still log only the fields you need — `error.message`, `error.response && error.response.status`, and `error.response && error.response.data` — rather than serializing the entire error, so credentials and payloads never reach your logs or error tracker. The examples below follow that pattern.
+
+List forms, with filtering, ordering, and pagination (`customer_id` is required — the server returns 403 without it):
 
 ```javascript
 service
-  .listForms({ search: 'intake', order_by: 'updated_at', order: 'desc', page: 1, items: 25 })
+  .listForms({
+    customer_id: 123,
+    search: 'intake',
+    order_by: 'updated_at',
+    order: 'desc',
+    page: 1,
+    items: 25,
+  })
   .then((response) => {
     console.log('Forms: ' + JSON.stringify(response.results));
     console.log('Page info: ' + JSON.stringify(response.page_info));
   })
   .catch((error) => {
-    console.log('Error listing forms: ' + JSON.stringify(error));
+    console.log('Error listing forms: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 
@@ -672,7 +692,9 @@ service
     console.log('Form: ' + JSON.stringify(form));
   })
   .catch((error) => {
-    console.log('Error getting form: ' + JSON.stringify(error));
+    console.log('Error getting form: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 
@@ -693,7 +715,9 @@ service
     console.log('New form id: ' + response.id);
   })
   .catch((error) => {
-    console.log('Error creating form: ' + JSON.stringify(error));
+    console.log('Error creating form: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 
@@ -708,7 +732,9 @@ service
     console.log('Update Form Response: ' + JSON.stringify(response));
   })
   .catch((error) => {
-    console.log('Error updating form: ' + JSON.stringify(error));
+    console.log('Error updating form: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 
@@ -733,7 +759,9 @@ service
     console.log('New form: ' + JSON.stringify(newForm));
   })
   .catch((error) => {
-    console.log('Error copying form: ' + JSON.stringify(error));
+    console.log('Error copying form: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 
@@ -757,7 +785,9 @@ service
     console.log('Total: ' + response.total);
   })
   .catch((error) => {
-    console.log('Error listing submissions: ' + JSON.stringify(error));
+    console.log('Error listing submissions: ' + error.message);
+    if (error.response)
+      console.log('Status ' + error.response.status + ': ' + JSON.stringify(error.response.data));
   });
 ```
 

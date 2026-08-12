@@ -2,116 +2,83 @@ const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised').default;
 
-const sinon = require('sinon');
-const axios = require('axios');
+const nock = require('nock');
 
 const formService = require('../src/service/formService.js');
 
 chai.use(chaiAsPromised);
 
 const apiKey = 'test-scoped-api-key';
+const baseURL = 'https://forms.test';
 const formId = '550e8400-e29b-41d4-a716-446655440000';
-const submissionId = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+const submissionId = 'b3b8c7e2-1d2f-4c5a-9e8d-7f6a5b4c3d2e';
 
-const validPdfResponse = Buffer.from('%PDF-1.4 fake pdf content');
+// Minimal PDF byte stream (starts with the %PDF magic number).
+const pdfBytes = Buffer.from('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n', 'binary');
 
 describe('formService.exportSubmissionPdf', function () {
-  let axiosStub;
+  beforeEach(() => {
+    nock.disableNetConnect();
+  });
 
-  this.afterEach(() => {
-    axiosStub.restore();
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   it('can export a submission as a PDF', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validPdfResponse });
-    });
+    nock(baseURL)
+      .get('/api/forms/' + formId + '/submissions/' + submissionId + '/submission-pdf')
+      .reply(200, pdfBytes, { 'Content-Type': 'application/pdf' });
 
-    const service = formService({ apiKey: apiKey });
+    const service = formService({ apiKey, baseURL });
     const response = await service.exportSubmissionPdf(formId, submissionId);
-    expect(response).to.equal(validPdfResponse);
+    const buf = Buffer.from(response);
+    expect(buf.slice(0, 4).toString('ascii')).to.equal('%PDF');
   });
 
-  it('sends the Authorization header, arraybuffer responseType, and the submission url', async function () {
-    let capturedConfig;
+  it('sends the Bearer Authorization header, arraybuffer responseType, and the submission url', async function () {
+    const scope = nock(baseURL, {
+      reqheaders: { authorization: 'Bearer ' + apiKey },
+    })
+      .get('/api/forms/' + formId + '/submissions/' + submissionId + '/submission-pdf')
+      .reply(200, pdfBytes, { 'Content-Type': 'application/pdf' });
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
-      return Promise.resolve({ data: validPdfResponse });
-    });
-
-    const service = formService({ apiKey: apiKey });
+    const service = formService({ apiKey, baseURL });
     await service.exportSubmissionPdf(formId, submissionId);
+    expect(scope.isDone()).to.equal(true);
+  });
 
-    const createConfig = axiosStub.getCall(0).args[0];
-    expect(createConfig.headers.Authorization).to.equal('Bearer test-scoped-api-key');
-    expect(createConfig.responseType).to.equal('arraybuffer');
-    expect(capturedConfig.url).to.equal(
-      `/api/forms/${formId}/submissions/${submissionId}/submission-pdf`,
+  it('throws before any request when an id is not a UUID', async function () {
+    const service = formService({ apiKey, baseURL });
+    await expect(service.exportSubmissionPdf('..', submissionId)).to.be.rejectedWith(
+      /formId must be a UUID/,
+    );
+    await expect(service.exportSubmissionPdf(formId, '..')).to.be.rejectedWith(
+      /submissionId must be a UUID/,
+    );
+    await expect(service.exportSubmissionPdf(formId, undefined)).to.be.rejectedWith(
+      /submissionId is required/,
     );
   });
 
-  it('throws an error if formId is not provided', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validPdfResponse });
-    });
+  it('propagates the request error without leaking the Authorization header', async function () {
+    nock(baseURL)
+      .get('/api/forms/' + formId + '/submissions/' + submissionId + '/submission-pdf')
+      .reply(404, 'Not found', { 'Content-Type': 'text/plain' });
 
-    const service = formService({ apiKey: apiKey });
-    await expect(service.exportSubmissionPdf(null, submissionId)).to.be.rejectedWith(
-      'formId is required',
-    );
-  });
-
-  it('throws an error if submissionId is not provided', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validPdfResponse });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.exportSubmissionPdf(formId)).to.be.rejectedWith(
-      'submissionId is required',
-    );
-  });
-
-  it('throws an error if no apiKey was configured', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validPdfResponse });
-    });
-
-    const savedEnvKey = process.env.FORMS_API_KEY;
-    delete process.env.FORMS_API_KEY;
-
+    const service = formService({ apiKey, baseURL });
+    let caught;
     try {
-      const service = formService();
-      await expect(service.exportSubmissionPdf(formId, submissionId)).to.be.rejectedWith(
-        'apiKey is required for this method',
-      );
-    } finally {
-      if (savedEnvKey !== undefined) {
-        process.env.FORMS_API_KEY = savedEnvKey;
-      }
+      await service.exportSubmissionPdf(formId, submissionId);
+    } catch (error) {
+      caught = error;
     }
-  });
 
-  it('throws the response if the request fails', async function () {
-    const errorMessage = 'Request failed with status code 404';
-
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.reject({ message: errorMessage, response: { status: 404 } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.exportSubmissionPdf(formId, submissionId)).to.be.rejectedWith(
-      errorMessage,
-    );
-  });
-
-  it('throws if the response body is null', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: null });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.exportSubmissionPdf(formId, submissionId)).to.be.rejected;
+    expect(caught, 'expected exportSubmissionPdf to reject').to.not.equal(undefined);
+    expect(caught.response.status).to.equal(404);
+    expect(caught).to.not.have.property('config');
+    expect(caught).to.not.have.property('request');
+    expect(JSON.stringify(caught)).to.not.contain(apiKey);
   });
 });

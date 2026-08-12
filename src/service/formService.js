@@ -4,8 +4,14 @@ const axios = require('axios');
 
 class formService {
   constructor(config = {}) {
-    config = Object.assign({ apiKey: process.env.FORMS_API_KEY }, config);
-    this.baseURL = 'https://apx.paubox.com/forms';
+    config = Object.assign(
+      {
+        apiKey: process.env.FORMS_API_KEY,
+        baseURL: process.env.FORMS_BASE_URL,
+      },
+      config,
+    );
+    this.baseURL = config.baseURL || 'https://apx.paubox.com/forms';
     this.apiKey = config.apiKey || null;
   }
 
@@ -20,9 +26,10 @@ class formService {
   // returns a promise that resolves to the form object
   //
   async getForm(formId) {
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    // Public route: no credential is attached, so no UUID requirement, but
+    // still encode the segment so a caller-supplied value can't splice the
+    // path.
+    const formSegment = this._pathSegment('formId', formId, { requireUuid: false });
 
     const axiosInstance = axios.create({
       baseURL: this.baseURL,
@@ -31,13 +38,13 @@ class formService {
 
     const response = await axiosInstance({
       method: 'GET',
-      url: `/public/form_data/${formId}`,
+      url: `/public/form_data/${formSegment}`,
     });
 
     const form = response.data;
 
     if (!form || !form.id) {
-      throw form;
+      throw this._unexpectedResponseError(form);
     }
 
     return form;
@@ -59,9 +66,10 @@ class formService {
   // returns a promise that resolves to null on success (201 No Content)
   //
   async submitForm(formId, formData, attachments = null) {
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    // Public route: no credential is attached, so no UUID requirement, but
+    // still encode the segment so a caller-supplied value can't splice the
+    // path.
+    const formSegment = this._pathSegment('formId', formId, { requireUuid: false });
     if (!formData || typeof formData !== 'object' || Array.isArray(formData)) {
       throw new Error('formData is required and must be an object');
     }
@@ -81,7 +89,7 @@ class formService {
 
     await axiosInstance({
       method: 'POST',
-      url: `/api/forms/${formId}/submissions`,
+      url: `/api/forms/${formSegment}/submissions`,
       data: requestBody,
     });
 
@@ -99,12 +107,60 @@ class formService {
     }
   }
 
+  // Validate a caller-supplied value before interpolating it into a URL
+  // path. Without this an id like '../stats' or 'id?x=' would steer the
+  // credentialed request to an unintended path. requireUuid enforces the
+  // canonical UUID shape (the authenticated routes take UUIDs); public
+  // routes pass requireUuid=false and are only encoded. Returns the
+  // encoded segment.
+  //
+  _pathSegment(name, value, { requireUuid = true } = {}) {
+    if (value === undefined || value === null || value === '') {
+      throw new Error(name + ' is required');
+    }
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      throw new Error(name + ' must be a string');
+    }
+    const str = String(value);
+    if (requireUuid && !formService.UUID_RE.test(str)) {
+      throw new Error(name + ' must be a UUID');
+    }
+    return encodeURIComponent(str);
+  }
+
+  // Wrap an unexpected/invalid response body in a real Error without
+  // serializing the body onto an enumerable property (a logger that
+  // stringifies the error must not spill response content). The body is
+  // still reachable on the non-enumerable `body` property for debugging.
+  //
+  _unexpectedResponseError(body) {
+    const error = new Error('Unexpected response from Forms API');
+    Object.defineProperty(error, 'body', {
+      value: body,
+      enumerable: false,
+      writable: false,
+    });
+    return error;
+  }
+
   // Builds an axios instance with the Authorization header for
   // authenticated requests. extraConfig extends the base config
   // (e.g. responseType).
   //
+  // A response interceptor replaces any rejected axios error with a narrow
+  // error that carries only the caller-useful fields (message, code, and a
+  // trimmed response with status/statusText/data). The raw axios error is
+  // discarded because it keeps the outbound request — and thus the
+  // Authorization: Bearer <token> header — in several enumerable places
+  // (error.config.headers, error.request._header, error.request.headers,
+  // error.request.options.headers, error.request._redirectable._options...),
+  // and the exact set varies by transport and axios version. Reconstructing
+  // a clean error is version-independent: a caller that logs or serializes
+  // it (JSON.stringify, util.inspect, an error tracker) cannot leak the
+  // bearer token.
+  //
   _authorizedAxios(extraConfig = {}) {
-    return axios.create(
+    const instance = axios.create(
       Object.assign(
         {
           baseURL: this.baseURL,
@@ -116,6 +172,39 @@ class formService {
         extraConfig,
       ),
     );
+
+    instance.interceptors.response.use(undefined, (error) => {
+      return Promise.reject(this._sanitizeRequestError(error));
+    });
+
+    return instance;
+  }
+
+  // Build a token-free error from an axios error. Copies only message,
+  // code, and a trimmed response (status/statusText/data) — never config
+  // or request, which carry the Authorization header.
+  //
+  _sanitizeRequestError(error) {
+    if (!error || typeof error !== 'object') {
+      return error;
+    }
+
+    const safe = new Error(error.message || 'Forms API request failed');
+    if (error.name) {
+      safe.name = error.name;
+    }
+    if (error.code !== undefined) {
+      safe.code = error.code;
+    }
+    if (error.response) {
+      safe.response = {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      };
+      safe.status = error.response.status;
+    }
+    return safe;
   }
 
   // List the customer's forms with optional filtering, ordering, and
@@ -123,15 +212,27 @@ class formService {
   //
   // Requires a scoped API key with the forms scope.
   //
-  // params is an optional object; only provided keys are sent as query
-  // parameters: customer_id, form_id, search, order ('asc'|'desc'),
-  // order_by ('title'|'updated_at'|'submission_count'), archived (bool),
-  // active (bool), page, items (max 100)
+  // params must include customer_id (the server authorizes on it and
+  // returns 403 when it is absent). Other keys are optional and only sent
+  // when provided: form_id, search, order ('asc'|'desc'), order_by
+  // ('title'|'updated_at'|'submission_count'), archived (bool), active
+  // (bool), page, items (max 100)
   //
   // returns a promise that resolves to { results, page_info }
   //
   async listForms(params = {}) {
     this._requireApiKey();
+
+    if (!params || typeof params !== 'object' || Array.isArray(params)) {
+      throw new Error('params is required and must be an object');
+    }
+    if (
+      params.customer_id === undefined ||
+      params.customer_id === null ||
+      params.customer_id === ''
+    ) {
+      throw new Error('customer_id is required');
+    }
 
     const allowedParams = [
       'customer_id',
@@ -161,7 +262,7 @@ class formService {
     });
 
     if (!response.data || !Array.isArray(response.data.results)) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -179,19 +280,17 @@ class formService {
   async getFormById(formId) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
 
     const axiosInstance = this._authorizedAxios();
 
     const response = await axiosInstance({
       method: 'GET',
-      url: `/api/forms/${formId}`,
+      url: `/api/forms/${formSegment}`,
     });
 
     if (!response.data || !response.data.data || !response.data.data.id) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data.data;
@@ -256,7 +355,7 @@ class formService {
     });
 
     if (!response.data || !response.data.id) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -270,16 +369,14 @@ class formService {
   // formId is the UUID of the form to update
   //
   // updates is an object with at least one of: title, description,
-  // form_json, vanity_url, recipient, active, subscription_list_id
+  // form_json, recipient, active, subscription_list_id
   //
   // returns a promise that resolves to { detail, form_id }
   //
   async updateForm(formId, updates) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
     if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
       throw new Error('updates is required and must be an object');
     }
@@ -288,7 +385,6 @@ class formService {
       'title',
       'description',
       'form_json',
-      'vanity_url',
       'recipient',
       'active',
       'subscription_list_id',
@@ -309,12 +405,12 @@ class formService {
 
     const response = await axiosInstance({
       method: 'PUT',
-      url: `/api/forms/${formId}`,
+      url: `/api/forms/${formSegment}`,
       data: requestBody,
     });
 
     if (!response.data || !response.data.detail) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -331,19 +427,17 @@ class formService {
   async archiveForm(formId) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
 
     const axiosInstance = this._authorizedAxios();
 
     const response = await axiosInstance({
       method: 'POST',
-      url: `/api/forms/${formId}/archive`,
+      url: `/api/forms/${formSegment}/archive`,
     });
 
     if (!response.data || !response.data.detail) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -360,19 +454,17 @@ class formService {
   async unarchiveForm(formId) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
 
     const axiosInstance = this._authorizedAxios();
 
     const response = await axiosInstance({
       method: 'POST',
-      url: `/api/forms/${formId}/unarchive`,
+      url: `/api/forms/${formSegment}/unarchive`,
     });
 
     if (!response.data || !response.data.detail) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -408,7 +500,7 @@ class formService {
     });
 
     if (!response.data || !response.data.id) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -441,7 +533,7 @@ class formService {
     });
 
     if (!response.data || response.data.active_form_count === undefined) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -463,9 +555,7 @@ class formService {
   async listSubmissions(formId, params = {}) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
 
     const allowedParams = ['submission_id', 'order_by', 'order', 'page', 'items'];
 
@@ -480,12 +570,12 @@ class formService {
 
     const response = await axiosInstance({
       method: 'GET',
-      url: `/api/forms/${formId}/submissions`,
+      url: `/api/forms/${formSegment}/submissions`,
       params: queryParams,
     });
 
     if (!response.data || !Array.isArray(response.data.data)) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -506,13 +596,11 @@ class formService {
   async exportSubmissionsCsv(formId, submissionId = null) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
 
-    let url = `/api/forms/${formId}/submissions/submission-csv`;
-    if (submissionId) {
-      url += `/${submissionId}`;
+    let url = `/api/forms/${formSegment}/submissions/submission-csv`;
+    if (submissionId !== undefined && submissionId !== null) {
+      url += `/${this._pathSegment('submissionId', submissionId)}`;
     }
 
     const axiosInstance = this._authorizedAxios({ responseType: 'text' });
@@ -523,7 +611,7 @@ class formService {
     });
 
     if (typeof response.data !== 'string') {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
@@ -542,27 +630,27 @@ class formService {
   async exportSubmissionPdf(formId, submissionId) {
     this._requireApiKey();
 
-    if (!formId) {
-      throw new Error('formId is required');
-    }
-    if (!submissionId) {
-      throw new Error('submissionId is required');
-    }
+    const formSegment = this._pathSegment('formId', formId);
+    const submissionSegment = this._pathSegment('submissionId', submissionId);
 
     const axiosInstance = this._authorizedAxios({ responseType: 'arraybuffer' });
 
     const response = await axiosInstance({
       method: 'GET',
-      url: `/api/forms/${formId}/submissions/${submissionId}/submission-pdf`,
+      url: `/api/forms/${formSegment}/submissions/${submissionSegment}/submission-pdf`,
     });
 
     if (response.data === null || response.data === undefined) {
-      throw response.data;
+      throw this._unexpectedResponseError(response.data);
     }
 
     return response.data;
   }
 }
+
+// Canonical UUID (8-4-4-4-12 hex). Used to validate id path segments before
+// they are interpolated into a credentialed request URL.
+formService.UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 module.exports = function (config) {
   return new formService(config);
