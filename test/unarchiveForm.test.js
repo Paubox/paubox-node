@@ -70,7 +70,8 @@ describe('formService.unarchiveForm', function () {
 
     expect(caught, 'expected unarchiveForm to reject').to.not.equal(undefined);
     expect(caught.response.status).to.equal(404);
-    expect(caught.config.headers).to.not.have.property('Authorization');
+    expect(caught).to.not.have.property('config');
+    expect(caught).to.not.have.property('request');
     expect(JSON.stringify(caught)).to.not.contain(apiKey);
   });
 });

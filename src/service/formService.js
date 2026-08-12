@@ -145,10 +145,19 @@ class formService {
 
   // Builds an axios instance with the Authorization header for
   // authenticated requests. extraConfig extends the base config
-  // (e.g. responseType). A response interceptor strips the Authorization
-  // header (and the raw request header buffer) off any error before it
-  // propagates, so a caller that logs the error can't leak the bearer
-  // token to stdout / their log aggregator / their error tracker.
+  // (e.g. responseType).
+  //
+  // A response interceptor replaces any rejected axios error with a narrow
+  // error that carries only the caller-useful fields (message, code, and a
+  // trimmed response with status/statusText/data). The raw axios error is
+  // discarded because it keeps the outbound request — and thus the
+  // Authorization: Bearer <token> header — in several enumerable places
+  // (error.config.headers, error.request._header, error.request.headers,
+  // error.request.options.headers, error.request._redirectable._options...),
+  // and the exact set varies by transport and axios version. Reconstructing
+  // a clean error is version-independent: a caller that logs or serializes
+  // it (JSON.stringify, util.inspect, an error tracker) cannot leak the
+  // bearer token.
   //
   _authorizedAxios(extraConfig = {}) {
     const instance = axios.create(
@@ -165,16 +174,37 @@ class formService {
     );
 
     instance.interceptors.response.use(undefined, (error) => {
-      if (error && error.config && error.config.headers) {
-        delete error.config.headers.Authorization;
-      }
-      if (error && error.request && error.request._header) {
-        delete error.request._header;
-      }
-      return Promise.reject(error);
+      return Promise.reject(this._sanitizeRequestError(error));
     });
 
     return instance;
+  }
+
+  // Build a token-free error from an axios error. Copies only message,
+  // code, and a trimmed response (status/statusText/data) — never config
+  // or request, which carry the Authorization header.
+  //
+  _sanitizeRequestError(error) {
+    if (!error || typeof error !== 'object') {
+      return error;
+    }
+
+    const safe = new Error(error.message || 'Forms API request failed');
+    if (error.name) {
+      safe.name = error.name;
+    }
+    if (error.code !== undefined) {
+      safe.code = error.code;
+    }
+    if (error.response) {
+      safe.response = {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+      };
+      safe.status = error.response.status;
+    }
+    return safe;
   }
 
   // List the customer's forms with optional filtering, ordering, and

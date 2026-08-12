@@ -3,6 +3,7 @@ const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised').default;
 
 const nock = require('nock');
+const util = require('util');
 
 const formService = require('../src/service/formService.js');
 
@@ -131,10 +132,15 @@ describe('formService security hardening', function () {
         caught = error;
       }
       expect(caught, 'expected the call to reject').to.not.equal(undefined);
-      if (caught.config && caught.config.headers) {
-        expect(caught.config.headers).to.not.have.property('Authorization');
-      }
+      // The propagated error carries no request/config branch at all — those
+      // are where axios (and follow-redirects) keep the Authorization header.
+      expect(caught).to.not.have.property('config');
+      expect(caught).to.not.have.property('request');
+      // And the token appears via no serialization or deep-inspection path.
       expect(JSON.stringify(caught)).to.not.contain(apiKey);
+      expect(util.inspect(caught, { depth: null })).to.not.contain(apiKey);
+      // Caller-useful fields survive the sanitization.
+      expect(caught.response.status).to.equal(500);
     }
   });
 });
