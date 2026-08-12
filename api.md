@@ -232,17 +232,17 @@ Each attachment object:
 
 ### listForms(params)
 
-List the customer's forms with optional filtering, ordering, and pagination. Requires a scoped API key with the `forms` scope.
+List the customer's forms with filtering, ordering, and pagination. Requires a scoped API key with the `forms` scope.
 
-| Parameter | Type      | Description                                                         |
-| --------- | --------- | ------------------------------------------------------------------- |
-| `params`  | `object?` | Optional query parameters; only provided keys are sent (see below). |
+| Parameter | Type     | Description                                                           |
+| --------- | -------- | --------------------------------------------------------------------- |
+| `params`  | `object` | Query parameters. `customer_id` is required; other keys are optional. |
 
 Supported `params` keys:
 
 | Key           | Type      | Description                                                                        |
 | ------------- | --------- | ---------------------------------------------------------------------------------- |
-| `customer_id` | `number`  | Filter by customer ID.                                                             |
+| `customer_id` | `number`  | **Required.** The server authorizes on this and returns 403 when it is absent.     |
 | `form_id`     | `string`  | Filter by form UUID.                                                               |
 | `search`      | `string`  | Search term.                                                                       |
 | `order`       | `string`  | `'asc'` or `'desc'` (server default: `desc`).                                      |
@@ -290,7 +290,7 @@ Supported `formAttributes` keys:
 | `recipient`                    | `string`  | No       | Recipient of form submissions.               |
 | `signable`                     | `boolean` | No       | Whether the form includes a signature field. |
 | `signature_confirmation_label` | `string`  | No       | Label for signature confirmation.            |
-| `subscription_list_id`         | `number`  | No       | Associated subscription list ID.             |
+| `subscription_list_id`         | `string`  | No       | Associated subscription list ID.             |
 | `type`                         | `string`  | No       | Form type classification.                    |
 | `active`                       | `boolean` | No       | Whether the form accepts submissions.        |
 | `submission_count`             | `number`  | No       | Initial submission count.                    |
@@ -303,14 +303,14 @@ Only provided keys are sent.
 
 ### updateForm(formId, updates)
 
-Update an existing form. PATCH semantics: only the provided keys are changed; omitted keys are left unchanged server-side. Requires a scoped API key with the `forms` scope.
+Update an existing form. Issued as an HTTP `PUT`, but with merge semantics: only the provided keys are changed; omitted keys are left unchanged server-side. Requires a scoped API key with the `forms` scope.
 
 | Parameter | Type     | Description                             |
 | --------- | -------- | --------------------------------------- |
 | `formId`  | `string` | UUID of the form to update.             |
 | `updates` | `object` | At least one updatable key (see below). |
 
-Updatable keys: `title`, `description`, `form_json`, `vanity_url`, `recipient`, `active`, `subscription_list_id`.
+Updatable keys: `title`, `description`, `form_json`, `recipient`, `active`, `subscription_list_id`.
 
 **Returns:** `Promise<object>` — `{ detail, form_id }`.
 

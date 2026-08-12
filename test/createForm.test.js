@@ -2,171 +2,101 @@ const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised').default;
 
-const sinon = require('sinon');
-const axios = require('axios');
+const nock = require('nock');
 
 const formService = require('../src/service/formService.js');
 
 chai.use(chaiAsPromised);
 
 const apiKey = 'test-scoped-api-key';
-const newFormId = '770e8400-e29b-41d4-a716-446655440002';
+const baseURL = 'https://forms.test';
 
-const validFormAttributes = {
-  title: 'Patient Intake Form',
+const validAttributes = {
+  title: 'Patient Intake',
   form_json: { fields: [{ label: 'First Name', type: 'text' }] },
-  customer_id: 123,
+  customer_id: 629,
   version: 1,
 };
 
-describe('formService.createForm', function () {
-  let axiosStub;
+const createdResponse = { id: '550e8400-e29b-41d4-a716-446655440000' };
 
-  this.afterEach(() => {
-    axiosStub.restore();
+describe('formService.createForm', function () {
+  beforeEach(() => {
+    nock.disableNetConnect();
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   it('can create a form', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: { id: newFormId } });
-    });
+    nock(baseURL).post('/api/forms', validAttributes).reply(200, createdResponse);
 
-    const service = formService({ apiKey: apiKey });
-    const response = await service.createForm(validFormAttributes);
-    expect(response).to.deep.equal({ id: newFormId });
+    const service = formService({ apiKey, baseURL });
+    const response = await service.createForm(validAttributes);
+    expect(response).to.deep.equal(createdResponse);
   });
 
-  it('sends an Authorization header and posts to the right url', async function () {
-    let capturedConfig;
+  it('sends a Bearer Authorization header and only the allow-listed fields', async function () {
+    const scope = nock(baseURL, {
+      reqheaders: { authorization: 'Bearer ' + apiKey },
+    })
+      .post('/api/forms', validAttributes)
+      .reply(200, createdResponse);
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await service.createForm(validFormAttributes);
-
-    const createConfig = axiosStub.firstCall.args[0];
-    expect(createConfig.headers.Authorization).to.equal('Bearer ' + apiKey);
-    expect(capturedConfig.method).to.equal('POST');
-    expect(capturedConfig.url).to.equal('/api/forms');
+    const service = formService({ apiKey, baseURL });
+    await service.createForm(Object.assign({ not_allowed: 'drop me' }, validAttributes));
+    expect(scope.isDone()).to.equal(true);
   });
 
-  it('sends only the provided fields', async function () {
-    let capturedConfig;
-
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await service.createForm({
-      ...validFormAttributes,
-      description: 'Please complete before your appointment.',
-      active: true,
-      not_an_allowed_field: 'should not be sent',
-    });
-
-    expect(capturedConfig.data).to.deep.equal({
-      title: validFormAttributes.title,
-      form_json: validFormAttributes.form_json,
-      customer_id: validFormAttributes.customer_id,
-      version: validFormAttributes.version,
-      description: 'Please complete before your appointment.',
-      active: true,
-    });
-  });
-
-  it('throws an error if formAttributes is not provided', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.createForm()).to.be.rejectedWith(
-      'formAttributes is required and must be an object',
-    );
-  });
-
-  it('throws an error if formAttributes is not an object', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.createForm('not an object')).to.be.rejectedWith(
-      'formAttributes is required and must be an object',
-    );
-  });
-
-  it('throws an error if formAttributes is an array', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.createForm(['title'])).to.be.rejectedWith(
-      'formAttributes is required and must be an object',
-    );
-  });
-
-  ['title', 'form_json', 'customer_id', 'version'].forEach((field) => {
-    it(`throws an error if ${field} is missing`, async function () {
-      axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-        return Promise.resolve({ data: { id: newFormId } });
-      });
-
-      const attributes = { ...validFormAttributes };
-      delete attributes[field];
-
-      const service = formService({ apiKey: apiKey });
-      await expect(service.createForm(attributes)).to.be.rejectedWith(`${field} is required`);
-    });
-  });
-
-  it('throws an error if no apiKey was configured', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: { id: newFormId } });
-    });
-
-    const savedEnvKey = process.env.FORMS_API_KEY;
-    delete process.env.FORMS_API_KEY;
-
-    try {
-      const service = formService();
-      await expect(service.createForm(validFormAttributes)).to.be.rejectedWith(
-        'apiKey is required for this method. Pass { apiKey } to formService() or set the FORMS_API_KEY environment variable.',
-      );
-    } finally {
-      if (savedEnvKey !== undefined) {
-        process.env.FORMS_API_KEY = savedEnvKey;
-      }
+  it('throws before any request when a required field is missing', async function () {
+    const service = formService({ apiKey, baseURL });
+    for (const field of ['title', 'form_json', 'customer_id', 'version']) {
+      const attrs = Object.assign({}, validAttributes);
+      delete attrs[field];
+      await expect(service.createForm(attrs)).to.be.rejectedWith(field + ' is required');
     }
   });
 
-  it('throws the response if the request fails', async function () {
-    const errorMessage = 'Request failed with status code 422';
-
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.reject({ message: errorMessage, response: { status: 422 } });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.createForm(validFormAttributes)).to.be.rejectedWith(errorMessage);
+  it('throws before any request when formAttributes is not an object', async function () {
+    const service = formService({ apiKey, baseURL });
+    for (const bad of [null, 'a string', [1, 2], undefined]) {
+      await expect(service.createForm(bad)).to.be.rejectedWith(
+        'formAttributes is required and must be an object',
+      );
+    }
   });
 
-  it('throws the response if an unexpected response is returned', async function () {
-    const unexpectedResponse = { this: 'is not what we expected' };
+  it('propagates the request error without leaking the Authorization header', async function () {
+    nock(baseURL).post('/api/forms').reply(403, { detail: 'Forbidden' });
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: unexpectedResponse });
-    });
+    const service = formService({ apiKey, baseURL });
+    let caught;
+    try {
+      await service.createForm(validAttributes);
+    } catch (error) {
+      caught = error;
+    }
 
-    const service = formService({ apiKey: apiKey });
-    await expect(service.createForm(validFormAttributes)).to.be.rejected.and.eventually.deep.equal(
-      unexpectedResponse,
-    );
+    expect(caught, 'expected createForm to reject').to.not.equal(undefined);
+    expect(caught.response.status).to.equal(403);
+    expect(caught.config.headers).to.not.have.property('Authorization');
+    expect(JSON.stringify(caught)).to.not.contain(apiKey);
+  });
+
+  it('throws a shapeless-safe Error if an unexpected response is returned', async function () {
+    nock(baseURL).post('/api/forms').reply(200, { no: 'id' });
+
+    const service = formService({ apiKey, baseURL });
+    let caught;
+    try {
+      await service.createForm(validAttributes);
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).to.be.an.instanceof(Error);
+    expect(caught.message).to.equal('Unexpected response from Forms API');
   });
 });

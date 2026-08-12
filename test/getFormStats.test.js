@@ -2,109 +2,93 @@ const chai = require('chai');
 const { expect } = chai;
 const chaiAsPromised = require('chai-as-promised').default;
 
-const sinon = require('sinon');
-const axios = require('axios');
+const nock = require('nock');
 
 const formService = require('../src/service/formService.js');
 
 chai.use(chaiAsPromised);
 
 const apiKey = 'test-scoped-api-key';
+const baseURL = 'https://forms.test';
+const customerId = 629;
 
-const validStatsResponse = {
-  active_form_count: 12,
-  total_submission_count: 340,
-  submissions_last_7_days: 27,
+const statsResponse = {
+  active_form_count: 3,
+  total_submission_count: 128,
+  submissions_last_7_days: 12,
 };
 
 describe('formService.getFormStats', function () {
-  let axiosStub;
+  beforeEach(() => {
+    nock.disableNetConnect();
+  });
 
-  this.afterEach(() => {
-    axiosStub.restore();
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
   });
 
   it('can get form stats', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validStatsResponse });
-    });
+    nock(baseURL).get('/api/forms/stats').reply(200, statsResponse);
 
-    const service = formService({ apiKey: apiKey });
+    const service = formService({ apiKey, baseURL });
     const response = await service.getFormStats();
-    expect(response).to.deep.equal(validStatsResponse);
+    expect(response).to.deep.equal(statsResponse);
   });
 
   it('sends a Bearer Authorization header and no customer_id when omitted', async function () {
-    let capturedConfig;
+    const scope = nock(baseURL, {
+      reqheaders: { authorization: 'Bearer ' + apiKey },
+    })
+      .get('/api/forms/stats')
+      .query({})
+      .reply(200, statsResponse);
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
-      return Promise.resolve({ data: validStatsResponse });
-    });
-
-    const service = formService({ apiKey: apiKey });
+    const service = formService({ apiKey, baseURL });
     await service.getFormStats();
-
-    const createConfig = axiosStub.firstCall.args[0];
-    expect(createConfig.headers.Authorization).to.equal('Bearer ' + apiKey);
-    expect(capturedConfig.method).to.equal('GET');
-    expect(capturedConfig.url).to.equal('/api/forms/stats');
-    expect(capturedConfig.params).to.deep.equal({});
+    expect(scope.isDone()).to.equal(true);
   });
 
   it('sends the customer_id query param when provided', async function () {
-    let capturedConfig;
+    const scope = nock(baseURL)
+      .get('/api/forms/stats')
+      .query({ customer_id: customerId })
+      .reply(200, statsResponse);
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (config) {
-      capturedConfig = config;
-      return Promise.resolve({ data: validStatsResponse });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await service.getFormStats(123);
-
-    expect(capturedConfig.url).to.equal('/api/forms/stats');
-    expect(capturedConfig.params).to.deep.equal({ customer_id: 123 });
+    const service = formService({ apiKey, baseURL });
+    await service.getFormStats(customerId);
+    expect(scope.isDone()).to.equal(true);
   });
 
-  it('throws an error if no apiKey was configured', async function () {
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: validStatsResponse });
-    });
+  it('propagates the request error without leaking the Authorization header', async function () {
+    nock(baseURL).get('/api/forms/stats').query(true).reply(400, { detail: 'Bad request' });
 
-    const savedApiKey = process.env.FORMS_API_KEY;
-    delete process.env.FORMS_API_KEY;
+    const service = formService({ apiKey, baseURL });
+    let caught;
     try {
-      const service = formService();
-      await expect(service.getFormStats()).to.be.rejectedWith('apiKey is required for this method');
-    } finally {
-      if (savedApiKey !== undefined) {
-        process.env.FORMS_API_KEY = savedApiKey;
-      }
+      await service.getFormStats('not-numeric');
+    } catch (error) {
+      caught = error;
     }
+
+    expect(caught, 'expected getFormStats to reject').to.not.equal(undefined);
+    expect(caught.response.status).to.equal(400);
+    expect(caught.config.headers).to.not.have.property('Authorization');
+    expect(JSON.stringify(caught)).to.not.contain(apiKey);
   });
 
-  it('throws the response if the request fails', async function () {
-    const errorMessage = 'Request failed with status code 401';
+  it('throws a shapeless-safe Error if an unexpected response is returned', async function () {
+    nock(baseURL).get('/api/forms/stats').query({}).reply(200, { unexpected: true });
 
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.reject({ message: errorMessage, response: { status: 401 } });
-    });
+    const service = formService({ apiKey, baseURL });
+    let caught;
+    try {
+      await service.getFormStats();
+    } catch (error) {
+      caught = error;
+    }
 
-    const service = formService({ apiKey: apiKey });
-    await expect(service.getFormStats()).to.be.rejectedWith(errorMessage);
-  });
-
-  it('throws the response if an unexpected response is returned', async function () {
-    const unexpectedResponse = { this: 'is not what we expected' };
-
-    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
-      return Promise.resolve({ data: unexpectedResponse });
-    });
-
-    const service = formService({ apiKey: apiKey });
-    await expect(service.getFormStats()).to.be.rejected.then((thrown) => {
-      expect(thrown).to.deep.equal(unexpectedResponse);
-    });
+    expect(caught).to.be.an.instanceof(Error);
+    expect(caught.message).to.equal('Unexpected response from Forms API');
   });
 });

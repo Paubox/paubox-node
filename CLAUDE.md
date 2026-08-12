@@ -5,7 +5,7 @@
 `paubox-node` is the official Node.js SDK for the Paubox platform. It exposes two services:
 
 - **emailService** — authenticated REST client for the Paubox Email API (`api.paubox.net/v1/`). Sends messages, tracks delivery, and manages dynamic Handlebars templates.
-- **formService** — REST client for the Paubox Forms API (`next.paubox.com`). Fetches form definitions and submits form responses without credentials, and also supports authenticated form-management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF exports) via an optional scoped API key.
+- **formService** — REST client for the Paubox Forms API (`apx.paubox.com/forms`). Fetches form definitions and submits form responses without credentials, and also supports authenticated form-management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF exports) via an optional scoped API key.
 
 ## Repository layout
 
