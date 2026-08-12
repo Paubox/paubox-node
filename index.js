@@ -7,8 +7,8 @@ module.exports.emailService = function (config) {
   return new emailService(config);
 };
 
-module.exports.formService = function () {
-  return new formService();
+module.exports.formService = function (config) {
+  return new formService(config);
 };
 
 module.exports.message = function (options) {
