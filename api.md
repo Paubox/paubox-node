@@ -10,10 +10,10 @@ Create a service instance to send email and manage dynamic templates.
 
 ```javascript
 const pbMail = require('paubox-node');
-const service = pbMail.emailService({ apiUsername: '...', apiKey: '...' });
+const service = pbMail.emailService({ apiKey: '...' });
 ```
 
-Credentials can also be loaded from environment variables `API_USERNAME` and `API_KEY`.
+The API key can also be loaded from the environment variable `API_KEY`.
 
 ---
 
@@ -164,7 +164,7 @@ const service = pbMail.formService({ apiKey: 'your-scoped-api-key' });
 
 Calling an authenticated method without an API key throws an error.
 
-Base URL: `https://apx.paubox.com/forms`
+Base URL: `https://api.paubox.com/forms`
 
 ---
 

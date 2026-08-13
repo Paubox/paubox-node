@@ -12,7 +12,6 @@ const TemplatedMessage = require('../src/data/templatedMessage.js');
 chai.use(chaiAsPromised);
 
 const testCredentials = {
-  apiUsername: 'authorized_domain',
   apiKey: 'api-key-12345',
 };
 
