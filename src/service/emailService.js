@@ -8,7 +8,6 @@ class emailService {
   constructor(config) {
     config = Object.assign(
       {
-        apiUsername: process.env.API_USERNAME,
         apiKey: process.env.API_KEY,
       },
       config,
@@ -17,16 +16,12 @@ class emailService {
     if (!config.apiKey) {
       throw new Error('apiKey is missing.');
     }
-    if (!config.apiUsername) {
-      throw new Error('apiUsername is missing.');
-    }
     this.apiKey = config.apiKey;
-    this.apiUser = config.apiUsername;
     this.protocol = 'https:';
-    this.host = 'api.paubox.net';
+    this.host = 'api.paubox.com';
     this.port = 443;
     this.version = 'v1';
-    this.baseURL = `${this.protocol}//${this.host}/${this.version}/${this.apiUser}/`;
+    this.baseURL = `${this.protocol}//${this.host}/${this.version}/`;
 
     this.apiHelper = apiHelper(`Token token=${this.apiKey}`);
   }

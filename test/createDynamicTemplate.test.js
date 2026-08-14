@@ -11,7 +11,6 @@ const emailService = require('../src/service/emailService.js');
 chai.use(chaiAsPromised);
 
 const testCredentials = {
-  apiUsername: 'authorized_domain',
   apiKey: 'api-key-12345',
 };
 

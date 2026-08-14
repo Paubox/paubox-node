@@ -62,13 +62,10 @@ Once you have an account, follow the instructions on the Rest API dashboard to v
 
 Include your API credentials in your environment file.
 
-Your "API Username" comes from your unique API endpoint.
-
-**Base URL:** `https://api.paubox.net/v1/<USERNAME>`
+**Base URL:** `https://api.paubox.com/v1/`
 
 ```bash
 echo "API_KEY='YOUR_API_KEY'" > .env
-echo "API_USERNAME='YOUR_ENDPOINT_NAME'" >> .env
 echo ".env" >> .gitignore
 ```
 
@@ -77,7 +74,6 @@ Or pass them as parameters when creating emailService
 ```javascript
 const pbMail = require('paubox-node');
 const pauboxConfig = {
-  apiUsername: 'your-api-username',
   apiKey: 'your-api-key',
 };
 const service = pbMail.emailService(pauboxConfig);
@@ -539,7 +535,7 @@ service
 
 ### Paubox Forms
 
-The Paubox Forms endpoints for fetching a form definition and submitting responses are **public** — no API key or username is required. Use `pbMail.formService()` to get a service instance. Form-management endpoints require a scoped API key — see [Authenticated form management](#authenticated-form-management) below.
+The Paubox Forms endpoints for fetching a form definition and submitting responses are **public** — no API key is required. Use `pbMail.formService()` to get a service instance. Form-management endpoints require a scoped API key — see [Authenticated form management](#authenticated-form-management) below.
 
 #### Get Form
 
@@ -647,12 +643,12 @@ const service = pbMail.formService(); // reads FORMS_API_KEY from the environmen
 
 Calling an authenticated method without an API key throws an error. The public `getForm` and `submitForm` methods work with or without a key.
 
-The service targets production (`https://apx.paubox.com/forms`) by default. To point it at another environment, pass `{ baseURL }` or set the `FORMS_BASE_URL` environment variable (config wins over the env var):
+The service targets production (`https://api.paubox.com/forms`) by default. To point it at another environment, pass `{ baseURL }` or set the `FORMS_BASE_URL` environment variable (config wins over the env var):
 
 ```javascript
 const service = pbMail.formService({
   apiKey: 'your-scoped-api-key',
-  baseURL: 'https://apx.staging.paubox.com/forms',
+  baseURL: 'https://api.staging.paubox.com/forms',
 });
 ```
 

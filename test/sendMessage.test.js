@@ -11,7 +11,6 @@ const Message = require('../src/data/message.js');
 chai.use(chaiAsPromised);
 
 const testCredentials = {
-  apiUsername: 'authorized_domain',
   apiKey: 'api-key-12345',
 };
 

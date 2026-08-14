@@ -11,7 +11,7 @@ class formService {
       },
       config,
     );
-    this.baseURL = config.baseURL || 'https://apx.paubox.com/forms';
+    this.baseURL = config.baseURL || 'https://api.paubox.com/forms';
     this.apiKey = config.apiKey || null;
   }
 
