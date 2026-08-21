@@ -85,7 +85,11 @@ The next version is derived from PR titles, so the title is the only thing that 
 
 `.release-please-manifest.json` tracks the last released version and is seeded from npm.
 
-Publishing runs as a job inside `release-please.yml`, gated on `release_created`, and verifies the tag and `package.json` agree before uploading. `publish.yml` is a manual `workflow_dispatch`-only escape hatch; it no longer triggers on tag pushes, so a stray or malformed tag cannot cause a publish.
+Publishing runs as a job inside `release-please.yml`, gated on `release_created`, and verifies the tag and `package.json` agree before uploading. Nothing is keyed on tag pushes, so a stray or malformed tag cannot cause a publish.
+
+Authentication is npm **trusted publishing** (OIDC) — there is no token to rotate or expire. npm pins the trust to the exact `Paubox` / `paubox-node` / `release-please.yml` triple, so **renaming that workflow file breaks publishing** until the entry at <https://www.npmjs.com/package/paubox-node/access> is updated to match. Two related constraints: the job must run on Node 24 or newer, because trusted publishing needs npm >= 11.5.1 and Node 22 ships 10.9; and `repository.url` in `package.json` must keep pointing at this GitHub repo, because npm checks it.
+
+If a publish fails, re-run the failed `publish` job from the Actions tab on that release-please run. The tag and GitHub release are already created by that point and `npm publish` is the last step, so nothing is lost and no version number is consumed. That re-run is the escape hatch — there is deliberately no separate manual publish workflow, since npm allows only one trusted publisher per package and a second workflow file could not authenticate.
 
 To force a specific version, land an empty commit carrying a `Release-As` footer:
 
