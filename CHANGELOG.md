@@ -2,9 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
-
-Not yet published to npm.
+## [1.5.0](https://github.com/Paubox/paubox-node/compare/v1.4.2...v1.5.0) (2026-08-21)
 
 ### 🚀 New Features
 
@@ -27,13 +25,6 @@ Not yet published to npm.
 
 - Link Paubox Community discussions
 - Update `docs.paubox.com` links to current Mintlify URLs and fix broken `paubox.com` marketing links
-
-## [1.5.0](https://github.com/Paubox/paubox-node/compare/v1.4.2...v1.5.0) (2026-08-21)
-
-
-### Features
-
-* add authenticated Forms API methods with scoped API key support ([#56](https://github.com/Paubox/paubox-node/issues/56)) ([7d68a4e](https://github.com/Paubox/paubox-node/commit/7d68a4e42acfeeab1d96ad0bd5285dc06e80bec7))
 
 ## v1.4.2 / 2025-10-10
 
