@@ -1,0 +1,36 @@
+name: PR Title
+
+on:
+  pull_request:
+    branches: [master, main]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  conventional-title:
+    name: Conventional commit title
+    runs-on: ubuntu-latest
+    steps:
+      # With squash merging the squash commit subject is the PR title, so this
+      # string is all release-please ever parses. A title it cannot parse is
+      # silently dropped from the release rather than failing anything, so it is
+      # gated here instead.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            perf
+            revert
+            docs
+            style
+            refactor
+            test
+            build
+            ci
+            chore
+            deps

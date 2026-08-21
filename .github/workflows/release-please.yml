@@ -1,0 +1,80 @@
+name: release-please
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      # Maintains a release PR that bumps `version` in package.json and the
+      # lockfile and writes CHANGELOG.md. Merging that PR creates the tag and
+      # the GitHub release, which gates the publish job below.
+      #
+      # The manifest is seeded from npm (1.4.2), which happens to match
+      # package.json here. include-component-in-tag is false so tags stay bare
+      # `vX.Y.Z`, matching every existing tag and the rest of the SDK fleet.
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    name: Publish ${{ needs.release-please.outputs.tag_name }} to npm
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Verify the tag and package.json agree
+        # Cheap guard against publishing a version that does not match the tag
+        # it was cut from. release-please keeps these in sync, but the publish
+        # is irreversible and npm will not let the number be reused.
+        env:
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "v${PKG_VERSION}" != "${RELEASE_TAG}" ]; then
+            echo "::error::package.json is ${PKG_VERSION} but the tag is ${RELEASE_TAG}"
+            exit 1
+          fi
+          echo "package.json ${PKG_VERSION} matches ${RELEASE_TAG}"
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
