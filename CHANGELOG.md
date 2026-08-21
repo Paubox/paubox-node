@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.5.0](https://github.com/Paubox/paubox-node/compare/v1.4.2...v1.5.0) (2026-08-21)
+## Unreleased
+
+Not yet published to npm.
 
 ### 🚀 New Features
 
