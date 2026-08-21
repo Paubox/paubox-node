@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Paubox/paubox-node.git"
+    "url": "git+https://github.com/Paubox/paubox-node.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",

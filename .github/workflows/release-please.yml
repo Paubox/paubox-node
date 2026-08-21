@@ -45,7 +45,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          # Node 24 ships npm 11.x. Trusted publishing needs npm >= 11.5.1, and
+          # Node 22 ships npm 10.9 — publishing from 22 fails to authenticate.
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
@@ -75,6 +77,12 @@ jobs:
           echo "package.json ${PKG_VERSION} matches ${RELEASE_TAG}"
 
       - name: Publish to npm
+        # Authenticated with OIDC (trusted publishing), configured on npmjs.com
+        # for Paubox/paubox-node against this workflow filename. npm pins the
+        # trust to the exact org/repo/filename triple, so renaming this file
+        # breaks publishing until the npm-side entry is updated to match.
+        #
+        # No NODE_AUTH_TOKEN: there is no token to expire. The previous one was
+        # set 2025-10-10 and had stopped authenticating by the 1.5.0 release,
+        # which npm reports as a 404 on PUT rather than a 401.
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
