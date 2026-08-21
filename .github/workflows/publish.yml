@@ -1,13 +1,19 @@
-name: Publish to npm
+name: Publish to npm (manual)
 
+# Escape hatch only. The normal path is release-please.yml, whose publish job
+# runs when a release is actually created.
+#
+# This used to trigger on any pushed `v*.*.*` tag, which meant the publish was
+# keyed on a tag glob rather than on a release. That glob also matched
+# malformed tags — `v1.2.5-corrected` was in this repo and would have matched.
+#
+# Run this from the Actions tab and pick the tag to publish in the ref selector.
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_dispatch:
 
 jobs:
   publish:
+    name: Publish ${{ github.ref_name }} to npm
     runs-on: ubuntu-latest
 
     permissions:

@@ -75,6 +75,23 @@ npm run build        # lint → format → clean lib/ → Babel compile → pret
 2. Add a test file to `test/`.
 3. If it is a new service, export it from `index.js` and run `npm run build:babel` before `npm run build`.
 4. Document the method in `api.md` and add a usage example to `README.md`.
+5. Do **not** hand-edit `version` in `package.json` or add a `CHANGELOG.md` entry — release-please owns both. See [Releases](#releases).
+
+## Releases
+
+Releases are automated with [release-please](https://github.com/googleapis/release-please). Merging to `master` refreshes a standing release PR; merging *that* PR bumps `package.json` and the lockfile, writes `CHANGELOG.md`, creates a bare `vX.Y.Z` tag and a GitHub release, and then **publishes to npm**.
+
+The next version is derived from PR titles, so the title is the only thing that matters: `feat:` gives a minor bump, `fix:` a patch, and a `!` suffix or a `BREAKING CHANGE:` footer gives a major. `.github/workflows/pr-title.yml` rejects titles release-please cannot parse — an unparseable one would otherwise be dropped from the changelog silently.
+
+`.release-please-manifest.json` tracks the last released version and is seeded from npm.
+
+Publishing runs as a job inside `release-please.yml`, gated on `release_created`, and verifies the tag and `package.json` agree before uploading. `publish.yml` is a manual `workflow_dispatch`-only escape hatch; it no longer triggers on tag pushes, so a stray or malformed tag cannot cause a publish.
+
+To force a specific version, land an empty commit carrying a `Release-As` footer:
+
+```bash
+git commit --allow-empty -m "chore: release 2.0.0" -m "Release-As: 2.0.0"
+```
 
 ## Code style
 
