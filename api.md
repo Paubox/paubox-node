@@ -164,7 +164,7 @@ const service = pbMail.formService({ apiKey: 'your-scoped-api-key' });
 
 Calling an authenticated method without an API key throws an error.
 
-Base URL: `https://api.paubox.com/forms`
+Base URL: `https://api.paubox.com/v1/forms`
 
 ---
 

@@ -34,3 +34,25 @@ jobs:
 
       - name: Run linter
         run: npm run lint
+
+  route-check:
+    name: Base URLs are routed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Ask the services, so a base URL change cannot pass unprobed.
+      - name: Probe the base URLs the services build
+        run: |
+          node -e '
+            const p = require("./");
+            console.log(p.emailService({ apiKey: "route-check" }).baseURL);
+            console.log(p.formService({ apiKey: "route-check" }).baseURL);
+          ' | .github/scripts/route-check.sh

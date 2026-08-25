@@ -180,7 +180,7 @@ describe('formService baseURL resolution', function () {
     const saved = process.env.FORMS_BASE_URL;
     delete process.env.FORMS_BASE_URL;
     try {
-      expect(formService({ apiKey }).baseURL).to.equal('https://api.paubox.com/forms');
+      expect(formService({ apiKey }).baseURL).to.equal('https://api.paubox.com/v1/forms');
     } finally {
       if (saved !== undefined) {
         process.env.FORMS_BASE_URL = saved;

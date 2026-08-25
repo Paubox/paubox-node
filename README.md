@@ -62,7 +62,7 @@ Once you have an account, follow the instructions on the Rest API dashboard to v
 
 Include your API credentials in your environment file.
 
-**Base URL:** `https://api.paubox.com/v1/`
+**Base URL:** `https://api.paubox.com/v1/email/`
 
 ```bash
 echo "API_KEY='YOUR_API_KEY'" > .env
@@ -643,7 +643,7 @@ const service = pbMail.formService(); // reads FORMS_API_KEY from the environmen
 
 Calling an authenticated method without an API key throws an error. The public `getForm` and `submitForm` methods work with or without a key.
 
-The service targets production (`https://api.paubox.com/forms`) by default. To point it at another environment, pass `{ baseURL }` or set the `FORMS_BASE_URL` environment variable (config wins over the env var):
+The service targets production (`https://api.paubox.com/v1/forms`) by default. To point it at another environment, pass `{ baseURL }` or set the `FORMS_BASE_URL` environment variable (config wins over the env var):
 
 ```javascript
 const service = pbMail.formService({

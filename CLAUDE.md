@@ -4,8 +4,8 @@
 
 `paubox-node` is the official Node.js SDK for the Paubox platform. It exposes two services:
 
-- **emailService** — authenticated REST client for the Paubox Email API (`api.paubox.com/v1/`). Sends messages, tracks delivery, and manages dynamic Handlebars templates.
-- **formService** — REST client for the Paubox Forms API (`api.paubox.com/forms`). Fetches form definitions and submits form responses without credentials, and also supports authenticated form-management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF exports) via an optional scoped API key.
+- **emailService** — authenticated REST client for the Paubox Email API (`api.paubox.com/v1/email/`). Sends messages, tracks delivery, and manages dynamic Handlebars templates.
+- **formService** — REST client for the Paubox Forms API (`api.paubox.com/v1/forms`). Fetches form definitions and submits form responses without credentials, and also supports authenticated form-management endpoints (list/create/update/archive/copy forms, stats, submissions, CSV/PDF exports) via an optional scoped API key.
 
 ## Repository layout
 
@@ -30,13 +30,13 @@ index.js                 # Public exports: emailService, formService, message, t
 
 - Constructor requires `apiKey` (or env var `API_KEY`). A legacy `apiUsername` in the config is accepted and ignored.
 - All requests use `apiHelper`, which injects `Authorization: Token token=<apiKey>`.
-- Base URL: `https://api.paubox.com/v1/`.
+- Base URL: `https://api.paubox.com/v1/email/`.
 - Dynamic template uploads use `FormData` (multipart); all other requests are JSON.
 - Response validation: methods inspect well-known fields and throw the raw response if unexpected.
 
 ### formService
 
-- Base URL: `https://api.paubox.com/forms` (overridable via `config.baseURL` or `FORMS_BASE_URL`).
+- Base URL: `https://api.paubox.com/v1/forms` (overridable via `config.baseURL` or `FORMS_BASE_URL`).
 - Uses `axios.create` directly (no `apiHelper`).
 - `getForm` and `submitForm` remain unauthenticated — public endpoints called by form respondents; they never send an Authorization header.
 - `getForm` validates that the response contains an `id` field before returning.
