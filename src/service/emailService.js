@@ -21,7 +21,7 @@ class emailService {
     this.host = 'api.paubox.com';
     this.port = 443;
     this.version = 'v1';
-    this.baseURL = `${this.protocol}//${this.host}/${this.version}/`;
+    this.baseURL = `${this.protocol}//${this.host}/${this.version}/email/`;
 
     this.apiHelper = apiHelper(`Token token=${this.apiKey}`);
   }

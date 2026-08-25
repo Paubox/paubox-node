@@ -4,9 +4,9 @@ const { expect } = chai;
 const emailService = require('../src/service/emailService.js');
 
 describe('emailService constructor', function () {
-  it('constructs with only an apiKey and uses the versioned base URL', function () {
+  it('constructs with only an apiKey and uses the Email API base URL', function () {
     const service = emailService({ apiKey: 'api-key-12345' });
-    expect(service.baseURL).to.equal('https://api.paubox.com/v1/');
+    expect(service.baseURL).to.equal('https://api.paubox.com/v1/email/');
   });
 
   it('ignores a legacy apiUsername without throwing', function () {
@@ -14,7 +14,7 @@ describe('emailService constructor', function () {
       apiUsername: 'authorized_domain',
       apiKey: 'api-key-12345',
     });
-    expect(service.baseURL).to.equal('https://api.paubox.com/v1/');
+    expect(service.baseURL).to.equal('https://api.paubox.com/v1/email/');
     expect(service.apiUser).to.equal(undefined);
   });
 
@@ -23,7 +23,7 @@ describe('emailService constructor', function () {
     process.env.API_KEY = 'env-api-key';
     try {
       const service = emailService();
-      expect(service.baseURL).to.equal('https://api.paubox.com/v1/');
+      expect(service.baseURL).to.equal('https://api.paubox.com/v1/email/');
     } finally {
       if (saved === undefined) {
         delete process.env.API_KEY;
