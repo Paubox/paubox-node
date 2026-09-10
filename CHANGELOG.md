@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1](https://github.com/Paubox/paubox-node/compare/v1.5.0...v1.5.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* target the documented /v1/email and /v1/forms base URLs ([#65](https://github.com/Paubox/paubox-node/issues/65)) ([aab85bd](https://github.com/Paubox/paubox-node/commit/aab85bd584b19b0f120aa612384572e37867b9c6))
+
 ## [1.5.0](https://github.com/Paubox/paubox-node/compare/v1.4.2...v1.5.0) (2026-08-21)
 
 ### 🚀 New Features
