@@ -289,6 +289,87 @@ class emailService {
     return response;
   }
 
+  async scheduleMessage(msg, scheduledAt) {
+    if (!msg || typeof msg.toJSON !== 'function') {
+      throw new Error('Message must implement toJSON()');
+    }
+    if (!scheduledAt) {
+      throw new Error('scheduledAt is required');
+    }
+
+    var requestBody = {
+      data: {
+        message: msg.toJSON(),
+        scheduled_at: scheduledAt,
+      },
+    };
+
+    const response = await this.apiHelper.post(this.baseURL, '/schedule', requestBody);
+
+    if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
+      throw response;
+    }
+
+    return response;
+  }
+
+  async getScheduledMessage(sourceTrackingId) {
+    if (!sourceTrackingId) {
+      throw new Error('sourceTrackingId is required');
+    }
+
+    const response = await this.apiHelper.get(this.baseURL, `/schedule/${sourceTrackingId}`);
+
+    if (response.state == null && response.errors == null) {
+      throw response;
+    }
+
+    return response;
+  }
+
+  async rescheduleMessage(sourceTrackingId, scheduledAt) {
+    if (!sourceTrackingId) {
+      throw new Error('sourceTrackingId is required');
+    }
+    if (!scheduledAt) {
+      throw new Error('scheduledAt is required');
+    }
+
+    var requestBody = {
+      scheduled_at: scheduledAt,
+    };
+
+    const response = await this.apiHelper.patch(
+      this.baseURL,
+      `/schedule/${sourceTrackingId}`,
+      requestBody,
+    );
+
+    if (response.data == null && response.sourceTrackingId == null && response.errors == null) {
+      throw response;
+    }
+
+    return response;
+  }
+
+  async cancelScheduledMessage(sourceTrackingId) {
+    if (!sourceTrackingId) {
+      throw new Error('sourceTrackingId is required');
+    }
+
+    const response = await this.apiHelper.post(
+      this.baseURL,
+      `/schedule/${sourceTrackingId}/cancel`,
+      {},
+    );
+
+    if (response.state == null && response.data == null && response.errors == null) {
+      throw response;
+    }
+
+    return response;
+  }
+
   createFormData(templateName = null, templateContent = null) {
     const formData = new FormData();
 
