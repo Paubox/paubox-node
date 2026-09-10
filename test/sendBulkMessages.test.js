@@ -79,13 +79,10 @@ describe('emailService.sendBulkMessages', function () {
           {
             recipients: ['alice@example.com', 'Alice Anderson <alice@host.com>'],
             cc: ['accounts@authorized_domain.com'],
-            bcc: null,
             headers: {
               subject: 'Hi Alice!',
               from: 'reception@authorized_domain.com',
               'reply-to': 'Reception <reception@authorized_domain.com>',
-              'List-Unsubscribe': null,
-              'List-Unsubscribe-Post': null,
               'X-Custom-Header': 'value alice',
             },
             allowNonTLS: false,
@@ -107,13 +104,10 @@ describe('emailService.sendBulkMessages', function () {
           {
             recipients: ['bob@example.com', 'Bob Brown <bob@host.com>'],
             cc: ['accounts@authorized_domain.com'],
-            bcc: null,
             headers: {
               subject: 'Hi Bob!',
               from: 'reception@authorized_domain.com',
               'reply-to': 'Reception <reception@authorized_domain.com>',
-              'List-Unsubscribe': null,
-              'List-Unsubscribe-Post': null,
               'X-Custom-Header-1': 'value bob 1',
               'X-Custom-Header-2': 'value bob 2',
             },

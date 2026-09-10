@@ -57,19 +57,15 @@ describe('emailService.sendTemplatedMessage', function () {
         message: {
           recipients: ['person@example.com'],
           cc: ['accounts@authorized_domain.com'],
-          bcc: null,
           headers: {
             subject: 'Welcome!',
             from: 'reception@authorized_domain.com',
             'reply-to': 'reception@authorized_domain.com',
-            'List-Unsubscribe': null,
-            'List-Unsubscribe-Post': null,
             'X-Custom-Header-1': 'value 1',
             'X-Custom-Header-2': 'value 2',
           },
           allowNonTLS: false,
           forceSecureNotification: false,
-          attachments: null,
         },
       },
     };

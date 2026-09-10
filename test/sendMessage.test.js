@@ -42,13 +42,10 @@ describe('emailService.sendMessage', function () {
         message: {
           recipients: ['person@example.com'],
           cc: ['accounts@authorized_domain.com'],
-          bcc: null,
           headers: {
             subject: 'Test Email',
             from: 'reception@authorized_domain.com',
             'reply-to': 'reception@authorized_domain.com',
-            'List-Unsubscribe': null,
-            'List-Unsubscribe-Post': null,
           },
           allowNonTLS: false,
           forceSecureNotification: false,
@@ -58,7 +55,6 @@ describe('emailService.sendMessage', function () {
               'base64',
             ),
           },
-          attachments: null,
         },
       },
     };
@@ -180,13 +176,10 @@ describe('emailService.sendMessage', function () {
         message: {
           recipients: ['person@example.com'],
           cc: ['accounts@authorized_domain.com'],
-          bcc: null,
           headers: {
             subject: 'Test Email',
             from: 'reception@authorized_domain.com',
             'reply-to': 'reception@authorized_domain.com',
-            'List-Unsubscribe': null,
-            'List-Unsubscribe-Post': null,
             'X-Custom-Header-1': 'value 1',
             'X-Custom-Header-2': 'value 2',
           },
@@ -198,7 +191,6 @@ describe('emailService.sendMessage', function () {
               'base64',
             ),
           },
-          attachments: null,
         },
       },
     };
