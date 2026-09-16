@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0](https://github.com/Paubox/paubox-node/compare/v1.5.1...v1.6.0) (2026-09-16)
+
+
+### Features
+
+* add receiving (inbound email) endpoints ([#71](https://github.com/Paubox/paubox-node/issues/71)) ([5ac1aa7](https://github.com/Paubox/paubox-node/commit/5ac1aa7470690d6b37321408afd79d4e73172e08))
+
 ## [1.5.1](https://github.com/Paubox/paubox-node/compare/v1.5.0...v1.5.1) (2026-08-25)
 
 
