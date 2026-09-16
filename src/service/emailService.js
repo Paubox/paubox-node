@@ -370,6 +370,63 @@ class emailService {
     return response;
   }
 
+  async listReceivingDomains() {
+    return this.apiHelper.get(this.baseURL, '/receiving/domains');
+  }
+
+  async createReceivingDomain(slug) {
+    const body = slug != null ? { slug } : {};
+    return this.apiHelper.post(this.baseURL, '/receiving/domains', body);
+  }
+
+  async getReceivingDomain(id) {
+    return this.apiHelper.get(this.baseURL, `/receiving/domains/${id}`);
+  }
+
+  async deleteReceivingDomain(id) {
+    return this.apiHelper.delete(this.baseURL, `/receiving/domains/${id}`);
+  }
+
+  async listReceivingMailboxes(domainId) {
+    return this.apiHelper.get(this.baseURL, `/receiving/domains/${domainId}/mailboxes`);
+  }
+
+  async createReceivingMailbox(domainId, name, password, quotaBytes) {
+    const body = { name, password };
+    if (quotaBytes != null) {
+      body.quota_bytes = quotaBytes;
+    }
+    return this.apiHelper.post(this.baseURL, `/receiving/domains/${domainId}/mailboxes`, body);
+  }
+
+  async getReceivingMailbox(domainId, mailboxId) {
+    return this.apiHelper.get(this.baseURL, `/receiving/domains/${domainId}/mailboxes/${mailboxId}`);
+  }
+
+  async deleteReceivingMailbox(domainId, mailboxId) {
+    return this.apiHelper.delete(
+      this.baseURL,
+      `/receiving/domains/${domainId}/mailboxes/${mailboxId}`,
+    );
+  }
+
+  async listReceivedEmails(options = {}) {
+    const params = new URLSearchParams();
+    if (options.limit != null) params.set('limit', options.limit);
+    if (options.after != null) params.set('after', options.after);
+    if (options.before != null) params.set('before', options.before);
+    const qs = params.toString();
+    return this.apiHelper.get(this.baseURL, `/receiving${qs ? `?${qs}` : ''}`);
+  }
+
+  async getReceivedEmail(emailId) {
+    return this.apiHelper.get(this.baseURL, `/receiving/${emailId}`);
+  }
+
+  async getReceivedEmailAttachment(emailId, blobId) {
+    return this.apiHelper.get(this.baseURL, `/receiving/${emailId}/attachments/${blobId}`);
+  }
+
   createFormData(templateName = null, templateContent = null) {
     const formData = new FormData();
 
