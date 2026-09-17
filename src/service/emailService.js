@@ -427,6 +427,26 @@ class emailService {
     return this.apiHelper.get(this.baseURL, `/receiving/${emailId}/attachments/${blobId}`);
   }
 
+  async listWebhookEndpoints() {
+    return this.apiHelper.get(this.baseURL, '/webhook_endpoints');
+  }
+
+  async createWebhookEndpoint(params) {
+    return this.apiHelper.post(this.baseURL, '/webhook_endpoints', params);
+  }
+
+  async getWebhookEndpoint(id) {
+    return this.apiHelper.get(this.baseURL, `/webhook_endpoints/${id}`);
+  }
+
+  async updateWebhookEndpoint(id, params) {
+    return this.apiHelper.patch(this.baseURL, `/webhook_endpoints/${id}`, params);
+  }
+
+  async deleteWebhookEndpoint(id) {
+    return this.apiHelper.delete(this.baseURL, `/webhook_endpoints/${id}`);
+  }
+
   createFormData(templateName = null, templateContent = null) {
     const formData = new FormData();
 
