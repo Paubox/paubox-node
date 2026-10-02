@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1](https://github.com/Paubox/paubox-node/compare/v1.7.0...v1.7.1) (2026-10-02)
+
+
+### Bug Fixes
+
+* **receiving:** return attachment bytes and match the UUID-based receiving API ([#74](https://github.com/Paubox/paubox-node/issues/74)) ([b088ce5](https://github.com/Paubox/paubox-node/commit/b088ce5c9201385a3856adf7460d5f14a98eb4ea))
+
 ## [1.7.0](https://github.com/Paubox/paubox-node/compare/v1.6.0...v1.7.0) (2026-09-17)
 
 
