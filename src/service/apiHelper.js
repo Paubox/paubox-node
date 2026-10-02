@@ -68,6 +68,31 @@ class apiHelper {
     });
   }
 
+  getBinary(baseUrl, apiUrl) {
+    const axiosInstance = axios.create({
+      baseURL: baseUrl,
+      headers: { ...this.baseHeaders },
+    });
+
+    return axiosInstance({ method: 'GET', url: apiUrl, responseType: 'arraybuffer' }).then(
+      (response) => ({
+        data: Buffer.isBuffer(response.data) ? response.data : Buffer.from(response.data),
+        headers: response.headers || {},
+      }),
+      (error) => {
+        if (error.response && Buffer.isBuffer(error.response.data)) {
+          const text = error.response.data.toString('utf8');
+          try {
+            error.response.data = JSON.parse(text);
+          } catch (_err) {
+            error.response.data = text;
+          }
+        }
+        throw error;
+      },
+    );
+  }
+
   delete(baseUrl, apiUrl) {
     const headers = { ...this.baseHeaders, ...{ 'Content-Type': 'application/json' } };
 

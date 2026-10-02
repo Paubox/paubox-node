@@ -400,7 +400,10 @@ class emailService {
   }
 
   async getReceivingMailbox(domainId, mailboxId) {
-    return this.apiHelper.get(this.baseURL, `/receiving/domains/${domainId}/mailboxes/${mailboxId}`);
+    return this.apiHelper.get(
+      this.baseURL,
+      `/receiving/domains/${domainId}/mailboxes/${mailboxId}`,
+    );
   }
 
   async deleteReceivingMailbox(domainId, mailboxId) {
@@ -415,6 +418,9 @@ class emailService {
     if (options.limit != null) params.set('limit', options.limit);
     if (options.after != null) params.set('after', options.after);
     if (options.before != null) params.set('before', options.before);
+    if (options.search != null) params.set('search', options.search);
+    if (options.sort != null) params.set('sort', options.sort);
+    if (options.ascending != null) params.set('ascending', options.ascending);
     const qs = params.toString();
     return this.apiHelper.get(this.baseURL, `/receiving${qs ? `?${qs}` : ''}`);
   }
@@ -423,8 +429,17 @@ class emailService {
     return this.apiHelper.get(this.baseURL, `/receiving/${emailId}`);
   }
 
-  async getReceivedEmailAttachment(emailId, blobId) {
-    return this.apiHelper.get(this.baseURL, `/receiving/${emailId}/attachments/${blobId}`);
+  async getReceivedEmailAttachment(emailId, attachmentId) {
+    const { data, headers } = await this.apiHelper.getBinary(
+      this.baseURL,
+      `/receiving/${emailId}/attachments/${attachmentId}`,
+    );
+
+    return {
+      content: data,
+      content_type: headers['content-type'] || null,
+      filename: parseContentDispositionFilename(headers['content-disposition']),
+    };
   }
 
   async listWebhookEndpoints() {
@@ -480,6 +495,18 @@ class emailService {
 
     return formData;
   }
+}
+
+function parseContentDispositionFilename(disposition) {
+  if (typeof disposition !== 'string') {
+    return null;
+  }
+  const match = /filename\s*=\s*(?:"([^"]*)"|([^;]+))/i.exec(disposition);
+  if (!match) {
+    return null;
+  }
+  const filename = (match[1] != null ? match[1] : match[2]).trim();
+  return filename || null;
 }
 
 module.exports = function (options) {
