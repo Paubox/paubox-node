@@ -414,6 +414,110 @@ Export a single submission as a PDF. Requires a scoped API key with the `forms` 
 
 ---
 
+## webhookService
+
+Create a service instance for the Paubox webhooks service.
+
+Every method requires a **scoped API key**, passed as `{ apiKey }` to `pbMail.webhookService()` or via the `WEBHOOKS_API_KEY` environment variable. It is sent as `Authorization: Bearer <key>` — the same scheme as Forms, and a different one from the Email API's `Token token=`.
+
+```javascript
+const pbMail = require('paubox-node');
+const service = pbMail.webhookService({ apiKey: 'your-scoped-api-key' });
+```
+
+Calling any method without an API key throws an error before a request is made.
+
+Base URL: `https://api.paubox.com/v1/webhooks` (override with `{ baseURL }` or `WEBHOOKS_BASE_URL`)
+
+Which events a key may subscribe to is decided by its scopes. Subscribing to an event the key is not scoped for returns `403`; an unrecognised event returns `422`.
+
+> **Breaking change.** These five methods previously lived on `emailService` and targeted the legacy Email API at `/v1/email/webhook_endpoints` with **integer** ids and `Token token=` auth. They now live on `webhookService`, target the webhooks service, and take **UUID** ids. Move the calls across; the names are unchanged.
+
+---
+
+### listWebhookEndpoints(params)
+
+List the endpoints this key can act on. Endpoints carrying an event the key is not scoped for are filtered out by the service.
+
+| Parameter      | Type     | Description                       |
+| -------------- | -------- | --------------------------------- |
+| `params.page`  | `number` | Optional. Page number.            |
+| `params.items` | `number` | Optional. Results per page.       |
+
+**Returns:** `Promise<object>` — `{ data, page_info }`.
+
+`page_info.count` is the **total** number of matching endpoints, not the length of the returned page.
+
+---
+
+### createWebhookEndpoint(params)
+
+Subscribe a URL to one or more events.
+
+| Parameter           | Type       | Description                                             |
+| ------------------- | ---------- | ------------------------------------------------------- |
+| `params.target_url` | `string`   | Required. Must be an `https` URL on a public address.   |
+| `params.events`     | `string[]` | Required. Non-empty.                                    |
+
+**Returns:** `Promise<object>` — the created endpoint, including `signing_secret`.
+
+`signing_secret` is returned **only here**. It is absent from `getWebhookEndpoint` and `listWebhookEndpoints`; a lost secret means replacing the endpoint.
+
+```javascript
+const created = await service.createWebhookEndpoint({
+  target_url: 'https://hooks.example.com/paubox',
+  events: ['forms.submission.created'],
+});
+// persist created.signing_secret now
+```
+
+Event names are **not** validated client-side: the catalog belongs to the service and grows without an SDK release.
+
+---
+
+### getWebhookEndpoint(endpointId)
+
+| Parameter    | Type     | Description                |
+| ------------ | -------- | -------------------------- |
+| `endpointId` | `string` | UUID of the endpoint.      |
+
+**Returns:** `Promise<object>` — the endpoint: `id`, `target_url`, `status`, `events`, `created_at`, `updated_at`.
+
+A malformed UUID and another tenant's id both return `404` with the same message — the service gives no existence oracle.
+
+---
+
+### updateWebhookEndpoint(endpointId, updates)
+
+Partial update: only the provided fields are sent, so changing `target_url` leaves `events` and `status` untouched.
+
+| Parameter            | Type       | Description                        |
+| -------------------- | ---------- | ---------------------------------- |
+| `endpointId`         | `string`   | UUID of the endpoint.              |
+| `updates.target_url` | `string`   | Optional.                          |
+| `updates.status`     | `string`   | Optional. `active` or `disabled`.  |
+| `updates.events`     | `string[]` | Optional. Replaces the event list. |
+
+**Returns:** `Promise<object>` — the updated endpoint.
+
+---
+
+### deleteWebhookEndpoint(endpointId)
+
+Delete an endpoint, stopping every event on it. The service answers `204` with no body.
+
+**Returns:** `Promise<void>`
+
+---
+
+### Webhook errors
+
+Failures reject with an `Error` carrying `status` and a trimmed `response`. The service's own message is promoted onto `error.message`, so a caller sees `target_url: must be an https URL` rather than `Request failed with status code 422`.
+
+Note a duplicate `target_url` is **`422`, not `409`**.
+
+---
+
 ## message(options)
 
 Construct an email message.
