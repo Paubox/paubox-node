@@ -37,6 +37,13 @@ The API wrapper allows you to construct and send messages.
     - [Get Form](#get-form)
     - [Submit Form](#submit-form)
     - [Authenticated form management](#authenticated-form-management)
+  - [Webhooks](#webhooks)
+    - [Create a webhook endpoint](#create-a-webhook-endpoint)
+    - [List webhook endpoints](#list-webhook-endpoints)
+    - [Get a webhook endpoint](#get-a-webhook-endpoint)
+    - [Update a webhook endpoint](#update-a-webhook-endpoint)
+    - [Delete a webhook endpoint](#delete-a-webhook-endpoint)
+    - [Webhook error handling](#webhook-error-handling)
 - [Supported Node Versions](#supported-node-versions)
 - [Contributing](#contributing)
 - [License](#license)
@@ -812,6 +819,79 @@ service.exportSubmissionPdf(formId, submissionId).then((pdf) => {
   fs.writeFileSync('./submission.pdf', Buffer.from(pdf));
 });
 ```
+
+### Webhooks
+
+A webhook endpoint is a URL you own that Paubox notifies when something happens. `pbMail.webhookService()` manages those subscriptions: which URL to notify, and for which events.
+
+It takes a **scoped API key**, sent as `Authorization: Bearer <key>` — not the Email API's `Token token=`. The key and base URL fall back to the `WEBHOOKS_API_KEY` and `WEBHOOKS_BASE_URL` environment variables:
+
+```js
+const pbMail = require('paubox-node');
+const service = pbMail.webhookService({ apiKey: 'YOUR-SCOPED-API-KEY' });
+```
+
+Which events a key may subscribe to follows from its scopes. The SDK does not inspect them — the service refuses an event the key isn't scoped for with 403, and an unrecognised event with 422.
+
+#### Create a webhook endpoint
+
+```js
+const endpoint = await service.createWebhookEndpoint({
+  target_url: 'https://example.com/paubox-webhook',
+  events: ['forms.submission.created'],
+});
+
+console.log(endpoint.id);             // UUID
+console.log(endpoint.signing_secret); // whsec_... — store this now
+```
+
+`signing_secret` is returned **once**, here. It is not on `getWebhookEndpoint` or `listWebhookEndpoints`, and there is no way to read it back — recovering from a lost secret means deleting the endpoint and creating a new one. Use it to verify that deliveries really came from Paubox.
+
+#### List webhook endpoints
+
+```js
+const result = await service.listWebhookEndpoints();
+
+result.data.forEach((e) => console.log(e.id, e.target_url, e.status));
+
+console.log(result.page_info.count); // total matching, not the length of data
+```
+
+Pass `page` and `items` to paginate:
+
+```js
+const page2 = await service.listWebhookEndpoints({ page: 2, items: 25 });
+```
+
+#### Get a webhook endpoint
+
+```js
+const endpoint = await service.getWebhookEndpoint('2ec66c21-bf48-48eb-8d28-f80b2d6b77c7');
+```
+
+#### Update a webhook endpoint
+
+Only the keys you pass are sent, so changing the status leaves the URL and events alone:
+
+```js
+const endpoint = await service.updateWebhookEndpoint(endpointId, { status: 'disabled' });
+```
+
+Pausing deliveries without losing the subscription is what `disabled` is for; set `active` to resume. Passing `events` replaces the list rather than adding to it.
+
+#### Delete a webhook endpoint
+
+```js
+await service.deleteWebhookEndpoint(endpointId);
+```
+
+Resolves with nothing — the service answers `204 No Content`. Deleting stops every event on that endpoint, and the signing secret goes with it.
+
+#### Webhook error handling
+
+A non-2xx response rejects with an `Error` whose message is the service's own text, so a caller sees `target_url: an endpoint already exists for this URL` rather than a bare status. The error carries no request configuration, so the `Authorization` header cannot reach a logger that serializes it.
+
+Two cases worth handling explicitly: subscribing a `target_url` that already has an endpoint comes back as 422, and an id that doesn't belong to your account is a 404 rather than a 403. An id that isn't a UUID is rejected locally, before any request is made.
 
 ## Supported Node Versions
 
