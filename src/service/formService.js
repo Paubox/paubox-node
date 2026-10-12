@@ -76,7 +76,7 @@ class formService {
 
     const requestBody = { form_data: formData };
 
-    if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+    if (Array.isArray(attachments) && attachments.length > 0) {
       requestBody.attachments = attachments;
     }
 
@@ -520,7 +520,7 @@ class formService {
     this._requireApiKey();
 
     const queryParams = {};
-    if (customerId !== undefined && customerId !== null) {
+    if (customerId !== null) {
       queryParams.customer_id = customerId;
     }
 
@@ -599,7 +599,7 @@ class formService {
     const formSegment = this._pathSegment('formId', formId);
 
     let url = `/api/forms/${formSegment}/submissions/submission-csv`;
-    if (submissionId !== undefined && submissionId !== null) {
+    if (submissionId !== null) {
       url += `/${this._pathSegment('submissionId', submissionId)}`;
     }
 

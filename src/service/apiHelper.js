@@ -5,7 +5,6 @@ const FormData = require('form-data');
 
 class apiHelper {
   constructor(authHeader) {
-    this.authHeader = authHeader;
     this.baseHeaders = { Authorization: `${authHeader}` };
   }
 
