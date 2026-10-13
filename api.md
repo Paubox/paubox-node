@@ -84,7 +84,7 @@ Create a new dynamic (Handlebars) template.
 | `templateName`    | `string`                     | Name for the template.           |
 | `templateContent` | `string \| Buffer \| Stream` | Template body (Handlebars HTML). |
 
-**Returns:** `Promise<object>` — the Paubox API response.
+**Returns:** `Promise<object>` — the created template object (`id`, `name`, `api_customer_id`, `body`, `created_at`, `updated_at`, `metadata`).
 
 **Docs:** https://docs.paubox.com/email-api/dynamic-templates/create
 
@@ -100,7 +100,7 @@ Update an existing dynamic template. At least one of `templateName` or `template
 | `templateName`    | `string \| null`                     | New name, or `null` to leave unchanged.           |
 | `templateContent` | `string \| Buffer \| Stream \| null` | New body, or `null` to leave unchanged.           |
 
-**Returns:** `Promise<object>` — the Paubox API response.
+**Returns:** `Promise<object>` — the updated template object.
 
 **Docs:** https://docs.paubox.com/email-api/dynamic-templates/update
 
@@ -138,7 +138,7 @@ Get a single dynamic template by ID.
 
 List all dynamic templates for the account.
 
-**Returns:** `Promise<object[]>` — array of template summary objects.
+**Returns:** `Promise<object[]>` — array of template objects (the API's `templates` array).
 
 **Docs:** https://docs.paubox.com/email-api/dynamic-templates
 

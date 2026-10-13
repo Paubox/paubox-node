@@ -26,17 +26,13 @@ describe('emailService.updateDynamicTemplate', function () {
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
     const validResponse = {
-      message: 'Template new_name updated!',
-      params: {
-        name: 'new_name',
-        body: {
-          tempfile: '#<File:0x00007f61b560e028>',
-          original_filename: 'new_file.hbs',
-          content_type: 'text/x-handlebars-template',
-          headers:
-            'Content-Disposition: form-data; name="data[body]"; filename="new_file.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
-        },
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'new_name',
+      body: '<html><body><h1>Bye {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;
@@ -62,10 +58,13 @@ describe('emailService.updateDynamicTemplate', function () {
     const newName = 'Another New Name';
 
     const validResponse = {
-      message: 'Template Another New Name updated!',
-      params: {
-        name: 'Another New Name',
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'Another New Name',
+      body: '<html><body><h1>Hello {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;
@@ -91,16 +90,13 @@ describe('emailService.updateDynamicTemplate', function () {
     const newFile = Buffer.from('<html><body><h1>Bye {{firstName}}!</h1></body></html>');
 
     const validResponse = {
-      message: 'Template  updated!',
-      params: {
-        body: {
-          tempfile: '#<File:0x00007f61b9b12d90>',
-          original_filename: 'new_file.hbs',
-          content_type: 'text/x-handlebars-template',
-          headers:
-            'Content-Disposition: form-data; name="data[body]"; filename="new_file.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
-        },
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'template_name',
+      body: '<html><body><h1>Bye {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;

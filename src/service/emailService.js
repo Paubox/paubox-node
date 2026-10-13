@@ -168,6 +168,7 @@ class emailService {
     const response = await this.apiHelper.post(this.baseURL, '/dynamic_templates', requestBody);
 
     if (
+      response.id == null &&
       response.message == null &&
       response.params == null &&
       response.errors == null &&
@@ -210,6 +211,7 @@ class emailService {
     );
 
     if (
+      response.id == null &&
       response.message == null &&
       response.params == null &&
       response.errors == null &&
@@ -234,6 +236,10 @@ class emailService {
 
     if (response instanceof Array) {
       return response;
+    }
+
+    if (response && response.templates instanceof Array) {
+      return response.templates;
     }
 
     throw response;
