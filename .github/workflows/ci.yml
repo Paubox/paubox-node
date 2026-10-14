@@ -55,4 +55,10 @@ jobs:
             const p = require("./");
             console.log(p.emailService({ apiKey: "route-check" }).baseURL);
             console.log(p.formService({ apiKey: "route-check" }).baseURL);
+            // The webhooks base is probed with /endpoints appended. The gateway
+            // scopes its rule to that one resource so the producers event-ingest
+            // route stays off the public host, which leaves the bare base
+            // unrouted by design — probing it directly would fail this check for
+            // a URL the service never requests on its own.
+            console.log(p.webhookService({ apiKey: "route-check" }).baseURL + "/endpoints");
           ' | .github/scripts/route-check.sh
