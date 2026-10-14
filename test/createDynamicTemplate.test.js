@@ -26,17 +26,13 @@ describe('emailService.createDynamicTemplate', function () {
     const templateContent = '<html><body><h1>Hello {{firstName}}!</h1></body></html>';
 
     const validResponse = {
-      message: 'Template template_name created!',
-      params: {
-        name: 'template_name',
-        body: {
-          tempfile: '#<File:0x00007ff371046a70>',
-          original_filename: 'template_name.hbs',
-          content_type: 'text/x-handlebars-template',
-          headers:
-            'Content-Disposition: form-data; name="data[body]"; filename="template_name.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
-        },
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'template_name',
+      body: '<html><body><h1>Hello {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;
@@ -61,17 +57,13 @@ describe('emailService.createDynamicTemplate', function () {
     const stream = fs.createReadStream('test/fixtures/template.hbs');
 
     const validResponse = {
-      message: 'Template template_name created!',
-      params: {
-        name: 'template_name',
-        body: {
-          tempfile: '#<File:0x00007ff371046a70>',
-          original_filename: 'template.hbs',
-          content_type: 'text/x-handlebars-template',
-          headers:
-            'Content-Disposition: form-data; name="data[body]"; filename="template.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
-        },
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'template_name',
+      body: '<html><body><h1>Hello {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;
@@ -97,17 +89,13 @@ describe('emailService.createDynamicTemplate', function () {
     const buffer = Buffer.from('<html><body><h1>Hello {{firstName}}!</h1></body></html>');
 
     const validResponse = {
-      message: 'Template template_name created!',
-      params: {
-        name: 'template_name',
-        body: {
-          tempfile: '#<File:0x00007ff371046a70>',
-          original_filename: 'template.hbs',
-          content_type: 'text/x-handlebars-template',
-          headers:
-            'Content-Disposition: form-data; name="data[body]"; filename="template.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
-        },
-      },
+      id: 123,
+      api_customer_id: 12,
+      name: 'template_name',
+      body: '<html><body><h1>Hello {{firstName}}!</h1></body></html>',
+      metadata: null,
+      created_at: '2026-10-13T17:02:11.123Z',
+      updated_at: '2026-10-13T17:02:11.123Z',
     };
 
     let capturedConfig;
@@ -126,6 +114,30 @@ describe('emailService.createDynamicTemplate', function () {
     expect(capturedConfig.method).to.equal('POST');
     expect(capturedConfig.url).to.equal('/dynamic_templates');
     expect(capturedConfig.headers['content-type']).to.include('multipart/form-data; boundary=');
+  });
+
+  it('still accepts the legacy message/params response', async function () {
+    const validResponse = {
+      message: 'Template template_name created!',
+      params: {
+        name: 'template_name',
+        body: {
+          tempfile: '#<File:0x00007ff371046a70>',
+          original_filename: 'template_name.hbs',
+          content_type: 'text/x-handlebars-template',
+          headers:
+            'Content-Disposition: form-data; name="data[body]"; filename="template_name.hbs"\r\nContent-Type: text/x-handlebars-template\r\n',
+        },
+      },
+    };
+
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({ data: validResponse });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.createDynamicTemplate('template_name', 'content');
+    expect(response).to.deep.equal(validResponse);
   });
 
   it('can respond to server errors', async function () {

@@ -21,32 +21,52 @@ describe('emailService.listDynamicTemplates', function () {
   });
 
   it('can list dynamic templates', async function () {
-    const validResponse = [
+    const templates = [
       {
         id: 123,
-        name: 'test_template',
         api_customer_id: 12,
+        name: 'test_template',
+        body: '<p>Hello {{name}}</p>',
+        metadata: null,
+        created_at: '2026-10-13T17:02:11.123Z',
+        updated_at: '2026-10-13T17:02:11.123Z',
       },
       {
         id: 124,
-        name: 'test_template_2',
         api_customer_id: 12,
+        name: 'test_template_2',
+        body: '<p>Hello {{name}}</p>',
+        metadata: null,
+        created_at: '2026-10-13T17:02:11.123Z',
+        updated_at: '2026-10-13T17:02:11.123Z',
       },
     ];
 
     axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
-        data: validResponse,
+        data: { templates },
       });
     });
 
     const service = emailService(testCredentials);
     const response = await service.listDynamicTemplates();
-    expect(response).to.deep.equal(validResponse);
+    expect(response).to.deep.equal(templates);
   });
 
   it('can list empty dynamic templates', async function () {
-    const validResponse = [];
+    axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
+      return Promise.resolve({
+        data: { templates: [] },
+      });
+    });
+
+    const service = emailService(testCredentials);
+    const response = await service.listDynamicTemplates();
+    expect(response).to.deep.equal([]);
+  });
+
+  it('still accepts the legacy bare-array response', async function () {
+    const validResponse = [{ id: 123, name: 'test_template', api_customer_id: 12 }];
 
     axiosStub = sinon.stub(axios, 'create').returns(function (_config) {
       return Promise.resolve({
