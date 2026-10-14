@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0](https://github.com/Paubox/paubox-node/compare/v1.7.1...v2.0.0) (2026-10-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* move webhook CRUD to the pb_webhooks service ([#77](https://github.com/Paubox/paubox-node/issues/77))
+
+### Features
+
+* move webhook CRUD to the pb_webhooks service ([#77](https://github.com/Paubox/paubox-node/issues/77)) ([9c41923](https://github.com/Paubox/paubox-node/commit/9c419234eedd2a6a9662c8d91da01b2befb3b3d6))
+
 ## [1.7.1](https://github.com/Paubox/paubox-node/compare/v1.7.0...v1.7.1) (2026-10-02)
 
 
